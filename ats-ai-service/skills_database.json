@@ -1,0 +1,17 @@
+{
+  "technical": [
+    "Python", "Java", "JavaScript", "C++", "C#", "Go", "Rust", "PHP", "Ruby", "Swift", "Kotlin", "TypeScript",
+    "Django", "Flask", "FastAPI", "Spring Boot", "Node.js", "React", "Angular", "Vue", "Next.js", "Express",
+    "PostgreSQL", "MySQL", "MongoDB", "Redis", "Elasticsearch", "Cassandra", "SQLite", "SQL",
+    "Docker", "Kubernetes", "AWS", "Azure", "GCP", "Terraform", "Ansible", "Jenkins", "Git", "GitHub", "GitLab",
+    "Machine Learning", "Deep Learning", "NLP", "Computer Vision", "TensorFlow", "PyTorch", "Scikit-learn",
+    "Data Analysis", "Pandas", "NumPy", "Tableau", "Power BI", "Spark", "Hadoop", "Airflow", "Kafka",
+    "Rest API", "GraphQL", "gRPC", "Microservices", "Unit Testing", "CI/CD", "Agile", "Scrum",
+    "HTML", "CSS", "SASS", "Tailwind CSS", "Bootstrap", "Redux", "Webpack", "Vite"
+  ],
+  "soft_skills": [
+    "Leadership", "Communication", "Problem Solving", "Critical Thinking", "Teamwork", "Adaptability",
+    "Time Management", "Project Management", "Agile", "Mentorship", "Public Speaking", "Writing",
+    "Strategic Planning", "Negotiation", "Creativity", "Emotional Intelligence", "Conflict Resolution"
+  ]
+}

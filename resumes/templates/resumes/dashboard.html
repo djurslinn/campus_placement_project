@@ -1,0 +1,549 @@
+{% extends "resumes/base.html" %}
+{% load static %}
+
+{% block title %}Resume Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ── Dashboard-specific styles ─────────────────────────── */
+
+    .dash-grid {
+        display: grid;
+        gap: 24px;
+    }
+
+    /* ── Stats row ──────────────────────────────────────────── */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-bottom: 8px;
+    }
+
+    /* ── Resume card ────────────────────────────────────────── */
+    .resume-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+    }
+    .resume-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .resume-card__header {
+        padding: 20px 26px 18px;
+        background: var(--gradient);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .resume-card__header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .resume-card__header-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: rgba(255,255,255,.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 19px;
+        color: #fff;
+    }
+    .resume-card__header h2 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -.1px;
+    }
+    .resume-card__header p {
+        font-size: 12px;
+        color: rgba(255,255,255,.72);
+        margin-top: 2px;
+    }
+
+    .resume-card__body {
+        padding: 28px;
+    }
+
+    /* ── Meta rows ──────────────────────────────────────────── */
+    .meta-list {
+        display: flex;
+        flex-direction: column;
+        gap: 13px;
+        margin-bottom: 26px;
+    }
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        font-size: 13.5px;
+    }
+    .meta-item__icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--primary-lt);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        color: var(--primary);
+        flex-shrink: 0;
+    }
+    .meta-item__label {
+        font-weight: 600;
+        color: var(--ink-3);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        display: block;
+        margin-bottom: 1px;
+    }
+    .meta-item__value {
+        color: var(--ink-1);
+        font-weight: 500;
+        font-size: 13.5px;
+    }
+
+    /* ── ATS score section ──────────────────────────────────── */
+    .ats-section {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 22px 24px;
+    }
+
+    .ats-section__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .ats-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        color: var(--ink-3);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+    .ats-label i { font-size: 14px; color: var(--primary); }
+
+    .ats-score-display {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+    }
+    .ats-score-display .score-num {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.7rem;
+        font-weight: 800;
+        color: var(--ink-1);
+        line-height: 1;
+    }
+    .ats-score-display .score-denom {
+        font-size: 13px;
+        color: var(--ink-3);
+        font-weight: 500;
+    }
+
+    /* Progress bar */
+    .progress-track {
+        height: 10px;
+        background: var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+    .progress-fill {
+        height: 100%;
+        border-radius: 20px;
+        transition: width .8s var(--ease);
+    }
+    .progress-fill--success { background: linear-gradient(90deg, #27ae60, #2ecc71); }
+    .progress-fill--info    { background: linear-gradient(90deg, #2980b9, #3498db); }
+    .progress-fill--warning { background: linear-gradient(90deg, #e67e22, #f39c12); }
+    .progress-fill--danger  { background: linear-gradient(90deg, #c0392b, #e74c3c); }
+
+    .ats-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+    }
+    .ats-category {
+        font-size: 12.5px;
+        color: var(--ink-2);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* ── No-ATS info block ──────────────────────────────────── */
+    .info-block {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 18px 20px;
+        border-radius: var(--radius-card);
+        border: 1px solid var(--border);
+        background: var(--bg);
+    }
+    .info-block__icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 17px;
+    }
+    .info-block__icon--info    { background: var(--primary-lt); color: var(--primary); }
+    .info-block__icon--warning { background: #fff9ec; color: #b46a00; }
+    .info-block__icon--tip     { background: #edfbf3; color: #1a7a49; }
+
+    .info-block__title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--ink-1);
+        margin-bottom: 3px;
+    }
+    .info-block__body {
+        font-size: 13px;
+        color: var(--ink-2);
+        line-height: 1.55;
+    }
+
+    /* ── Action buttons row ─────────────────────────────────── */
+    .action-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding-top: 22px;
+        border-top: 1px solid var(--border);
+        margin-top: 22px;
+    }
+
+    /* ── Creation cards (no resume) ─────────────────────────── */
+    .create-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .create-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        box-shadow: var(--shadow-sm);
+        padding: 36px 28px 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 4px;
+        transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+        text-decoration: none;
+    }
+    .create-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .create-card__icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        background: var(--gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: #fff;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 20px rgba(102,126,234,.3);
+    }
+
+    .create-card__title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--ink-1);
+        margin-bottom: 7px;
+    }
+    .create-card__desc {
+        font-size: 13px;
+        color: var(--ink-3);
+        line-height: 1.55;
+        margin-bottom: 22px;
+        flex: 1;
+    }
+
+    /* Delete confirm inline */
+    .delete-form { display: inline; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Stats Row ──────────────────────────────────────────── -->
+<div class="stats-row stagger">
+    <div class="stat-card">
+        <div class="stat-card__icon"><i class="ri-file-text-line"></i></div>
+        <div>
+            <div class="stat-card__label">Resume Status</div>
+            <div class="stat-card__value">{{ has_resume|yesno:"Active,None" }}</div>
+        </div>
+    </div>
+
+    {% if ats_score %}
+    <div class="stat-card">
+        <div class="stat-card__icon"><i class="ri-bar-chart-2-line"></i></div>
+        <div>
+            <div class="stat-card__label">ATS Score</div>
+            <div class="stat-card__value">{{ ats_score.score }}<span style="font-size:1rem;color:var(--ink-3)">/100</span></div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card__icon"><i class="ri-award-line"></i></div>
+        <div>
+            <div class="stat-card__label">Category</div>
+            <div class="stat-card__value" style="font-size:1.1rem">{{ ats_score.get_score_category }}</div>
+        </div>
+    </div>
+    {% else %}
+    <div class="stat-card">
+        <div class="stat-card__icon"><i class="ri-bar-chart-2-line"></i></div>
+        <div>
+            <div class="stat-card__label">ATS Score</div>
+            <div class="stat-card__value" style="font-size:1rem;color:var(--ink-3)">Not analysed</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="stat-card">
+        <div class="stat-card__icon"><i class="ri-calendar-check-line"></i></div>
+        <div>
+            <div class="stat-card__label">Last Updated</div>
+            <div class="stat-card__value" style="font-size:1rem">
+                {% if resume %}{{ resume.updated_at|date:"d M Y" }}{% else %}—{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ────────────────────────────────────────────────────────── -->
+
+{% if has_resume %}
+
+<!-- ── Resume Exists ─────────────────────────────────────── -->
+<div class="resume-card" style="animation: fadeInUp .4s var(--ease) .18s both;">
+
+    <div class="resume-card__header">
+        <div class="resume-card__header-left">
+            <div class="resume-card__header-icon">
+                <i class="ri-file-check-2-line"></i>
+            </div>
+            <div>
+                <h2>Your Resume</h2>
+                <p>Active &amp; ready to share</p>
+            </div>
+        </div>
+        <span class="badge badge-success" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);">
+            <span style="background:#7effc4;width:6px;height:6px;border-radius:50%;display:inline-block;"></span>
+            Active
+        </span>
+    </div>
+
+    <div class="resume-card__body">
+
+        <!-- Meta info -->
+        <div class="meta-list">
+            <div class="meta-item">
+                <div class="meta-item__icon"><i class="ri-file-list-3-line"></i></div>
+                <div>
+                    <span class="meta-item__label">Resume Type</span>
+                    <span class="meta-item__value">{{ resume.get_resume_type_display }}</span>
+                </div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-item__icon"><i class="ri-calendar-2-line"></i></div>
+                <div>
+                    <span class="meta-item__label">Created</span>
+                    <span class="meta-item__value">{{ resume.created_at|date:"F d, Y" }}</span>
+                </div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-item__icon"><i class="ri-time-line"></i></div>
+                <div>
+                    <span class="meta-item__label">Last Updated</span>
+                    <span class="meta-item__value">{{ resume.updated_at|date:"F d, Y" }}</span>
+                </div>
+            </div>
+            {% if resume.file %}
+            <div class="meta-item">
+                <div class="meta-item__icon"><i class="ri-attachment-2"></i></div>
+                <div>
+                    <span class="meta-item__label">File</span>
+                    <span class="meta-item__value">{{ resume.get_filename }}</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ATS Score -->
+        {% if ats_score %}
+        <div class="ats-section" style="animation: fadeInUp .4s var(--ease) .28s both;">
+            <div class="ats-section__top">
+                <span class="ats-label"><i class="ri-bar-chart-grouped-line"></i>ATS Score</span>
+                <div class="ats-score-display">
+                    <span class="score-num">{{ ats_score.score }}</span>
+                    <span class="score-denom">/100</span>
+                </div>
+            </div>
+
+            <div class="progress-track">
+                <div class="progress-fill
+                    {% if ats_score.score >= 80 %}progress-fill--success
+                    {% elif ats_score.score >= 60 %}progress-fill--info
+                    {% elif ats_score.score >= 40 %}progress-fill--warning
+                    {% else %}progress-fill--danger{% endif %}"
+                    style="width: {{ ats_score.score }}%;">
+                </div>
+            </div>
+
+            <div class="ats-footer">
+                <span class="ats-category">
+                    <i class="ri-medal-line" style="color:var(--primary);"></i>
+                    Category: <strong style="color:var(--ink-1);margin-left:4px;">{{ ats_score.get_score_category }}</strong>
+                </span>
+                <span class="ats-category">
+                    <i class="ri-focus-3-line" style="color:var(--primary);"></i>
+                    Role: <strong style="color:var(--ink-1);margin-left:4px;">{{ ats_score.target_role|title }}</strong>
+                </span>
+                <a href="{% url 'resumes:analysis' %}" class="btn btn-secondary btn-sm">
+                    <i class="ri-line-chart-line"></i>Detailed Analysis
+                </a>
+            </div>
+        </div>
+
+        {% else %}
+
+        <div class="info-block" style="animation: fadeInUp .4s var(--ease) .28s both;">
+            <div class="info-block__icon info-block__icon--info">
+                <i class="ri-bar-chart-2-line"></i>
+            </div>
+            <div>
+                <div class="info-block__title">No ATS Analysis Yet</div>
+                <div class="info-block__body">
+                    Run an analysis to see how well your resume performs against applicant-tracking systems.
+                </div>
+                <form method="POST" action="{% url 'resumes:analysis' %}" style="margin-top:12px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="target_role" value="general">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="ri-refresh-line"></i>Analyse Now
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% endif %}
+
+        <!-- Policy notice -->
+        <div class="info-block" style="margin-top:16px; animation: fadeInUp .4s var(--ease) .34s both;">
+            <div class="info-block__icon info-block__icon--warning">
+                <i class="ri-information-line"></i>
+            </div>
+            <div>
+                <div class="info-block__title">Single Resume Policy</div>
+                <div class="info-block__body">
+                    You already have an active resume. To create a new one, please download and delete your current resume first.
+                </div>
+            </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="action-row" style="animation: fadeInUp .4s var(--ease) .4s both;">
+            <a href="{% url 'resumes:view' %}" class="btn btn-primary" target="_blank">
+                <i class="ri-eye-line"></i>View Resume
+            </a>
+            <a href="{% url 'resumes:download' %}" class="btn btn-secondary">
+                <i class="ri-download-2-line"></i>Download PDF
+            </a>
+            <a href="{% url 'resumes:analysis' %}" class="btn btn-secondary">
+                <i class="ri-line-chart-line"></i>View Analysis
+            </a>
+            <form method="POST" action="{% url 'resumes:delete' %}" class="delete-form"
+                  onsubmit="return confirm('Are you sure you want to delete your resume? This action cannot be undone.');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-ghost" style="color:#c0392b;border-color:#ffc9c9;">
+                    <i class="ri-delete-bin-6-line"></i>Delete Resume
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+{% else %}
+
+<!-- ── No Resume – Creation Options ─────────────────────── -->
+<div class="create-grid stagger">
+
+    <div class="create-card" style="text-decoration:none;">
+        <div class="create-card__icon"><i class="ri-upload-cloud-2-line"></i></div>
+        <div class="create-card__title">Upload Resume</div>
+        <div class="create-card__desc">Already have a PDF resume? Upload it directly and we'll store it securely.</div>
+        <a href="{% url 'resumes:upload' %}" class="btn btn-primary" style="width:100%;justify-content:center;">
+            <i class="ri-upload-2-line"></i>Upload PDF
+        </a>
+    </div>
+
+    <div class="create-card">
+        <div class="create-card__icon"><i class="ri-magic-2-line"></i></div>
+        <div class="create-card__title">Build with AI</div>
+        <div class="create-card__desc">Create a fully ATS-optimised resume in minutes using our intelligent builder.</div>
+        <a href="{% url 'resumes:builder' %}" class="btn btn-primary" style="width:100%;justify-content:center;">
+            <i class="ri-edit-2-line"></i>Start Building
+        </a>
+    </div>
+
+</div>
+
+<!-- Tip block -->
+<div class="info-block" style="animation: fadeInUp .4s var(--ease) .3s both;">
+    <div class="info-block__icon info-block__icon--tip">
+        <i class="ri-lightbulb-flash-line"></i>
+    </div>
+    <div>
+        <div class="info-block__title">Pro Tip</div>
+        <div class="info-block__body">
+            Use our AI-powered builder to create an ATS-compliant resume that highlights your skills and achievements
+            effectively — significantly improving your chances with automated screening systems.
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

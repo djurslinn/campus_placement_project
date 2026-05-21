@@ -1,0 +1,1328 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mock Interview – Campus Placement Training System</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --border: #e8eaf2;
+            --ink-1: #1b1e2e;
+            --ink-2: #58607a;
+            --ink-3: #9ea6bc;
+            --primary: #4f6ef7;
+            --primary-lt: #eef0fe;
+            --primary-dk: #3a56d9;
+            --grad-a: #667eea;
+            --grad-b: #764ba2;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #e83d68;
+            --sb-w: 240px;
+            --r: 14px;
+            --ease: cubic-bezier(.4, 0, .2, 1);
+            --dur: 200ms;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--ink-1);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Wrapper ── */
+        .dashboard-container {
+            margin-left: var(--sb-w);
+            min-height: 100vh;
+            padding: 36px 32px;
+            animation: fadeInUp .45s var(--ease) both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .main-content {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* ── Page Header ── */
+        .page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .page-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--ink-1);
+        }
+
+        .page-sub {
+            font-size: 13px;
+            color: var(--ink-3);
+            margin-top: 3px;
+        }
+
+        .btn-report {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+            text-decoration: none;
+            transition: background var(--dur), border-color var(--dur), box-shadow var(--dur);
+        }
+
+        .btn-report:hover {
+            background: var(--primary-lt);
+            border-color: var(--primary);
+            box-shadow: 0 4px 14px rgba(79, 110, 247, .15);
+        }
+
+        /* ── Toast ── */
+        .toast-wrap {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #bbf7d0;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* ── Stats Strip ── */
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px;
+            margin-bottom: 26px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: box-shadow var(--dur), transform var(--dur);
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 8px 24px rgba(79, 110, 247, .12);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            color: #fff;
+        }
+
+        .si-blue {
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+        }
+
+        .si-green {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+
+        .si-yellow {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .si-red {
+            background: linear-gradient(135deg, #e83d68, #be123c);
+        }
+
+        .stat-val {
+            font-family: 'Poppins', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-lbl {
+            font-size: 11px;
+            color: var(--ink-3);
+            margin-top: 3px;
+        }
+
+        /* ── Toolbar ── */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+            max-width: 320px;
+        }
+
+        .search-wrap i {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--ink-3);
+            font-size: 15px;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 9px 12px 9px 34px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+            font-size: 13px;
+            color: var(--ink-1);
+            outline: none;
+            transition: border-color var(--dur), box-shadow var(--dur);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 110, 247, .12);
+        }
+
+        .filter-select {
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+            font-size: 13px;
+            color: var(--ink-2);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 4px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .view-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 7px;
+            border: none;
+            background: transparent;
+            color: var(--ink-3);
+            display: grid;
+            place-items: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background var(--dur), color var(--dur);
+        }
+
+        .view-btn.active {
+            background: var(--surface);
+            color: var(--primary);
+            box-shadow: 0 1px 4px rgba(20, 24, 60, .08);
+        }
+
+        /* ── Table View ── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(20, 24, 60, .04);
+            min-height: 420px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        thead tr {
+            background: var(--bg);
+        }
+
+        thead th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        thead th:nth-child(1) {
+            width: 44px;
+        }
+
+        thead th:nth-child(2) {
+            width: 230px;
+        }
+
+        thead th:nth-child(3) {
+            width: 170px;
+        }
+
+        thead th:nth-child(4) {
+            width: 120px;
+        }
+
+        thead th:nth-child(5) {
+            width: 120px;
+        }
+
+        thead th:nth-child(6) {
+            width: 130px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background var(--dur);
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: var(--bg);
+        }
+
+        tbody td {
+            padding: 14px 16px;
+            font-size: 13px;
+            color: var(--ink-2);
+            vertical-align: middle;
+        }
+
+        .partner-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar-sm {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            display: grid;
+            place-items: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .p-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink-1);
+        }
+
+        .p-meta {
+            font-size: 11px;
+            color: var(--ink-3);
+            margin-top: 1px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .badge-submitted {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge-submitted::before {
+            background: #22c55e;
+        }
+
+        .badge-pending {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .badge-pending::before {
+            background: #f97316;
+        }
+
+        .no-results-row td {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--ink-3);
+            font-size: 13px;
+        }
+
+        .no-results-row i {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* ── Action Buttons ── */
+        .btn-eval {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity var(--dur), transform var(--dur), box-shadow var(--dur);
+        }
+
+        .btn-eval:hover {
+            opacity: .9;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, .35);
+        }
+
+        .btn-update {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--primary);
+            background: var(--primary-lt);
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background var(--dur), color var(--dur);
+        }
+
+        .btn-update:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* ── Card View ── */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 18px;
+            min-height: 420px;
+            align-content: start;
+        }
+
+        .partner-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            transition: box-shadow var(--dur), transform var(--dur);
+            animation: fadeInUp .4s var(--ease) both;
+        }
+
+        .partner-card:hover {
+            box-shadow: 0 12px 32px rgba(79, 110, 247, .13);
+            transform: translateY(-4px);
+        }
+
+        .card-top {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .card-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            display: grid;
+            place-items: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .card-pname {
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--ink-1);
+        }
+
+        .card-pmeta {
+            font-size: 12px;
+            color: var(--ink-3);
+            margin-top: 2px;
+        }
+
+        .card-body-inner {
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-key {
+            font-size: 12px;
+            color: var(--ink-3);
+        }
+
+        .card-val {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ink-2);
+        }
+
+        .card-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+        }
+
+        .card-footer .btn-eval,
+        .card-footer .btn-update {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .no-results-card {
+            display: none;
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--ink-3);
+            font-size: 13px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+        }
+
+        .no-results-card i {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* ── Empty State ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            color: var(--ink-3);
+            margin-bottom: 16px;
+        }
+
+        .empty-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--ink-1);
+            margin-bottom: 8px;
+        }
+
+        .empty-sub {
+            font-size: 13px;
+            color: var(--ink-2);
+            max-width: 380px;
+            margin: 0 auto;
+        }
+
+        /* ════════════════════════════════════════
+       EVALUATE MODAL
+    ════════════════════════════════════════ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 900;
+            background: rgba(20, 24, 60, .45);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+            animation: fadeOverlay .25s var(--ease);
+        }
+
+        @keyframes fadeOverlay {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        .modal-box {
+            background: var(--surface);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 620px;
+            max-height: 92vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 24px 64px rgba(20, 24, 60, .28);
+            animation: slideUp .3s var(--ease);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(28px) scale(.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Modal gradient header */
+        .modal-head {
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            padding: 24px 24px 20px;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+            color: #fff;
+        }
+
+        .modal-partner-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .modal-avatar-lg {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, .2);
+            backdrop-filter: blur(4px);
+            display: grid;
+            place-items: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .modal-pname {
+            font-family: 'Poppins', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-pmeta {
+            font-size: 12px;
+            opacity: .8;
+            margin-top: 3px;
+        }
+
+        .modal-pill {
+            position: absolute;
+            top: 18px;
+            right: 52px;
+            background: rgba(255, 255, 255, .2);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 16px;
+            top: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, .2);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-size: 17px;
+            cursor: pointer;
+            transition: background var(--dur), transform var(--dur);
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, .35);
+            transform: rotate(90deg);
+        }
+
+        /* Modal body */
+        .modal-body {
+            padding: 24px;
+        }
+
+        /* Each form wrapper — hidden by default, shown when its modal opens */
+        .eval-form-wrapper {
+            display: none;
+        }
+
+        .eval-form-wrapper.active {
+            display: block;
+        }
+
+        /* Section label */
+        .section-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .7px;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Eval form layout */
+        .eval-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink-2);
+        }
+
+        .form-group label i {
+            font-size: 15px;
+            color: var(--primary);
+        }
+
+        /* Score buttons — same 1-10 logic, new style */
+        .score-input-group {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .score-btn {
+            flex: 1;
+            min-width: 30px;
+            height: 36px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ink-2);
+            transition: all var(--dur);
+        }
+
+        .score-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-lt);
+        }
+
+        .score-btn.active {
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, .35);
+            transform: translateY(-1px);
+        }
+
+        /* Textarea */
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            color: var(--ink-1);
+            resize: vertical;
+            outline: none;
+            transition: border-color var(--dur), box-shadow var(--dur);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 110, 247, .12);
+        }
+
+        .form-control::placeholder {
+            color: var(--ink-3);
+        }
+
+        /* Submit */
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity var(--dur), transform var(--dur), box-shadow var(--dur);
+        }
+
+        .btn-submit:hover {
+            opacity: .92;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(102, 126, 234, .38);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width:768px) {
+            .dashboard-container {
+                margin-left: 0;
+                padding: 20px 16px;
+            }
+
+            .stats-strip {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'menu_student.html' %}
+
+    <div class="dashboard-container" style="margin-left:260px;">
+        <div class="main-content">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Mock Interviews</div>
+                    <div class="page-sub">Complete evaluations for your assigned partners.</div>
+                </div>
+                <a href="{% url 'mock_interviews:student_report' %}" class="btn-report">
+                    <i class="ri-file-chart-line"></i> View My Report
+                </a>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="toast-wrap">
+                {% for message in messages %}
+                <div class="toast"><i class="ri-checkbox-circle-line"></i> {{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if pairings %}
+
+            <!-- Stats Strip -->
+            <div class="stats-strip">
+                <div class="stat-card">
+                    <div class="stat-icon si-blue"><i class="ri-group-line"></i></div>
+                    <div>
+                        <div class="stat-val">{{ pairings|length }}</div>
+                        <div class="stat-lbl">Total Partners</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon si-green"><i class="ri-checkbox-circle-line"></i></div>
+                    <div>
+                        <div class="stat-val" id="count-submitted">0</div>
+                        <div class="stat-lbl">Submitted</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon si-yellow"><i class="ri-time-line"></i></div>
+                    <div>
+                        <div class="stat-val" id="count-pending">0</div>
+                        <div class="stat-lbl">Pending</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon si-red"><i class="ri-mic-line"></i></div>
+                    <div>
+                        <div class="stat-val">{{ pairings|length }}</div>
+                        <div class="stat-lbl">Sessions</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="search-wrap">
+                    <i class="ri-search-line"></i>
+                    <input type="text" class="search-input" id="searchInput"
+                        placeholder="Search partner name or roll no…" oninput="filterRows()" />
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <select class="filter-select" id="statusFilter" onchange="filterRows()">
+                        <option value="">All Status</option>
+                        <option value="Submitted">Submitted</option>
+                        <option value="Pending">Pending</option>
+                    </select>
+
+                </div>
+            </div>
+
+            <!-- TABLE VIEW -->
+            <div id="tableView">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Partner</th>
+                                <th>Department</th>
+                                <th>Roll No</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in pairings %}
+                            <tr class="data-row" data-name="{{ item.partner.user.get_full_name|lower }}"
+                                data-roll="{{ item.partner.roll_no|lower }}" data-status="{{ item.status }}">
+                                <td style="color:var(--ink-3);font-weight:600;">{{ forloop.counter }}</td>
+                                <td>
+                                    <div class="partner-cell">
+                                        <div class="avatar-sm">
+                                            {{ item.partner.user.first_name|first }}
+                                            {{ item.partner.user.last_name|first }}
+                                        </div>
+                                        <div>
+                                            <div class="p-name">{{ item.partner.user.get_full_name }}</div>
+                                            <div class="p-meta">{{ item.partner.roll_no }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ item.partner.user.department.name }}</td>
+                                <td>{{ item.partner.roll_no }}</td>
+                                <td>
+                                    {% if item.status == 'Submitted' %}
+                                    <span class="badge badge-submitted">Submitted</span>
+                                    {% else %}
+                                    <span class="badge badge-pending">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.status == 'Submitted' %}
+                                    <button class="btn-update" onclick="openModal('{{ item.pair.id }}')">
+                                        <i class="ri-edit-line"></i> Update
+                                    </button>
+                                    {% else %}
+                                    <button class="btn-eval" onclick="openModal('{{ item.pair.id }}')">
+                                        <i class="ri-quill-pen-line"></i> Evaluate
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="no-results-row" id="noResultsRow" style="display:none;">
+                                <td colspan="6">
+                                    <i class="ri-search-line"></i>No partners match your search.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"><i class="ri-calendar-todo-line"></i></div>
+                <div class="empty-title">No Active Mock Sessions</div>
+                <p class="empty-sub">You don't have any pending mock interview sessions assigned at the moment. Keep
+                    practicing!</p>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════
+       EVALUATE MODAL
+       Strategy: all forms are rendered in the
+       page with 100% original logic intact.
+       openModal(pairId) reveals the correct one
+       inside the modal shell.
+  ════════════════════════════════════════ -->
+    <div class="modal-overlay" id="evalModal" onclick="handleOverlayClick(event)">
+        <div class="modal-box">
+
+            <!-- Gradient header — filled by JS from data-attributes -->
+            <div class="modal-head">
+                <div class="modal-partner-row">
+                    <div class="modal-avatar-lg" id="modalAvatar">AB</div>
+                    <div>
+                        <div class="modal-pname" id="modalName">Partner Name</div>
+                        <div class="modal-pmeta" id="modalMeta">Roll No · Department</div>
+                    </div>
+                </div>
+                <span class="modal-pill">Evaluation Form</span>
+                <button class="modal-close" onclick="closeModal()"><i class="ri-close-line"></i></button>
+            </div>
+
+            <!-- All forms rendered here. Each hidden; active one shown by JS. -->
+            <div class="modal-body">
+                {% for item in pairings %}
+
+
+                <div class="eval-form-wrapper" id="form-wrapper-{{ item.pair.id }}"
+                    data-name="{{ item.partner.user.get_full_name }}" data-roll="{{ item.partner.roll_no }}"
+                    data-dept="{{ item.partner.user.department.name }}" data-status="{{ item.status }}">
+
+                    <form action="{% url 'mock_interviews:submit_evaluation' item.session.id item.partner.id %}"
+                        method="POST" id="form-{{ item.pair.id }}">
+                        {% csrf_token %}
+
+                        <div class="eval-form">
+
+                            <div class="section-label"><i class="ri-bar-chart-2-line"></i> Category Scores (1 – 10)
+                            </div>
+
+                            <!-- Communication Skills (1-10) -->
+                            <div class="form-group">
+                                <label><i class="ri-chat-voice-line"></i> Communication Skills (1-10)</label>
+                                <div class="score-input-group" data-field="communication">
+                                    {% for i in score_range %}
+                                    <button type="button"
+                                        class="score-btn {% if item.evaluation.communication == i %}active{% endif %}"
+                                        onclick="setScore(this, 'communication', {{ i }}, {{ item.pair.id }})">
+                                        {{ i }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="communication" id="comm-{{ item.pair.id }}"
+                                    value="{{ item.evaluation.communication|default:0 }}" />
+                            </div>
+
+                            <!-- Confidence Level (1-10) -->
+                            <div class="form-group">
+                                <label><i class="ri-fire-line"></i> Confidence Level (1-10)</label>
+                                <div class="score-input-group" data-field="confidence">
+                                    {% for i in score_range %}
+                                    <button type="button"
+                                        class="score-btn {% if item.evaluation.confidence == i %}active{% endif %}"
+                                        onclick="setScore(this, 'confidence', {{ i }}, {{ item.pair.id }})">
+                                        {{ i }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="confidence" id="conf-{{ item.pair.id }}"
+                                    value="{{ item.evaluation.confidence|default:0 }}" />
+                            </div>
+
+                            <!-- Technical Knowledge (1-10) -->
+                            <div class="form-group">
+                                <label><i class="ri-code-s-slash-line"></i> Technical Knowledge (1-10)</label>
+                                <div class="score-input-group" data-field="technical">
+                                    {% for i in score_range %}
+                                    <button type="button"
+                                        class="score-btn {% if item.evaluation.technical == i %}active{% endif %}"
+                                        onclick="setScore(this, 'technical', {{ i }}, {{ item.pair.id }})">
+                                        {{ i }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="technical" id="tech-{{ item.pair.id }}"
+                                    value="{{ item.evaluation.technical|default:0 }}" />
+                            </div>
+
+                            <!-- Body Language (1-10) -->
+                            <div class="form-group">
+                                <label><i class="ri-user-smile-line"></i> Body Language (1-10)</label>
+                                <div class="score-input-group" data-field="body_language">
+                                    {% for i in score_range %}
+                                    <button type="button"
+                                        class="score-btn {% if item.evaluation.body_language == i %}active{% endif %}"
+                                        onclick="setScore(this, 'body_language', {{ i }}, {{ item.pair.id }})">
+                                        {{ i }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="body_language" id="body-{{ item.pair.id }}"
+                                    value="{{ item.evaluation.body_language|default:0 }}" />
+                            </div>
+
+                            <!-- Problem Solving (1-10) -->
+                            <div class="form-group">
+                                <label><i class="ri-lightbulb-line"></i> Problem Solving (1-10)</label>
+                                <div class="score-input-group" data-field="problem_solving">
+                                    {% for i in score_range %}
+                                    <button type="button"
+                                        class="score-btn {% if item.evaluation.problem_solving == i %}active{% endif %}"
+                                        onclick="setScore(this, 'problem_solving', {{ i }}, {{ item.pair.id }})">
+                                        {{ i }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="problem_solving" id="prob-{{ item.pair.id }}"
+                                    value="{{ item.evaluation.problem_solving|default:0 }}" />
+                            </div>
+
+                            <!-- Constructive Feedback -->
+                            <div class="form-group">
+                                <label><i class="ri-feedback-line"></i> Constructive Feedback</label>
+                                <textarea name="feedback" rows="4" class="form-control"
+                                    placeholder="Provide specific feedback on strengths and areas for improvement...">{{ item.evaluation.feedback }}</textarea>
+                            </div>
+
+                            <!-- Submit -->
+                            <button type="submit" class="btn-submit">
+                                <i class="ri-send-plane-line"></i>
+                                {% if item.status == 'Submitted' %}Update Evaluation{% else %}Submit Evaluation
+                                {% endif %}
+                            </button>
+
+                        </div><!-- /eval-form -->
+                    </form>
+
+                </div><!-- /eval-form-wrapper -->
+                {% endfor %}
+            </div><!-- /modal-body -->
+
+        </div><!-- /modal-box -->
+    </div><!-- /modal-overlay -->
+
+
+    <script>
+        /* ══════════════════════════════════════════
+           ORIGINAL setScore FUNCTION — UNCHANGED
+           Same prefix mapping, same hidden input IDs
+        ══════════════════════════════════════════ */
+        function setScore(btn, field, value, pairId) {
+            let prefix = field === 'communication' ? 'comm' :
+                field === 'confidence' ? 'conf' :
+                    field === 'technical' ? 'tech' :
+                        field === 'body_language' ? 'body' : 'prob';
+
+            document.getElementById(prefix + '-' + pairId).value = value;
+
+            const group = btn.closest('.score-input-group');
+            group.querySelectorAll('.score-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        /* ══════════════════════════════════════════
+           MODAL — opens the correct form wrapper
+        ══════════════════════════════════════════ */
+        let activePairId = null;
+
+        function openModal(pairId) {
+            // Hide previously shown form
+            if (activePairId) {
+                const prev = document.getElementById('form-wrapper-' + activePairId);
+                if (prev) prev.classList.remove('active');
+            }
+            activePairId = pairId;
+
+            const wrapper = document.getElementById('form-wrapper-' + pairId);
+
+            // Populate modal header from data attributes on wrapper
+            const name = wrapper.dataset.name;
+            const roll = wrapper.dataset.roll;
+            const dept = wrapper.dataset.dept;
+            const initials = name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+
+            document.getElementById('modalAvatar').textContent = initials;
+            document.getElementById('modalName').textContent = name;
+            document.getElementById('modalMeta').textContent = roll + ' · ' + dept;
+
+            wrapper.classList.add('active');
+            document.getElementById('evalModal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            if (activePairId) {
+                const prev = document.getElementById('form-wrapper-' + activePairId);
+                if (prev) prev.classList.remove('active');
+                activePairId = null;
+            }
+            document.getElementById('evalModal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function handleOverlayClick(e) {
+            if (e.target === document.getElementById('evalModal')) closeModal();
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+
+        /* ══════════════════════════════════════════
+           SEARCH + FILTER  (stable container size)
+        ══════════════════════════════════════════ */
+        function filterRows() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            let visibleRows = 0, visibleCards = 0;
+
+            document.querySelectorAll('.data-row').forEach(row => {
+                const match = (row.dataset.name.includes(q) || row.dataset.roll.includes(q))
+                    && (!status || row.dataset.status === status);
+                row.style.display = match ? '' : 'none';
+                if (match) visibleRows++;
+            });
+
+            document.querySelectorAll('.data-card').forEach(card => {
+                const match = (card.dataset.name.includes(q) || card.dataset.roll.includes(q))
+                    && (!status || card.dataset.status === status);
+                card.style.display = match ? '' : 'none';
+                if (match) visibleCards++;
+            });
+
+            document.getElementById('noResultsRow').style.display = visibleRows === 0 ? '' : 'none';
+            document.getElementById('noResultsCard').style.display = visibleCards === 0 ? 'block' : 'none';
+        }
+
+        /* ══════════════════════════════════════════
+           STATS COUNTER
+        ══════════════════════════════════════════ */
+        (function computeStats() {
+            let submitted = 0, pending = 0;
+            document.querySelectorAll('.data-row').forEach(r => {
+                r.dataset.status === 'Submitted' ? submitted++ : pending++;
+            });
+            document.getElementById('count-submitted').textContent = submitted;
+            document.getElementById('count-pending').textContent = pending;
+        })();
+    </script>
+</body>
+
+</html>

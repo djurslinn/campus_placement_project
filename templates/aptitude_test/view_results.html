@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Results: {{ test.title }} - Campus Placement Training System</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar Include -->
+        {% include 'menu_coordinator.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <h1>Results: {{ test.title }}</h1>
+                <div class="user-info">
+                    <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+                </div>
+            </header>
+
+            <section class="content-section">
+                <div class="stats-section" style="margin-bottom: 20px;">
+                    <p><strong>Total Questions:</strong> {{ test.total_questions }}</p>
+                    <p><strong>Total Attempts:</strong> {{ results.count }}</p>
+                </div>
+
+                <section class="sessions-list">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Roll No</th>
+                                    <th>Student Name</th>
+                                    <th>Dept</th>
+                                    <th>Score</th>
+                                    <th>Percentage</th>
+                                    <th>Submitted At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in results %}
+                                <tr>
+                                    <td>{{ result.student.roll_no }}</td>
+                                    <td>{{ result.student.user.get_full_name }}</td>
+                                    <td>{{ result.student.user.department|default:"N/A" }}</td>
+                                    <td>{{ result.score }} / {{ test.total_questions }}</td>
+                                    <td>
+                                        <span
+                                            style="font-weight: bold; color: {% if result.percentage >= 60 %}#16a34a{% else %}#dc2626{% endif %};">
+                                            {{ result.percentage }}%
+                                        </span>
+                                    </td>
+                                    <td>{{ result.submitted_at|date:"M d, Y H:i" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">No students have attempted this test
+                                        yet.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+        </div>
+    </div>
+</body>
+
+</html>

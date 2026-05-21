@@ -1,0 +1,407 @@
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Dashboard - Campus Placement Training System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --border: #e8eaf2;
+            --ink-1: #1b1e2e;
+            --ink-2: #58607a;
+            --ink-3: #9ea6bc;
+            --primary: #4f6ef7;
+            --primary-lt: #eef0fe;
+            --primary-dk: #3a56d9;
+            --sb-w: 240px;
+            --r: 14px;
+            --ease: cubic-bezier(.4, 0, .2, 1);
+            --dur: 200ms;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--ink-1);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ── Shell ── */
+        .shell {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ═══════════ SIDEBAR ═══════════ */
+        .sidebar {
+            width: var(--sb-w);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 300;
+            box-shadow: 2px 0 12px rgba(20, 24, 60, .06);
+            transition: transform var(--dur) var(--ease);
+        }
+
+        .sb-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 22px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sb-logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--primary);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-size: 17px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(79, 110, 247, .28);
+        }
+
+        .sb-logo-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--ink-1);
+            line-height: 1.2;
+        }
+
+        .sb-logo-sub {
+            font-size: 10px;
+            color: var(--ink-3);
+        }
+
+        .sb-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .sb-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #7c55e8);
+            display: grid;
+            place-items: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            border: 2px solid var(--border);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .sb-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sb-user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink-1);
+        }
+
+        .sb-user-meta {
+            font-size: 11px;
+            color: var(--ink-3);
+            margin-top: 1px;
+        }
+
+        .sb-nav {
+            flex: 1;
+            padding: 12px 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .nav-section-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .7px;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            padding: 10px 10px 5px;
+            margin-top: 4px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--ink-2);
+            transition: background var(--dur), color var(--dur);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .nav-item i {
+            font-size: 17px;
+            width: 18px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .nav-item:hover {
+            background: var(--primary-lt);
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: var(--primary-lt);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 3px;
+            border-radius: 0 3px 3px 0;
+            background: var(--primary);
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            background: var(--primary-lt);
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .sb-footer {
+            padding: 12px 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-logout {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--ink-2);
+            transition: background var(--dur), color var(--dur);
+        }
+
+        .btn-logout i {
+            font-size: 17px;
+            width: 18px;
+            text-align: center;
+        }
+
+        .btn-logout:hover {
+            background: #fff2f5;
+            color: #e83d68;
+        }
+
+        /* ═══════════ TOPBAR (mobile) ═══════════ */
+        .topbar {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 4px rgba(20, 24, 60, .06);
+        }
+
+        .topbar-inner {
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18px;
+        }
+
+        .hamburger {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            border: 1px solid ar(--border);
+            background: none;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            color: var(--ink-2);
+            cursor: pointer;
+            transition: background var(--dur);
+        }
+
+        .hamburger:hover {
+            background: var(--primary-lt);
+            color: var(--primary);
+        }
+
+        .topbar-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--ink-1);
+        }
+
+        .sb-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 24, 60, .3);
+            z-index: 299;
+        }
+    </style>
+</head>
+
+<!-- Mobile Toggle Button -->
+<button class="sidebar-toggle" onclick="toggleSidebar()">
+    <i class="ri-menu-line"></i>
+</button>
+
+<!-- Overlay for mobile -->
+<div class="overlay" onclick="toggleSidebar()"></div>
+<!-- ══════════ SIDEBAR ══════════ -->
+<aside class="sidebar" id="sidebar">
+
+    <div class="sb-logo">
+        <div class="sb-logo-icon"><i class="ri-building-4-line"></i></div>
+        <div>
+            <div class="sb-logo-name">Campus Placement Training System</div>
+            <div class="sb-logo-sub"> Management System</div>
+        </div>
+    </div>
+
+  
+
+    <nav class="sb-nav">
+        <div class="nav-section-label">Main</div>
+
+        <a href="{% url 'student_dashboard' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'student_dashboard' %}active{% endif %}">
+            <i class="ri-dashboard-line"></i> Dashboard
+        </a>
+
+        <a href="{% url 'student_profile' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'student_profile' %}active{% endif %}">
+            <i class="ri-user-3-line"></i> My Profile
+        </a>
+
+        <a href="{% url 'attendance:performance_dashboard' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'performance_dashboard' %}active{% endif %}">
+            <i class="ri-line-chart-line"></i> Performance
+        </a>
+
+        <a href="{% url 'attendance:activity_log' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'activity_log' %}active{% endif %}">
+            <i class="ri-calendar-todo-line"></i> Attendance & Activity
+        </a>
+
+        <a href="{% url 'student_placement_drives' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'student_placement_drives' %}active{% endif %}">
+            <i class="ri-building-2-line"></i> Placement Drives
+        </a>
+
+        <div class="nav-section-label">Tests & Practice</div>
+
+        <a href="{% url 'student_pdf_tests' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'student_pdf_tests' %}active{% endif %}">
+            <i class="ri-file-text-line"></i> PDF Aptitude Tests
+        </a>
+
+        <a href="{% url 'mock_interviews:student_dashboard' %}"
+            class="nav-item {% if 'mock_interviews' in request.resolver_match.namespace or 'mock_interviews' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="ri-mic-line"></i> Mock Interviews
+        </a>
+
+        <a href="{% url 'student_gd_sessions' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'student_gd_sessions' %}active{% endif %}">
+            <i class="ri-discuss-line"></i> Group Discussion
+        </a>
+
+        <div class="nav-section-label">Tools</div>
+
+        <a href="{% url 'resumes:dashboard' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'dashboard' and 'resumes' in request.path %}active{% endif %}">
+            <i class="ri-file-user-line"></i> Resume Builder
+        </a>
+
+        <a href="{% url 'student_notifications' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'student_notifications' %}active{% endif %}">
+            <i class="ri-notification-3-line"></i> Notifications
+            <span class="nav-badge">New</span>
+        </a>
+    </nav>
+
+    <div class="sb-footer">
+        <a href="{% url 'logout' %}" class="btn-logout">
+            <i class="ri-logout-box-r-line"></i> Logout
+        </a>
+    </div>
+
+</aside>
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.querySelector('.overlay');
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    }
+
+    // Close sidebar when clicking on a menu item on mobile
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        });
+    });
+</script>

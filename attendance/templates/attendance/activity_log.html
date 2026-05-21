@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Log – CPMS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+
+    <style>
+        :root {
+            --bg:         #f4f6fb;
+            --surface:    #ffffff;
+            --border:     #e8eaf2;
+            --ink-1:      #1b1e2e;
+            --ink-2:      #58607a;
+            --ink-3:      #9ea6bc;
+            --primary:    #4f6ef7;
+            --primary-lt: #eef0fe;
+            --primary-dk: #3a56d9;
+            --sb-w:       240px;
+            --r:          12px;
+            --ease:       cubic-bezier(.4,0,.2,1);
+            --dur:        180ms;
+
+            --green:    #16a34a;  --green-lt:  #dcfce7;
+            --violet:   #7c3aed;  --violet-lt: #ede9fe;
+            --amber:    #d97706;  --amber-lt:  #fef3c7;
+            --cyan:     #0891b2;  --cyan-lt:   #cffafe;
+
+            --sh: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--ink-1);
+        }
+
+        /* ── SHELL ───────────────────────────────────────────── */
+        .shell {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        .sidebar-placeholder {
+            width: var(--sb-w);
+            flex-shrink: 0;
+        }
+
+        /* ── MAIN: flex column, fills remaining height exactly ── */
+        .main {
+            flex: 1;
+            min-width: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: .9rem 1.4rem .9rem;
+            gap: .65rem;
+            overflow: hidden;
+        }
+
+        /* ── TOP BAR ─────────────────────────────────────────── */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.68rem;
+            color: var(--ink-3);
+            font-weight: 500;
+            letter-spacing: .02em;
+            margin-bottom: .15rem;
+        }
+        .breadcrumb a { color: var(--ink-3); text-decoration: none; transition: color var(--dur); }
+        .breadcrumb a:hover { color: var(--primary); }
+
+        .page-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.3rem;
+            line-height: 1.2;
+            color: var(--ink-1);
+            letter-spacing: -.02em;
+        }
+        .page-title em { font-style: italic; color: var(--primary); }
+
+        .page-sub { color: var(--ink-3); font-size: 0.72rem; }
+
+        .cpms-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            font-size: 0.67rem;
+            font-weight: 600;
+            color: var(--ink-2);
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            box-shadow: var(--sh);
+        }
+        .dot-live {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 0 2px var(--green-lt);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,100% { box-shadow: 0 0 0 2px var(--green-lt); }
+            50%      { box-shadow: 0 0 0 4px var(--green-lt); }
+        }
+
+        /* ── STAT ROW ────────────────────────────────────────── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: .65rem;
+            flex-shrink: 0;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: .75rem .9rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--sh);
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeUp .35s var(--ease) forwards;
+            transition: transform var(--dur) var(--ease);
+        }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--c);
+            border-radius: var(--r) var(--r) 0 0;
+        }
+        .stat-card:nth-child(1) { animation-delay: .04s; }
+        .stat-card:nth-child(2) { animation-delay: .08s; }
+        .stat-card:nth-child(3) { animation-delay: .12s; }
+        .stat-card:nth-child(4) { animation-delay: .16s; }
+
+        @keyframes fadeUp { to { opacity:1; transform:none; } }
+
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: .45rem;
+        }
+        .stat-icon {
+            width: 28px; height: 28px;
+            border-radius: 7px;
+            display: grid; place-items: center;
+            font-size: .85rem;
+            background: var(--c-lt);
+            color: var(--c);
+        }
+        .stat-tag {
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 20px;
+            background: var(--c-lt);
+            color: var(--c);
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+        .stat-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--ink-1);
+            line-height: 1;
+            margin-bottom: .15rem;
+        }
+        .stat-val .denom { font-size: .8rem; color: var(--ink-3); }
+        .stat-label {
+            font-size: 0.65rem;
+            color: var(--ink-3);
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            font-weight: 500;
+        }
+        .stat-bar-wrap {
+            margin-top: .5rem;
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .stat-bar {
+            height: 100%;
+            border-radius: 2px;
+            background: var(--c);
+            width: 0%;
+            transition: width 1s var(--ease) .3s;
+        }
+
+        /* ── CONTENT GRID ────────────────────────────────────── */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 255px;
+            gap: .65rem;
+            flex: 1;        /* take all remaining vertical space */
+            min-height: 0;  /* allow shrink */
+        }
+
+        /* ── CARDS ───────────────────────────────────────────── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            box-shadow: var(--sh);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .card-inner {
+            padding: .85rem 1rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-shrink: 0;
+            margin-bottom: .65rem;
+            gap: .5rem;
+        }
+        .card-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: .9rem;
+            color: var(--ink-1);
+        }
+        .card-sub { font-size: 0.68rem; color: var(--ink-3); margin-top: .08rem; }
+
+        /* ── LEGEND ──────────────────────────────────────────── */
+        .legend-row { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
+        .legend-chip {
+            display: flex; align-items: center; gap: 4px;
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            color: var(--ink-2);
+            background: var(--bg);
+        }
+        .lc-dot { width: 5px; height: 5px; border-radius: 50%; }
+
+        /* ── CALENDAR WRAPPER stretches to fill card ─────────── */
+        .cal-wrap {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+        }
+
+        .fc {
+            --fc-border-color:          var(--border);
+            --fc-button-bg-color:       var(--primary);
+            --fc-button-border-color:   var(--primary);
+            --fc-button-hover-bg-color: var(--primary-dk);
+            --fc-today-bg-color:        var(--primary-lt);
+            --fc-page-bg-color:         transparent;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--ink-1);
+            height: 100%;
+        }
+
+        .fc .fc-toolbar { margin-bottom: .45rem !important; }
+        .fc .fc-toolbar-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: .9rem;
+            color: var(--ink-1);
+        }
+        .fc .fc-col-header-cell-cushion {
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: var(--ink-3);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            padding: 3px 4px;
+        }
+        .fc .fc-daygrid-day-number {
+            font-size: 0.67rem;
+            color: var(--ink-2);
+            padding: 2px 4px;
+        }
+        .fc .fc-day-today .fc-daygrid-day-number { color: var(--primary); font-weight: 700; }
+        .fc .fc-button {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.67rem;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 6px;
+            box-shadow: none !important;
+        }
+        .fc-daygrid-event {
+            border-radius: 4px !important;
+            padding: 1px 4px !important;
+            font-size: 0.6rem !important;
+            font-weight: 600 !important;
+            border: none !important;
+        }
+
+        /* ── FILTER PANEL ────────────────────────────────────── */
+        .filter-panel { display: flex; flex-direction: column; overflow: hidden; }
+
+        .fp-section {
+            padding: .75rem .9rem;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .fp-section.grow { flex: 1; border-bottom: none; display: flex; flex-direction: column; justify-content: space-between; }
+
+        .fp-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .09em;
+            color: var(--ink-3);
+            margin-bottom: .5rem;
+        }
+
+        .filter-list { display: flex; flex-direction: column; gap: .3rem; }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all var(--dur) var(--ease);
+            user-select: none;
+        }
+        .filter-item:hover { background: var(--bg); border-color: var(--border); }
+        .filter-item.active { background: var(--primary-lt); border-color: rgba(79,110,247,.2); }
+
+        .fi-swatch { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+        .fi-label { flex: 1; font-size: 0.75rem; font-weight: 500; color: var(--ink-2); }
+        .filter-item.active .fi-label { color: var(--ink-1); font-weight: 600; }
+
+        .fi-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem;
+            padding: 1px 6px;
+            border-radius: 20px;
+            background: var(--border);
+            color: var(--ink-3);
+            font-weight: 600;
+        }
+        .filter-item.active .fi-count { background: rgba(79,110,247,.15); color: var(--primary); }
+
+        .fi-pill {
+            width: 26px; height: 14px;
+            border-radius: 7px;
+            background: var(--border);
+            position: relative;
+            flex-shrink: 0;
+            transition: background var(--dur);
+        }
+        .fi-pill::after {
+            content: '';
+            position: absolute;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #fff;
+            top: 3px; left: 3px;
+            transition: left var(--dur) var(--ease);
+            box-shadow: 0 1px 2px rgba(0,0,0,.15);
+        }
+        .filter-item.active .fi-pill { background: var(--primary); }
+        .filter-item.active .fi-pill::after { left: 15px; }
+
+        .tip-box {
+            background: var(--primary-lt);
+            border: 1px solid rgba(79,110,247,.15);
+            border-radius: 9px;
+            padding: 9px 10px;
+            font-size: 0.7rem;
+            color: var(--ink-2);
+            line-height: 1.5;
+        }
+        .tip-box strong {
+            display: flex; align-items: center; gap: 4px;
+            color: var(--primary);
+            font-size: 0.62rem;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+    </style>
+</head>
+<body>
+
+{% include 'menu_student.html' %}
+
+<div class="shell">
+    <div class="sidebar-placeholder"></div>
+
+    <main class="main">
+
+        <!-- TOP BAR -->
+        <div class="topbar">
+            <div>
+                <div class="breadcrumb">
+                    <a href="{% url 'attendance:performance_dashboard' %}"><i class="ri-home-4-line"></i>&nbsp;Dashboard</a>
+                    <i class="ri-arrow-right-s-line"></i>
+                    <span>Activity Log</span>
+                </div>
+                <h1 class="page-title">Activity &amp; <em>Attendance</em> Log</h1>
+                <p class="page-sub">Track your journey through placement sessions, tests &amp; interviews</p>
+            </div>
+            <div class="cpms-badge">
+                <span class="dot-live"></span>
+                CPMS · Student View
+            </div>
+        </div>
+
+        <!-- STAT CARDS -->
+        <div class="stats-row">
+            <div class="stat-card" style="--c:var(--green);--c-lt:var(--green-lt);">
+                <div class="stat-top">
+                    <div class="stat-icon"><i class="ri-calendar-check-line"></i></div>
+                    <span class="stat-tag">Attendance</span>
+                </div>
+                <div class="stat-val">{{ attended_sessions }}<span class="denom">&thinsp;/&thinsp;{{ total_sessions }}</span></div>
+                <div class="stat-label">Days Present</div>
+                <div class="stat-bar-wrap"><div class="stat-bar" id="attn-bar"></div></div>
+            </div>
+
+            <div class="stat-card" style="--c:var(--violet);--c-lt:var(--violet-lt);">
+                <div class="stat-top">
+                    <div class="stat-icon"><i class="ri-discuss-line"></i></div>
+                    <span class="stat-tag">GD</span>
+                </div>
+                <div class="stat-val">{{ gd_count }}</div>
+                <div class="stat-label">GD Sessions</div>
+            </div>
+
+            <div class="stat-card" style="--c:var(--amber);--c-lt:var(--amber-lt);">
+                <div class="stat-top">
+                    <div class="stat-icon"><i class="ri-brain-line"></i></div>
+                    <span class="stat-tag">Aptitude</span>
+                </div>
+                <div class="stat-val">{{ aptitude_count }}</div>
+                <div class="stat-label">Aptitude Tests</div>
+            </div>
+
+            <div class="stat-card" style="--c:var(--cyan);--c-lt:var(--cyan-lt);">
+                <div class="stat-top">
+                    <div class="stat-icon"><i class="ri-user-voice-line"></i></div>
+                    <span class="stat-tag">Mock</span>
+                </div>
+                <div class="stat-val">{{ mi_count }}</div>
+                <div class="stat-label">Mock Interviews</div>
+            </div>
+        </div>
+
+        <!-- CONTENT GRID -->
+        <div class="content-grid">
+
+            <!-- Calendar Card -->
+            <div class="card">
+                <div class="card-inner">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Monthly Overview</div>
+                            <div class="card-sub">All placement activities at a glance</div>
+                        </div>
+                        <div class="legend-row">
+                            <div class="legend-chip"><span class="lc-dot" style="background:var(--green);"></span>Present</div>
+                            <div class="legend-chip"><span class="lc-dot" style="background:var(--violet);"></span>GD</div>
+                            <div class="legend-chip"><span class="lc-dot" style="background:var(--amber);"></span>Aptitude</div>
+                            <div class="legend-chip"><span class="lc-dot" style="background:var(--cyan);"></span>MI</div>
+                        </div>
+                    </div>
+                    <div class="cal-wrap">
+                        <div id="calendar" style="height:100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Panel -->
+            <div class="card filter-panel">
+
+                <div class="fp-section">
+                    <div class="card-title">Filter Views</div>
+                    <div class="card-sub" style="margin-top:.1rem;">Toggle layers on the calendar</div>
+                </div>
+
+                <div class="fp-section grow">
+                    <div>
+                        <div class="fp-label">Activity Types</div>
+                        <div class="filter-list">
+                            <div class="filter-item active" onclick="toggleLayer(this,'attendance')">
+                                <span class="fi-swatch" style="background:var(--green);"></span>
+                                <span class="fi-label">Attendance</span>
+                                <span class="fi-count">{{ attended_sessions }}/{{ total_sessions }}</span>
+                                <div class="fi-pill"></div>
+                            </div>
+                            <div class="filter-item active" onclick="toggleLayer(this,'gd')">
+                                <span class="fi-swatch" style="background:var(--violet);"></span>
+                                <span class="fi-label">GD Sessions</span>
+                                <span class="fi-count">{{ gd_count }}</span>
+                                <div class="fi-pill"></div>
+                            </div>
+                            <div class="filter-item active" onclick="toggleLayer(this,'aptitude')">
+                                <span class="fi-swatch" style="background:var(--amber);"></span>
+                                <span class="fi-label">Aptitude Tests</span>
+                                <span class="fi-count">{{ aptitude_count }}</span>
+                                <div class="fi-pill"></div>
+                            </div>
+                            <div class="filter-item active" onclick="toggleLayer(this,'mi')">
+                                <span class="fi-swatch" style="background:var(--cyan);"></span>
+                                <span class="fi-label">Mock Interviews</span>
+                                <span class="fi-count">{{ mi_count }}</span>
+                                <div class="fi-pill"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tip-box">
+                        <strong><i class="ri-lightbulb-flash-line"></i> Pro Tip</strong>
+                        Toggle layers to identify patterns in your placement preparation schedule.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Attendance bar
+        const bar = document.getElementById('attn-bar');
+        if (bar) {
+            const attended = parseInt("{{ attended_sessions }}") || 0;
+            const total    = parseInt("{{ total_sessions }}")    || 1;
+            setTimeout(() => { bar.style.width = Math.round((attended / total) * 100) + '%'; }, 300);
+        }
+
+        const attendanceEvents = [{% for d in attendance_events %}{ title:'Present',     start:'{{ d }}', backgroundColor:'#16a34a', borderColor:'transparent', textColor:'#fff', category:'attendance' },{% endfor %}];
+        const gdEvents         = [{% for d in gd_events         %}{ title:'GD Session',  start:'{{ d }}', backgroundColor:'#7c3aed', borderColor:'transparent', textColor:'#fff', category:'gd'         },{% endfor %}];
+        const aptitudeEvents   = [{% for d in aptitude_events   %}{ title:'Aptitude',    start:'{{ d }}', backgroundColor:'#d97706', borderColor:'transparent', textColor:'#fff', category:'aptitude'   },{% endfor %}];
+        const miEvents         = [{% for d in mi_events         %}{ title:'Mock Int.',   start:'{{ d }}', backgroundColor:'#0891b2', borderColor:'transparent', textColor:'#fff', category:'mi'         },{% endfor %}];
+
+        const allEvents = [...attendanceEvents, ...gdEvents, ...aptitudeEvents, ...miEvents];
+
+        const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,dayGridWeek'
+            },
+            events: allEvents,
+            eventDisplay: 'block',
+            height: '100%',
+            expandRows: true
+        });
+
+        calendar.render();
+
+        window.toggleLayer = function (el, category) {
+            el.classList.toggle('active');
+            const isActive = cat => document.querySelector(`[onclick*="${cat}"]`).classList.contains('active');
+            calendar.removeAllEvents();
+            calendar.addEventSource(allEvents.filter(ev => isActive(ev.category)));
+        };
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Notifications - Campus Placement Training System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .notifications-wrapper {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .notification-card {
+            border-bottom: 1px solid #eee;
+            padding: 20px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            position: relative;
+        }
+
+        .notification-card:last-child {
+            border-bottom: none;
+        }
+
+        .notification-card.unread::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 25px;
+            width: 8px;
+            height: 8px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+        }
+
+        .notif-icon {
+            background-color: #eff6ff;
+            color: #3b82f6;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            flex-shrink: 0;
+        }
+
+        .notif-content {
+            flex-grow: 1;
+        }
+
+        .notif-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .notif-date {
+            font-size: 0.85em;
+            color: #9ca3af;
+            margin-bottom: 8px;
+        }
+
+        .notif-message {
+            color: #4b5563;
+            line-height: 1.5;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 0;
+            color: #6b7280;
+        }
+
+        .notif-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .badge-new {
+            background-color: #3b82f6;
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'menu_student.html' %}
+    <div class="dashboard-container" style="margin-left: var(--sb-w);">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <h1>My Notifications</h1>
+                <div class="user-info">
+                    <span>{{ request.user.get_full_name }}</span>
+                    <a href="{% url 'student_dashboard' %}" class="btn"
+                        style="background: rgba(255,255,255,0.2);">Dashboard</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="dashboard-main">
+            <a href="{% url 'student_dashboard' %}" class="back-link">← Back to Dashboard</a>
+
+            <section class="content-section">
+                <!-- Messages -->
+                {% if messages %}
+                <div class="messages" style="margin-bottom: 20px;">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                    <style>
+                        .tabs {
+                            display: flex;
+                            gap: 10px;
+                            margin-bottom: 20px;
+                            border-bottom: 2px solid #f1f5f9;
+                        }
+                        .tab {
+                            padding: 10px 20px;
+                            cursor: pointer;
+                            font-weight: 600;
+                            color: #64748b;
+                            border-bottom: 2px solid transparent;
+                            margin-bottom: -2px;
+                        }
+                        .tab.active {
+                            color: #3b82f6;
+                            border-bottom-color: #3b82f6;
+                        }
+                        .tab-content {
+                            display: none;
+                        }
+                        .tab-content.active {
+                            display: block;
+                        }
+                        .notif-type-tag {
+                            font-size: 0.75rem;
+                            padding: 2px 8px;
+                            border-radius: 4px;
+                            font-weight: 600;
+                            margin-bottom: 5px;
+                            display: inline-block;
+                        }
+                        .type-personal { background: #fee2e2; color: #991b1b; }
+                        .type-announcement { background: #dcfce7; color: #166534; }
+                        .type-drive { background: #e0e7ff; color: #4338ca; }
+                    </style>
+
+                    <div class="notif-header">
+                        <h2>Your Updates</h2>
+                    </div>
+
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchTab(event, 'personal')">Personal Notifications ({{ personal_notifications|length }})</div>
+                        <div class="tab" onclick="switchTab(event, 'general')">Announcements ({{ announcements|length }})</div>
+                    </div>
+
+                    <div id="personal" class="tab-content active">
+                        {% for notification in personal_notifications %}
+                        <div class="notification-card {% if not notification.is_read %}unread{% endif %}">
+                            <div class="notif-icon" style="background-color: #fee2e2; color: #ef4444;">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="notif-content">
+                                <div class="notif-type-tag type-personal">Personal Message</div>
+                                <div class="notif-title">
+                                    {{ notification.announcement.title }}
+                                </div>
+                                <div class="notif-date">
+                                    <i class="far fa-clock"></i> {{ notification.announcement.created_at|date:"M d, Y h:i A" }}
+                                </div>
+                                <div class="notif-message">
+                                    {{ notification.announcement.message|linebreaks }}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="empty-state">
+                            <i class="far fa-bell-slash" style="font-size: 3em; margin-bottom: 15px; color: #e5e7eb;"></i>
+                            <p>No personal notifications.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div id="general" class="tab-content">
+                        {% for notification in announcements %}
+                        <div class="notification-card {% if not notification.is_read %}unread{% endif %}">
+                            <div class="notif-icon">
+                                {% if notification.announcement.target_type == 'drive' %}
+                                <i class="fas fa-briefcase"></i>
+                                {% else %}
+                                <i class="fas fa-bullhorn"></i>
+                                {% endif %}
+                            </div>
+                            <div class="notif-content">
+                                {% if notification.announcement.target_type == 'drive' %}
+                                <div class="notif-type-tag type-drive">Placement Drive</div>
+                                {% else %}
+                                <div class="notif-type-tag type-announcement">General Announcement</div>
+                                {% endif %}
+                                <div class="notif-title">
+                                    {{ notification.announcement.title }}
+                                </div>
+                                <div class="notif-date">
+                                    <i class="far fa-clock"></i> {{ notification.announcement.created_at|date:"M d, Y h:i A" }}
+                                </div>
+                                <div class="notif-message">
+                                    {{ notification.announcement.message|linebreaks }}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="empty-state">
+                            <i class="far fa-bell-slash" style="font-size: 3em; margin-bottom: 15px; color: #e5e7eb;"></i>
+                            <p>No announcements.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <script>
+                        function switchTab(evt, tabName) {
+                            var i, tabcontent, tablinks;
+                            tabcontent = document.getElementsByClassName("tab-content");
+                            for (i = 0; i < tabcontent.length; i++) {
+                                tabcontent[i].style.display = "none";
+                            }
+                            tablinks = document.getElementsByClassName("tab");
+                            for (i = 0; i < tablinks.length; i++) {
+                                tablinks[i].className = tablinks[i].className.replace(" active", "");
+                            }
+                            document.getElementById(tabName).style.display = "block";
+                            evt.currentTarget.className += " active";
+                        }
+                    </script>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="dashboard-footer">
+            <p>&copy; 2024 Campus Placement Training System</p>
+        </footer>
+    </div>
+</body>
+
+</html>

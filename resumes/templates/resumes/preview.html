@@ -1,0 +1,152 @@
+{% extends "resumes/base.html" %}
+
+{% block title %}Preview Resume{% endblock %}
+
+{% block content %}
+<div class="preview-section">
+    <div class="preview-header">
+        <h2>📄 Resume Preview</h2>
+        <div class="preview-actions">
+            {% if resume.file %}
+                <a href="{% url 'resumes:download_pdf' resume.id %}" 
+                   class="btn btn-success">
+                    ⬇️ Download PDF
+                </a>
+            {% else %}
+                <a href="{% url 'resumes:generate_pdf' resume.id %}" 
+                   class="btn btn-primary">
+                    📄 Generate PDF
+                </a>
+            {% endif %}
+            <a href="{% url 'resumes:my_resumes' %}" class="btn btn-secondary">
+                Back to My Resumes
+            </a>
+        </div>
+    </div>
+
+    <div class="resume-preview-container">
+        <div class="resume-content">
+            {% if resume.ai_generated_content %}
+                {{ resume.ai_generated_content|linebreaks }}
+            {% else %}
+                <h3>{{ resume.full_name }}</h3>
+                
+                {% if resume.skills %}
+                    <div class="section">
+                        <h4>SKILLS</h4>
+                        <p>{{ resume.skills }}</p>
+                    </div>
+                {% endif %}
+                
+                {% if resume.education %}
+                    <div class="section">
+                        <h4>EDUCATION</h4>
+                        <p>{{ resume.education|linebreaks }}</p>
+                    </div>
+                {% endif %}
+                
+                {% if resume.projects %}
+                    <div class="section">
+                        <h4>PROJECTS</h4>
+                        <p>{{ resume.projects|linebreaks }}</p>
+                    </div>
+                {% endif %}
+                
+                {% if resume.experience %}
+                    <div class="section">
+                        <h4>EXPERIENCE</h4>
+                        <p>{{ resume.experience|linebreaks }}</p>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="preview-footer">
+        <p class="text-muted">
+            Created on: {{ resume.created_at|date:"F d, Y H:i" }}
+        </p>
+    </div>
+</div>
+
+<style>
+.resume-preview-container {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 40px;
+    margin: 20px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.resume-content {
+    font-family: 'Georgia', serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+.resume-content h1, .resume-content h2, .resume-content h3 {
+    color: #2c3e50;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.resume-content h1 {
+    font-size: 28px;
+    text-align: center;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+}
+
+.resume-content h2 {
+    font-size: 20px;
+    color: #34495e;
+    border-bottom: 1px solid #bdc3c7;
+    padding-bottom: 5px;
+    margin-top: 25px;
+}
+
+.resume-content h3 {
+    font-size: 24px;
+    text-align: center;
+}
+
+.resume-content h4 {
+    font-size: 18px;
+    color: #34495e;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.resume-content ul {
+    margin-left: 20px;
+}
+
+.resume-content li {
+    margin-bottom: 5px;
+}
+
+.section {
+    margin-bottom: 20px;
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.preview-footer {
+    text-align: center;
+    margin-top: 20px;
+}
+</style>
+{% endblock %}

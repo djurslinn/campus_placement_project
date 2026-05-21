@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Sessions - Campus Placement Training System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            margin-bottom: 30px;
+        }
+
+        .session-list-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .session-list-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .session-info h4 {
+            color: #667eea;
+            margin: 0 0 5px 0;
+            font-size: 1.2em;
+        }
+
+        .session-info p {
+            color: #666;
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        .session-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar Include -->
+        {% include 'menu_coordinator.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <h1>Attendance Management</h1>
+                <div class="user-info">
+                    <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+                </div>
+            </header>
+
+            <section class="content-section">
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="grid-container" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px;">
+                    <!-- Create Session Form -->
+                    <div class="glass-card">
+                        <h2 style="color: #667eea; margin-bottom: 20px;">Create New Session</h2>
+                        <form method="POST">
+                            {% csrf_token %}
+                            {% for field in form %}
+                                <div class="form-group" id="div_{{ field.name }}">
+                                    <label>{{ field.label }}</label>
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <div class="error">{{ field.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Create Session</button>
+                        </form>
+                    </div>
+
+                    <script>
+                        function toggleTargeting() {
+                            const type = document.getElementById('id_target_type').value;
+                            const deptDiv = document.getElementById('div_department');
+                            const driveDiv = document.getElementById('div_target_drive');
+
+                            if (type === 'department') {
+                                deptDiv.style.display = 'block';
+                                driveDiv.style.display = 'none';
+                            } else if (type === 'drive') {
+                                deptDiv.style.display = 'none';
+                                driveDiv.style.display = 'block';
+                            } else {
+                                deptDiv.style.display = 'none';
+                                driveDiv.style.display = 'none';
+                            }
+                        }
+
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const typeSelect = document.getElementById('id_target_type');
+                            if (typeSelect) {
+                                typeSelect.addEventListener('change', toggleTargeting);
+                                toggleTargeting();
+                            }
+                        });
+                    </script>
+
+                    <!-- Session List -->
+                    <div class="sessions-container">
+                        <h2 style="color: #667eea; margin-bottom: 20px;">Physical Sessions</h2>
+                        {% if sessions %}
+                        {% for session in sessions %}
+                        <div class="session-list-card">
+                            <div class="session-info">
+                                <h4>{{ session.title }}</h4>
+                                <p>📅 {{ session.date }} | ⏰ {{ session.time }}</p>
+                                <p>📍 {{ session.location }}</p>
+                                {% if session.is_marked %}
+                                <div
+                                    style="margin-top: 8px; font-size: 0.85em; display: flex; align-items: center; gap: 8px;">
+                                    <span
+                                        style="background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 12px; font-weight: 600;">
+                                        Marked
+                                    </span>
+                                    <span style="color: #666;">
+                                        {{ session.attendance_percentage|floatformat:0 }}% Present
+                                    </span>
+                                </div>
+                                {% else %}
+                                <div style="margin-top: 8px; font-size: 0.85em;">
+                                    <span
+                                        style="background: #ffebee; color: #c62828; padding: 2px 8px; border-radius: 12px; font-weight: 600;">
+                                        Not Marked
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="session-actions">
+                                <a href="{% url 'attendance:mark_attendance' session.id %}"
+                                    class="btn btn-primary btn-sm">Mark Attendance</a>
+                                <a href="{% url 'attendance:delete_session' session.id %}" class="btn btn-logout btn-sm"
+                                    onclick="return confirm('Are you sure?')">Delete</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="glass-card" style="text-align: center;">
+                            <p>No sessions created yet. Create one to start marking attendance.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="dashboard-footer">
+                <p>&copy; 2024 Campus Placement Training System</p>
+            </footer>
+        </div>
+    </div>
+</body>
+
+</html>

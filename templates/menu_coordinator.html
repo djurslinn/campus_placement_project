@@ -1,0 +1,84 @@
+<!-- Mobile Toggle Button -->
+<button class="sidebar-toggle" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+</button>
+
+<!-- Overlay for mobile -->
+<div class="overlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h2>Campus Placement Training System</h2>
+        <p>Coordinator Portal</p>
+    </div>
+    <nav class="sidebar-menu">
+        <a href="{% url 'coordinator_dashboard' %}"
+            class="menu-item {% if request.resolver_match.url_name == 'coordinator_dashboard' %}active{% endif %}">
+            <i class="fas fa-th-large"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{% url 'manage_students' %}"
+            class="menu-item {% if request.resolver_match.url_name == 'manage_students' %}active{% endif %}">
+            <i class="fas fa-users"></i>
+            <span>Manage Students</span>
+        </a>
+        <a href="{% url 'manage_drives' %}"
+            class="menu-item {% if request.resolver_match.url_name == 'manage_drives' or request.resolver_match.url_name == 'create_drive' or request.resolver_match.url_name == 'edit_drive' or request.resolver_match.url_name == 'view_drive_students' %}active{% endif %}">
+            <i class="fas fa-building"></i>
+            <span>Placement Drives</span>
+        </a>
+        <a href="{% url 'reports' %}"
+            class="menu-item {% if request.resolver_match.url_name == 'reports' %}active{% endif %}">
+            <i class="fas fa-chart-bar"></i>
+            <span>Reports</span>
+        </a>
+        <a href="{% url 'attendance:manage_sessions' %}"
+            class="menu-item {% if 'attendance' in request.resolver_match.namespace or 'attendance' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="fas fa-clipboard-check"></i>
+            <span>Manage Attendance</span>
+        </a>
+        <a href="{% url 'notifications' %}"
+            class="menu-item {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
+            <i class="fas fa-envelope"></i>
+            <span>Notifications</span>
+        </a>
+        <a href="{% url 'manage_gd_sessions' %}"
+            class="menu-item {% if 'gd' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="fas fa-comments"></i>
+            <span>Group Discussion</span>
+        </a>
+        <a href="{% url 'manage_pdf_tests' %}"
+            class="menu-item {% if 'aptitude' in request.resolver_match.url_name or 'test' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="fas fa-file-pdf"></i>
+            <span>Aptitude Tests</span>
+        </a>
+        <a href="{% url 'mock_interviews:coordinator_dashboard' %}"
+            class="menu-item {% if 'mock_interviews' in request.resolver_match.namespace or 'mock_interviews' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="fas fa-user-tie"></i>
+            <span>Mock Interviews</span>
+        </a>
+
+        <a href="{% url 'logout' %}" class="menu-item"> <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+    </nav>
+</aside>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.querySelector('.overlay');
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    }
+
+    // Close sidebar when clicking on a menu item on mobile
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        });
+    });
+</script>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Aptitude Tests - Campus Placement Training System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar Include -->
+        {% include 'menu_coordinator.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <h1>Manage Aptitude Tests</h1>
+                <div class="user-info">
+                    <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+                </div>
+            </header>
+
+            <section class="content-section">
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="action-bar" style="margin-bottom: 20px;">
+                    <a href="{% url 'create_pdf_test' %}" class="btn btn-primary" style="width: auto;">Create New
+                        Aptitude Test</a>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Test Title</th>
+                                <th>Created At</th>
+                                <th>Total Questions</th>
+                                <th>Duration</th>
+                                <th>Results</th>
+                                <th>Edit</th>
+                                <th>Visibility</th>
+                                <th>Retest</th>
+                                <th>Delete</th>
+                                <th>PDF</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for test in tests %}
+                            <tr>
+                                <td>{{ test.title }}</td>
+                                <td>{{ test.created_at|date:"M d, Y" }}</td>
+                                <td>{{ test.total_questions }}</td>
+                                <td>{{ test.duration_minutes }} min</td>
+
+                                <!-- Results -->
+                                <td>
+                                    <div class="test-actions" style="display: flex; gap: 5px;">
+                                        <a href="{% url 'view_test_results' test.id %}"
+                                            class="test-btn test-btn-sm test-btn-info" title="View attempt results">
+                                            Results
+                                        </a>
+                                        <a href="{% url 'view_eligible_students' test.id %}"
+                                            class="test-btn test-btn-sm test-btn-secondary" title="View all eligible participants">
+                                            <i class="fas fa-users"></i> Eligible
+                                        </a>
+                                    </div>
+                                </td>
+
+                                <!-- Edit -->
+                                <td>
+                                    <a href="{% url 'edit_pdf_test' test.id %}"
+                                        class="test-btn test-btn-sm test-btn-primary">
+                                        Edit
+                                    </a>
+                                </td>
+
+                                <!-- Visibility -->
+                                <td>
+                                    <a href="{% url 'toggle_test_visibility' test.id %}"
+                                        class="test-btn test-btn-sm {% if test.is_published %}test-btn-secondary{% else %}test-btn-success{% endif %}">
+                                        {% if test.is_published %}Hide{% else %}Show{% endif %}
+                                    </a>
+                                </td>
+
+                                <!-- Retest -->
+                                <td>
+                                    <form action="{% url 'reset_test_results' test.id %}" method="POST"
+                                        onsubmit="return confirm('WARNING: This will delete ALL student scores. Proceed?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="test-btn test-btn-sm test-btn-warning">
+                                            Reset
+                                        </button>
+                                    </form>
+                                </td>
+
+                                <!-- Delete -->
+                                <td>
+                                    <form action="{% url 'delete_pdf_test' test.id %}" method="POST"
+                                        onsubmit="return confirm('Delete this test?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="test-btn test-btn-sm test-btn-danger">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </td>
+
+                                <!-- PDF -->
+                                <td>
+                                    {% if test.pdf_file %}
+                                    <a href="{{ test.pdf_file.url }}" target="_blank"
+                                        class="test-btn test-btn-sm test-btn-secondary">
+                                        View
+                                    </a>
+                                    {% else %}
+                                    —
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="10" style="text-align: center; padding: 20px;">
+                                    No aptitude tests created yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="dashboard-footer">
+                <p>&copy; 2024 Campus Placement Training System</p>
+            </footer>
+        </div>
+    </div>
+</body>
+
+</html>

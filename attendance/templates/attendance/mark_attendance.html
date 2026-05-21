@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance - {{ session.title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .attendance-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-bar {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .student-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .student-table th,
+        .student-table td {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .student-table th {
+            background: #f8f9fa;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .student-row:hover {
+            background: #fcfdff;
+        }
+
+        .custom-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .sticky-footer {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            border-radius: 0 0 15px 15px;
+        }
+
+        /* Attendance Status Indicators */
+        .attendance-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .student-cb {
+            display: none;
+            /* Hide real checkbox */
+        }
+
+        .tick {
+            display: none;
+            color: #2e7d32;
+            background: #e8f5e9;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .cross {
+            display: inline-block;
+            color: #c62828;
+            background: #ffebee;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .student-cb:checked+.status-indicator .tick {
+            display: inline-block;
+        }
+
+        .student-cb:checked+.status-indicator .cross {
+            display: none;
+        }
+
+        .student-row.present {
+            background-color: #f1f8e9;
+        }
+
+        .student-row.absent {
+            background-color: #fffde7;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar Include -->
+        {% include 'menu_coordinator.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <h1>Mark Attendance: {{ session.title }}</h1>
+                <div class="user-info">
+                    <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+                </div>
+            </header>
+
+            <section class="content-section">
+                <div class="attendance-container">
+                    <div class="session-summary"
+                        style="margin-bottom: 30px; padding: 20px; background: #f0f4ff; border-radius: 10px; border-left: 5px solid #667eea;">
+                        <p><strong>Session:</strong> {{ session.title }}</p>
+                        <p><strong>Date & Time:</strong> {{ session.date }} at {{ session.time }}</p>
+                        <p><strong>Location:</strong> {{ session.location }}</p>
+                    </div>
+
+                    <div class="search-bar">
+                        <input type="text" id="studentSearch" class="form-control"
+                            placeholder="Search by name, roll no, or department..." onkeyup="filterStudents()">
+                    </div>
+
+                    <form method="POST" id="attendanceForm">
+                        {% csrf_token %}
+                        <div style="max-height: 600px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px;">
+                            <table class="student-table" id="studentTable">
+                                <thead>
+                                    <tr>
+                                        <th>Roll No</th>
+                                        <th>Name</th>
+                                        <th>Course</th>
+                                        <th>Year</th>
+                                        <th>Select All <input type="checkbox" id="selectAll" onclick="toggleAll(this)">
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for student in students %}
+                                    <tr class="student-row">
+                                        <td>{{ student.roll_no }}</td>
+                                        <td>{{ student.user.get_full_name }}</td>
+                                        <td>{{ student.user.department|default:"N/A" }}</td>
+                                        <td>{{ student.year }}</td>
+                                        <td>
+                                            <div class="attendance-cell">
+                                                <input type="checkbox" name="students" value="{{ student.user.id }}"
+                                                    id="student_{{ student.user.id }}"
+                                                    class="custom-checkbox student-cb" 
+                                                    {% if student.user.id in present_student_ids %}
+                                                    checked
+                                                    {% endif %}>
+
+                                                <label for="student_{{ student.user.id }}" class="status-indicator">
+                                                    <span class="tick">✅ Present</span>
+                                                    <span class="cross">❌ Absent</span>
+                                                </label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="sticky-footer">
+                            <span id="selectedCount" style="align-self: center; color: #666; font-weight: 600;">0
+                                students
+                                selected</span>
+                            <button type="submit" class="btn btn-primary" style="width: auto; margin-bottom: 0;">Submit
+                                Attendance</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="dashboard-footer">
+                <p>&copy; 2024 Campus Placement Training System</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        function filterStudents() {
+            let input = document.getElementById('studentSearch');
+            let filter = input.value.toUpperCase();
+            let table = document.getElementById('studentTable');
+            let tr = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < tr.length; i++) {
+                let text = tr[i].textContent || tr[i].innerText;
+                if (text.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+
+        function toggleAll(source) {
+            checkboxes = document.getElementsByClassName('student-cb');
+            for (var i = 0, n = checkboxes.length; i < n; i++) {
+                if (checkboxes[i].parentElement.parentElement.parentElement.style.display !== "none") {
+                    checkboxes[i].checked = source.checked;
+                    updateRowStyle(checkboxes[i]);
+                }
+            }
+            updateCount();
+        }
+
+        function updateRowStyle(checkbox) {
+            const row = checkbox.closest('.student-row');
+            if (checkbox.checked) {
+                row.classList.add('present');
+                row.classList.remove('absent');
+            } else {
+                row.classList.add('absent');
+                row.classList.remove('present');
+            }
+        }
+
+        function updateCount() {
+            let count = document.querySelectorAll('.student-cb:checked').length;
+            document.getElementById('selectedCount').innerText = count + " students present";
+        }
+
+        document.querySelectorAll('.student-cb').forEach(cb => {
+            cb.addEventListener('change', function () {
+                updateRowStyle(this);
+                updateCount();
+            });
+            // Initial style
+            updateRowStyle(cb);
+        });
+
+        // Initial count
+        updateCount();
+    </script>
+</body>
+
+</html>

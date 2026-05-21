@@ -1,0 +1,848 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ session.title }} – Session Details</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+
+    <style>
+        /* ══════════════════════════════════
+       CPTS DESIGN TOKENS
+    ══════════════════════════════════ */
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --border: #e8eaf2;
+            --ink-1: #1b1e2e;
+            --ink-2: #58607a;
+            --ink-3: #9ea6bc;
+            --primary: #4f6ef7;
+            --primary-lt: #eef0fe;
+            --primary-dk: #3a56d9;
+            --grad-a: #667eea;
+            --grad-b: #764ba2;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #e83d68;
+            --r: 14px;
+            --ease: cubic-bezier(.4, 0, .2, 1);
+            --dur: 200ms;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--ink-1);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .shell {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 36px 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeInUp .45s var(--ease) both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Back Link ── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 10px;
+            font-weight: 500;
+            transition: gap var(--dur);
+        }
+
+        .back-link:hover {
+            gap: 8px;
+        }
+
+        /* ── Page Header ── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .page-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--ink-1);
+        }
+
+        .page-sub {
+            font-size: 13px;
+            color: var(--ink-3);
+            margin-top: 3px;
+        }
+
+        /* Delete button */
+        .btn-delete {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 16px;
+            border-radius: 10px;
+            background: #fff1f2;
+            color: #e11d48;
+            border: 1px solid #fecdd3;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background var(--dur), box-shadow var(--dur);
+            width: fit-content;
+        }
+
+        .btn-delete:hover {
+            background: #ffe4e6;
+            box-shadow: 0 4px 12px rgba(225, 29, 72, .15);
+        }
+
+        /* ── Stats Row ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 20px 22px;
+            transition: box-shadow var(--dur), transform var(--dur);
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 8px 24px rgba(79, 110, 247, .1);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-family: 'Poppins', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--ink-1);
+        }
+
+        /* Progress bar */
+        .progress-container {
+            background: var(--border);
+            height: 7px;
+            border-radius: 6px;
+            margin-top: 14px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--grad-a), var(--grad-b));
+            height: 100%;
+            border-radius: 6px;
+            transition: width .6s var(--ease);
+        }
+
+        /* ── Card Base ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(20, 24, 60, .04);
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--ink-1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        /* ── Analysis Grid ── */
+        .analysis-wrap {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .analysis-wrap .card {
+            margin-bottom: 0;
+        }
+
+        .analysis-body {
+            padding: 24px;
+        }
+
+        .analysis-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .analysis-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .analysis-section-title.strengths {
+            color: var(--success);
+        }
+
+        .analysis-section-title.weaknesses {
+            color: var(--danger);
+        }
+
+        .analysis-section-title.suggestions {
+            color: var(--warning);
+        }
+
+        .analysis-list {
+            padding-left: 18px;
+            color: var(--ink-2);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .analysis-divider {
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
+        }
+
+        .analysis-text {
+            color: var(--ink-2);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .empty-analysis {
+            text-align: center;
+            color: var(--ink-3);
+            padding: 28px 20px;
+            font-size: 13px;
+        }
+
+        .empty-analysis i {
+            font-size: 30px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        /* ── Top Performers ── */
+        .performers-body {
+            padding: 20px;
+        }
+
+        .performer-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--bg);
+        }
+
+        .performer-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .rank-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            background: var(--primary-lt);
+            color: var(--primary);
+            display: grid;
+            place-items: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .performer-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink-1);
+        }
+
+        .performer-roll {
+            font-size: 11px;
+            color: var(--ink-3);
+            margin-top: 1px;
+        }
+
+        .performer-score {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .performer-score-lbl {
+            font-size: 10px;
+            color: var(--ink-3);
+            text-align: right;
+        }
+
+        .empty-performers {
+            text-align: center;
+            color: var(--ink-3);
+            padding: 28px 20px;
+            font-size: 13px;
+        }
+
+        /* ── Pair Grid ── */
+        .pair-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 16px;
+            padding: 24px;
+        }
+
+        .pair-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            transition: box-shadow var(--dur), transform var(--dur);
+        }
+
+        .pair-card:hover {
+            box-shadow: 0 8px 24px rgba(79, 110, 247, .1);
+            transform: translateY(-2px);
+        }
+
+        .pair-tag {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            background: var(--bg);
+            border-radius: 6px;
+            padding: 3px 8px;
+            margin-bottom: 14px;
+        }
+
+        .student-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: var(--bg);
+            transition: background var(--dur);
+        }
+
+        .student-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .student-item:hover {
+            background: var(--primary-lt);
+        }
+
+        .student-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            display: grid;
+            place-items: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .student-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink-1);
+        }
+
+        .student-eval-lbl {
+            font-size: 11px;
+            color: var(--ink-3);
+            margin-top: 1px;
+        }
+
+        .eval-status {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .avg-score {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            background: var(--primary-lt);
+            padding: 3px 9px;
+            border-radius: 10px;
+        }
+
+        .pending-lbl {
+            font-size: 11px;
+            color: var(--ink-3);
+        }
+
+        /* Empty pair grid */
+        .empty-pairs {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--ink-3);
+            font-size: 13px;
+        }
+
+        .empty-pairs i {
+            font-size: 36px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* ── Detailed Report ── */
+        .report-body {
+            padding: 24px;
+        }
+
+        .eval-item {
+            border-bottom: 1px solid var(--border);
+            padding: 18px 0;
+        }
+
+        .eval-item:last-child {
+            border-bottom: none;
+        }
+
+        .eval-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+        }
+
+        .eval-by {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink-1);
+        }
+
+        .eval-date {
+            font-size: 11px;
+            color: var(--ink-3);
+            margin-top: 2px;
+        }
+
+        .eval-avg {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            text-align: right;
+        }
+
+        /* Performance level tags */
+        .perf-tag {
+            display: inline-block;
+            margin-top: 4px;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .tag-excellent {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .tag-good {
+            background: var(--primary-lt);
+            color: var(--primary);
+        }
+
+        .tag-ni {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .score-breakdown {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 14px;
+            background: var(--bg);
+            padding: 14px;
+            border-radius: 10px;
+        }
+
+        .score-col {
+            text-align: center;
+        }
+
+        .score-col-lbl {
+            font-size: 10px;
+            color: var(--ink-3);
+            margin-bottom: 4px;
+        }
+
+        .score-col-val {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--ink-1);
+        }
+
+        .eval-feedback {
+            font-size: 13px;
+            color: var(--ink-2);
+            font-style: italic;
+            line-height: 1.7;
+            padding: 10px 14px;
+            background: var(--bg);
+            border-left: 3px solid var(--primary-lt);
+            border-radius: 0 8px 8px 0;
+        }
+
+        @media (max-width: 900px) {
+            .analysis-wrap {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px 16px;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            .pair-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analysis-cols {
+                grid-template-columns: 1fr;
+            }
+
+            .score-breakdown {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        {% include 'menu_coordinator.html' %}
+
+        <main class="main-content" style="margin-left:260px;">
+
+            <!-- ── Page Header ── -->
+            <div class="header">
+                <div>
+                    <a href="{% url 'mock_interviews:coordinator_dashboard' %}" class="back-link">
+                        <i class="ri-arrow-left-line"></i> Back to Dashboard
+                    </a>
+                    <div class="page-title">{{ session.label|default:"Mock Session" }}</div>
+                    <div class="page-sub">Created on {{ session.created_at|date:"F d, Y" }}</div>
+                </div>
+                <div>
+                    <a href="{% url 'mock_interviews:delete_session' session.id %}" class="btn-delete"
+                        onclick="return confirm('Delete this session?')">
+                        <i class="ri-delete-bin-line"></i> Delete Session
+                    </a>
+                </div>
+            </div>
+
+            <!-- ── Stats Row ── -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-label">Total Pairings</div>
+                    <div class="stat-value">{{ pairs_count }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Completion Status</div>
+                    <div class="stat-value">{{ completion_percentage|floatformat:1 }}%</div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width:{{ completion_percentage }}%;"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Submissions</div>
+                    <div class="stat-value">{{ session.submissions_count }} / {{ session.expected_submissions }}</div>
+                </div>
+            </div>
+
+            <!-- ── Session Analysis + Top Performers ── -->
+            <div class="analysis-wrap">
+
+                <!-- Session Analysis -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="ri-pie-chart-line"></i> Session-Wide Analysis</div>
+                    </div>
+                    <div class="analysis-body">
+                        {% if session_analysis %}
+                        <div class="analysis-cols">
+                            <div>
+                                <div class="analysis-section-title strengths">
+                                    <i class="ri-checkbox-circle-line"></i> Advantages (Strengths)
+                                </div>
+                                <ul class="analysis-list">
+                                    {% for strength in session_analysis.strengths %}
+                                    <li>{{ strength }}</li>
+                                    {% empty %}
+                                    <li style="list-style:none;margin-left:-18px;">Insufficient data for strengths.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div>
+                                <div class="analysis-section-title weaknesses">
+                                    <i class="ri-error-warning-line"></i> Weaknesses
+                                </div>
+                                <ul class="analysis-list">
+                                    {% for weakness in session_analysis.weaknesses %}
+                                    <li>{{ weakness }}</li>
+                                    {% empty %}
+                                    <li style="list-style:none;margin-left:-18px;">No major weaknesses identified.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="analysis-divider">
+                            <div class="analysis-section-title suggestions">
+                                <i class="ri-lightbulb-line"></i> Key Suggestions
+                            </div>
+                            <p class="analysis-text">{{ session_analysis.improvement_summary }}</p>
+                        </div>
+                        {% else %}
+                        <div class="empty-analysis">
+                            <i class="ri-bar-chart-2-line"></i>
+                            Waiting for more submissions to generate analysis.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Top Performers -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="ri-medal-line"></i> Top Performers</div>
+                    </div>
+                    <div class="performers-body">
+                        {% for tp in top_performers %}
+                        <div class="performer-item">
+                            <div class="rank-badge">#{{ forloop.counter }}</div>
+                            <div style="flex:1;">
+                                <div class="performer-name">
+                                    {{ tp.evaluatee__user__first_name }} {{ tp.evaluatee__user__last_name }}
+                                </div>
+                                <div class="performer-roll">{{ tp.evaluatee__roll_no }}</div>
+                            </div>
+                            <div>
+                                <div class="performer-score">{{ tp.avg_score|floatformat:1 }}</div>
+                                <div class="performer-score-lbl">Avg Score</div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="empty-performers">No evaluations yet.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div><!-- /analysis-wrap -->
+
+            <!-- ── Student Pairings ── -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><i class="ri-group-line"></i> Student Pairings</div>
+                </div>
+                <div class="pair-grid">
+                    {% for pdata in pairs_data %}
+                    <div class="pair-card">
+                        <span class="pair-tag">
+                            {% if pdata.pair.student3 %}Trio Group{% else %}Pair Group{% endif %}
+                        </span>
+
+                        {% for m in pdata.members %}
+                        <div class="student-item">
+                            <div class="student-avatar">
+                                {{ m.student.user.first_name|first }}{{ m.student.user.last_name|first }}
+                            </div>
+                            <div style="flex:1;min-width:0;">
+                                <div class="student-name">{{ m.student.user.get_full_name }}</div>
+                                <div class="student-eval-lbl">evaluating {{ m.partner.user.get_full_name }}</div>
+                            </div>
+                            <div class="eval-status">
+                                {% if m.submitted %}
+                                <span class="avg-score">{{ m.latest_eval.average_score|floatformat:1 }}</span>
+                                <i class="ri-checkbox-circle-fill" style="color:var(--success);font-size:15px;"></i>
+                                {% else %}
+                                <span class="pending-lbl">Pending</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                    {% empty %}
+                    <div class="empty-pairs">
+                        <i class="ri-user-search-line"></i>
+                        No pairings generated for this session.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ── Detailed Report (conditional) ── -->
+            {% if filter_student and report_evals %}
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="ri-file-chart-line"></i>
+                        Detailed Report: {{ filter_student.user.get_full_name }}
+                    </div>
+                </div>
+                <div class="report-body">
+                    {% for ev in report_evals %}
+                    <div class="eval-item">
+
+                        <div class="eval-top">
+                            <div>
+                                <div class="eval-by">Evaluated by {{ ev.evaluator.user.get_full_name }}</div>
+                                <div class="eval-date">{{ ev.submitted_at|date:"M d, Y H:i" }}</div>
+                            </div>
+                            <div>
+                                <div class="eval-avg">{{ ev.average_score }} / 10</div>
+                                <div class="perf-tag
+                  {% if ev.performance_level == 'Excellent' %}tag-excellent
+                  {% elif ev.performance_level == 'Good' %}tag-good
+                  {% else %}tag-ni{% endif %}">
+                                    {{ ev.performance_level }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="score-breakdown">
+                            <div class="score-col">
+                                <div class="score-col-lbl">Comm</div>
+                                <div class="score-col-val">{{ ev.communication }}</div>
+                            </div>
+                            <div class="score-col">
+                                <div class="score-col-lbl">Conf</div>
+                                <div class="score-col-val">{{ ev.confidence }}</div>
+                            </div>
+                            <div class="score-col">
+                                <div class="score-col-lbl">Tech</div>
+                                <div class="score-col-val">{{ ev.technical }}</div>
+                            </div>
+                            <div class="score-col">
+                                <div class="score-col-lbl">Body</div>
+                                <div class="score-col-val">{{ ev.body_language }}</div>
+                            </div>
+                            <div class="score-col">
+                                <div class="score-col-lbl">PS</div>
+                                <div class="score-col-val">{{ ev.problem_solving }}</div>
+                            </div>
+                        </div>
+
+                        <div class="eval-feedback">
+                            "{{ ev.feedback|default:"No feedback provided." }}"
+                        </div>
+
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+        </main>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,112 @@
+{% extends "resumes/base.html" %}
+
+{% block title %}ATS Score Result{% endblock %}
+
+{% block content %}
+<div class="ats-result-section">
+    <h2>📊 ATS Analysis Result</h2>
+    
+    <div class="score-overview">
+        <div class="score-circle score-{{ score_category|lower|cut:" " }}">
+            <div class="score-value">{{ ats_score.score }}</div>
+            <div class="score-label">/ 100</div>
+        </div>
+        <div class="score-details">
+            <h3>{{ score_category }}</h3>
+            <p class="score-description">
+                {% if ats_score.score >= 80 %}
+                    Excellent! Your resume is well-optimized for ATS systems.
+                {% elif ats_score.score >= 60 %}
+                    Good work! Your resume has solid ATS compatibility with room for improvement.
+                {% elif ats_score.score >= 40 %}
+                    Average score. Consider implementing the suggestions below.
+                {% else %}
+                    Needs improvement. Review the suggestions carefully to enhance your resume.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="analysis-sections">
+        <div class="analysis-card">
+            <h3>🎯 Missing Skills</h3>
+            <div class="content">
+                {% if ats_score.missing_skills %}
+                    <p>{{ ats_score.missing_skills }}</p>
+                {% else %}
+                    <p class="text-muted">No specific missing skills identified.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="analysis-card">
+            <h3>💡 Suggestions for Improvement</h3>
+            <div class="content">
+                {% if ats_score.suggestions %}
+                    <p>{{ ats_score.suggestions }}</p>
+                {% else %}
+                    <p class="text-muted">No specific suggestions at this time.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="resume-info">
+        <h3>Resume Details</h3>
+        <p><strong>File:</strong> {{ resume.get_filename|default:"AI Generated Resume" }}</p>
+        <p><strong>Analyzed on:</strong> {{ ats_score.created_at|date:"F d, Y H:i" }}</p>
+        <p><strong>Resume Type:</strong> {{ resume.get_resume_type_display }}</p>
+    </div>
+
+    <div class="action-buttons">
+        <a href="{% url 'resumes:my_resumes' %}" class="btn btn-primary">Back to My Resumes</a>
+        {% if resume.resume_type == 'uploaded' %}
+            <a href="{% url 'resumes:builder' %}" class="btn btn-success">Build Better Resume with AI</a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.score-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+    border: 8px solid;
+}
+
+.score-circle.excellent {
+    border-color: #27ae60;
+    background: #e8f8f0;
+}
+
+.score-circle.good {
+    border-color: #3498db;
+    background: #ebf5fb;
+}
+
+.score-circle.average {
+    border-color: #f39c12;
+    background: #fef5e7;
+}
+
+.score-circle.needsimprovement {
+    border-color: #e74c3c;
+    background: #fadbd8;
+}
+
+.score-value {
+    font-size: 48px;
+    font-weight: bold;
+}
+
+.score-label {
+    font-size: 18px;
+    color: #7f8c8d;
+}
+</style>
+{% endblock %}

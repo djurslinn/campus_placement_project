@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - CPTS Admin</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .user-table { width: 100%; border-collapse: collapse; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
+        .user-table th { background: #f8fafc; text-align: left; padding: 15px 20px; color: #64748b; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid #f1f5f9; }
+        .user-table td { padding: 15px 20px; font-size: 0.9rem; border-bottom: 1px solid #f8fafc; vertical-align: middle; }
+        .role-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .role-student { background: #e0e7ff; color: #4338ca; }
+        .role-coordinator { background: #ecfdf5; color: #059669; }
+        .role-admin { background: #fee2e2; color: #dc2626; }
+        .status-active { color: #10b981; font-weight: 700; }
+        .status-inactive { color: #ef4444; font-weight: 700; }
+        .btn-toggle { padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 0.75rem; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-deactivate { background: #fee2e2; color: #dc2626; }
+        .btn-activate { background: #ecfdf5; color: #10b981; }
+        .filter-bar { display: flex; gap: 15px; margin-bottom: 25px; align-items: center; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
+        .search-input { padding: 10px 15px; border-radius: 12px; border: 1px solid #e2e8f0; width: 300px; font-size: 0.9rem; }
+        .filter-select { padding: 10px 15px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.9rem; }
+        .btn-filter { background: #6366f1; color: white; padding: 10px 20px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        {% include 'menu_admin.html' %}
+
+        <div class="main-content">
+            <header class="dashboard-header" style="background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 40px;">
+                <h1 style="margin: 0; color: #1e293b; font-size: 1.5rem; font-weight: 800;">System User Management</h1>
+            </header>
+
+            <section class="content-section" style="padding: 35px 40px;">
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" style="margin-bottom: 20px; border-radius: 12px; padding: 15px; font-weight: 600;">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="filter-bar">
+                    <form method="GET" action="{% url 'admin_user_management' %}" style="display: flex; gap: 15px; width: 100%;">
+                        <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name or email..." class="search-input">
+                        <select name="role" class="filter-select">
+                            <option value="">All Roles</option>
+                            <option value="student" {% if role_filter == 'student' %}selected{% endif %}>Students</option>
+                            <option value="coordinator" {% if role_filter == 'coordinator' %}selected{% endif %}>Coordinators</option>
+                            <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Admins</option>
+                        </select>
+                        <button type="submit" class="btn-filter">Apply Filters</button>
+                        <a href="{% url 'admin_user_management' %}" style="padding: 10px; color: #64748b; text-decoration: none; font-size: 0.9rem; font-weight: 600;">Clear</a>
+                    </form>
+                </div>
+
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>User Details</th>
+                            <th>Role</th>
+                            <th>Date Joined</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>
+                                <div style="font-weight: 700; color: #1e293b;">{{ u.get_full_name|default:u.username }}</div>
+                                <div style="font-size: 0.8rem; color: #94a3b8;">{{ u.email }}</div>
+                            </td>
+                            <td>
+                                <span class="role-badge role-{{ u.role }}">
+                                    {{ u.role|upper }}
+                                </span>
+                            </td>
+                            <td style="color: #64748b; font-weight: 600; font-size: 0.85rem;">{{ u.date_joined|date:"d M Y" }}</td>
+                            <td>
+                                {% if u.is_active %}
+                                <span class="status-active">Active</span>
+                                {% else %}
+                                <span class="status-inactive">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="POST" action="{% url 'admin_toggle_user_status' u.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    {% if u.is_active %}
+                                    <button type="submit" class="btn-toggle btn-deactivate">Deactivate</button>
+                                    {% else %}
+                                    <button type="submit" class="btn-toggle btn-activate">Activate</button>
+                                    {% endif %}
+                                </form>
+                                <a href="/admin/accounts/user/{{ u.id }}/change/" class="btn-toggle" style="background: #f1f5f9; color: #475569; text-decoration: none; display: inline-block;">Details</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Dashboard - Campus Placement Training System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --navy:   #0d1b3e;
+      --accent: #4f46e5;
+      --asoft:  #e0e7ff;
+      --cyan:   #06b6d4;
+      --bg:     #eef0f7;
+      --surf:   #ffffff;
+      --border: #e2e8f0;
+      --tmute:  #64748b;
+      --tlight: #94a3b8;
+      --hdr:    52px;
+      --r:      12px;
+      --ease:   cubic-bezier(.4,0,.2,1);
+
+      /* card inner metric — roughly 1/3 of usable height */
+      --ch: calc((100vh - var(--hdr) - 24px - 42px) / 3);
+      --cw: calc((100vw - var(--sb-w, 0px) - 24px) / 3);
+      --cs: min(var(--ch), var(--cw)); /* square-ish reference */
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%; overflow: hidden;
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg); color: var(--navy);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ── PAGE ── */
+    .page {
+      display: flex; flex-direction: column;
+      height: 100vh;
+      padding-left: var(--sb-w, 0px);
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      flex-shrink: 0;
+      height: var(--hdr);
+      background: linear-gradient(135deg, var(--navy) 0%, #1e1b6e 55%, #312e81 100%);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+      box-shadow: 0 2px 14px rgba(13,27,62,.35);
+      position: relative; overflow: hidden; z-index: 10;
+    }
+
+    .topbar::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM36 4V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    .tb-left { display: flex; align-items: center; gap: 9px; }
+
+    .tb-logo {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: #fff; flex-shrink: 0;
+    }
+
+    .tb-brand { font-family: 'Sora', sans-serif; font-size: 0.85rem; font-weight: 700; color: #fff; }
+    .tb-brand span { font-weight: 300; color: rgba(255,255,255,.35); }
+    .tb-sep { width: 1px; height: 18px; background: rgba(255,255,255,.15); margin: 0 6px; }
+    .tb-greet { font-size: 0.7rem; font-weight: 600; color: rgba(255,255,255,.6); }
+    .tb-greet strong { color: rgba(255,255,255,.9); }
+
+    .tb-right { display: flex; align-items: center; gap: 5px; }
+
+    .tb-chip {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 3px 8px; border-radius: 20px;
+      font-size: 0.65rem; font-weight: 700;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.13);
+      color: rgba(255,255,255,.7);
+    }
+
+    .tbtn {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 5px 10px; border-radius: 6px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.68rem; font-weight: 700;
+      cursor: pointer; text-decoration: none;
+      border: 1px solid rgba(255,255,255,.13);
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.72);
+      transition: all .15s;
+    }
+
+    .tbtn:hover { background: rgba(255,255,255,.17); color: #fff; }
+    .tbtn-red { background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.22); color: #fca5a5; }
+    .tbtn-red:hover { background: rgba(239,68,68,.24); color: #fecaca; }
+
+    /* ── BODY ── */
+    .body-area {
+      flex: 1; overflow: hidden;
+      padding: 10px 12px;
+      display: flex; flex-direction: column;
+      gap: 10px; min-height: 0;
+    }
+
+    /* Flash */
+    .flash {
+      flex-shrink: 0; padding: 7px 12px; border-radius: 8px;
+      font-size: 0.73rem; font-weight: 700;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .flash-success { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+    .flash-error   { background: #fee2e2; color: #7f1d1d; border-left: 4px solid #ef4444; }
+    .flash-info    { background: #dbeafe; color: #1e3a8a; border-left: 4px solid #3b82f6; }
+
+    /* RTW Banner */
+    .rtw-banner {
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent), var(--primary-dk, #3a56d9));
+      border-radius: var(--r); padding: 10px 14px;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 3px 10px rgba(79, 70, 229, .22);
+    }
+
+    .rtw-icon {
+      width: 32px; height: 32px; background: rgba(255,255,255,.15);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: #fff; flex-shrink: 0;
+    }
+
+    .rtw-text h4 { font-family: 'Sora', sans-serif; font-size: 0.78rem; font-weight: 700; color: #fff; }
+    .rtw-text p  { font-size: 0.68rem; color: rgba(255,255,255,.7); margin-top: 1px; }
+
+    /* ── CONTAINER ── */
+    .container {
+      flex: 1; background: var(--surf);
+      border-radius: var(--r);
+      box-shadow: 0 4px 24px rgba(13,27,62,.08);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      min-height: 0;
+    }
+
+    .cont-head {
+      flex-shrink: 0; padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      background: #fafbff;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .cont-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 0.78rem; font-weight: 700; color: var(--navy);
+      display: flex; align-items: center; gap: 7px;
+    }
+
+    .cont-title::before {
+      content: ''; display: block; width: 3px; height: 13px;
+      background: var(--accent);
+      border-radius: 3px;
+    }
+
+    .cont-meta { font-size: 0.65rem; color: var(--tlight); font-weight: 600; }
+
+    /* ── 3×3 GRID — fills container, zero scroll ── */
+    .nav-grid {
+      flex: 1; min-height: 0;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    /* ── NAV CARD ── */
+    .nav-card {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      /* padding scales with the card's own size */
+      padding: calc(var(--cs) * .07);
+      display: flex; flex-direction: column;
+      gap: calc(var(--cs) * .04);
+      cursor: pointer; text-decoration: none;
+      position: relative; overflow: hidden;
+      transition: transform .18s var(--ease),
+                  box-shadow .18s var(--ease),
+                  border-color .18s var(--ease),
+                  background .18s var(--ease);
+      min-height: 0;
+      --cc: var(--accent);
+      --csoft: var(--asoft);
+    }
+
+    .nav-card::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: var(--cc);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .22s var(--ease);
+    }
+
+    .nav-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(13,27,62,.12);
+      border-color: var(--cc); background: var(--surf);
+    }
+
+    .nav-card:hover::after { transform: scaleX(1); }
+
+    /* ── ICON: scales with card size ── */
+    .nc-icon {
+      /* size = ~22% of card's smaller dimension */
+      width:  calc(var(--cs) * .22);
+      height: calc(var(--cs) * .22);
+      min-width: 28px; min-height: 28px;
+      max-width: 64px; max-height: 64px;
+      border-radius: calc(var(--cs) * .055);
+      background: var(--csoft);
+      display: flex; align-items: center; justify-content: center;
+      /* icon font-size = ~13% of card size */
+      font-size: clamp(14px, calc(var(--cs) * .13), 34px);
+      color: var(--accent);
+      flex-shrink: 0;
+      transition: transform .18s var(--ease);
+    }
+
+    .nav-card:hover .nc-icon { transform: scale(1.1) rotate(-5deg); }
+
+    /* ── LABEL: scales with card ── */
+    .nc-label {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(0.7rem, calc(var(--cs) * .07), 1.1rem);
+      font-weight: 700; color: var(--navy); line-height: 1.2;
+    }
+
+    /* ── DESC: scales with card ── */
+    .nc-desc {
+      font-size: clamp(0.6rem, calc(var(--cs) * .055), 0.85rem);
+      font-weight: 500; color: var(--tlight);
+      line-height: 1.45; flex: 1;
+    }
+
+    /* Footer row */
+    .nc-foot {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: auto;
+    }
+
+    .nc-action {
+      font-size: clamp(0.55rem, calc(var(--cs) * .047), 0.72rem);
+      font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--cc);
+      opacity: 0; transform: translateX(-5px);
+      transition: opacity .18s, transform .18s;
+    }
+
+    .nav-card:hover .nc-action { opacity: 1; transform: translateX(0); }
+
+    .nc-arr {
+      width:  clamp(18px, calc(var(--cs) * .13), 30px);
+      height: clamp(18px, calc(var(--cs) * .13), 30px);
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: clamp(9px, calc(var(--cs) * .07), 14px);
+      color: var(--tlight); flex-shrink: 0;
+      transition: all .18s var(--ease);
+    }
+
+    .nav-card:hover .nc-arr {
+      background: var(--cc); border-color: var(--cc);
+      color: #fff; transform: translateX(3px);
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .topbar    { animation: fadeUp .22s var(--ease) both; }
+    .container { animation: fadeUp .25s .05s var(--ease) both; }
+
+    .nav-card:nth-child(1) { animation: fadeUp .2s .05s var(--ease) both; }
+    .nav-card:nth-child(2) { animation: fadeUp .2s .08s var(--ease) both; }
+    .nav-card:nth-child(3) { animation: fadeUp .2s .11s var(--ease) both; }
+    .nav-card:nth-child(4) { animation: fadeUp .2s .14s var(--ease) both; }
+    .nav-card:nth-child(5) { animation: fadeUp .2s .17s var(--ease) both; }
+    .nav-card:nth-child(6) { animation: fadeUp .2s .20s var(--ease) both; }
+    .nav-card:nth-child(7) { animation: fadeUp .2s .23s var(--ease) both; }
+    .nav-card:nth-child(8) { animation: fadeUp .2s .26s var(--ease) both; }
+    .nav-card:nth-child(9) { animation: fadeUp .2s .29s var(--ease) both; }
+  </style>
+</head>
+<body>
+
+  {% include 'menu_student.html' %}
+
+  <div class="page">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="tb-left">
+        <div class="tb-logo"><i class="ri-graduation-cap-line"></i></div>
+        <div class="tb-brand">CPTS <span>/ Campus Placement Training System</span></div>
+        <div class="tb-sep"></div>
+        <div class="tb-greet">Welcome back, <strong>{{ user.first_name }} {{ user.last_name }}</strong></div>
+      </div>
+      <div class="tb-right">
+        <span class="tb-chip"><i class="ri-building-line"></i> {{ user.department|default:"N/A" }}</span>
+        <span class="tb-chip"><i class="ri-history-line"></i> Batch {{ user.studentprofile.batch|default:"N/A" }}</span>
+        <span class="tb-chip"><i class="ri-book-open-line"></i> Year {{ user.studentprofile.year|default:"N/A" }}</span>
+        <a href="{% url 'student_notifications' %}" class="tbtn"><i class="ri-notification-3-line"></i></a>
+        <a href="{% url 'logout' %}" class="tbtn tbtn-red"><i class="ri-logout-box-line"></i> Logout</a>
+      </div>
+    </header>
+
+    <!-- BODY -->
+    <div class="body-area">
+
+      {% if messages %}{% for message in messages %}
+      <div class="flash flash-{{ message.tags }}">
+        <i class="ri-information-line"></i> {{ message }}
+      </div>
+      {% endfor %}{% endif %}
+
+      {% if accepted_application %}
+      <div class="rtw-banner">
+        <div class="rtw-icon"><i class="ri-medal-line"></i></div>
+        <div class="rtw-text">
+          <h4>Ready to Work — {{ accepted_application.drive.company_name }}</h4>
+          <p>Placement confirmed · <strong>{{ accepted_application.drive.job_role }}</strong></p>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- SINGLE CONTAINER -->
+      <div class="container">
+        <div class="cont-head">
+          <div class="cont-title">Quick Navigation</div>
+          <div class="cont-meta">{{ user.first_name }} {{ user.last_name }} &nbsp;·&nbsp; Student Portal</div>
+        </div>
+
+        <div class="nav-grid">
+
+          <a href="{% url 'student_profile' %}" class="nav-card">
+            <div class="nc-icon"><i class="ri-user-3-line"></i></div>
+            <div class="nc-label">My Profile</div>
+            <div class="nc-desc">Personal &amp; academic details</div>
+            <div class="nc-foot"><span class="nc-action">Open →</span><div class="nc-arr"><i class="ri-arrow-right-line"></i></div></div>
+          </a>
+
+          <a href="{% url 'attendance:performance_dashboard' %}" class="nav-card">
+            <div class="nc-icon"><i class="ri-line-chart-line"></i></div>
+            <div class="nc-label">Performance</div>
+            <div class="nc-desc">Scores &amp; placement probability</div>
+            <div class="nc-foot"><span class="nc-action">View →</span><div class="nc-arr"><i class="ri-arrow-right-line"></i></div></div>
+          </a>
+
+          <a href="{% url 'attendance:activity_log' %}" class="nav-card">
+            <div class="nc-icon"><i class="ri-calendar-todo-line"></i></div>
+            <div class="nc-label">Attendance</div>
+            <div class="nc-desc">Daily presence &amp; training logs</div>
+            <div class="nc-foot"><span class="nc-action">Check →</span><div class="nc-arr"><i class="ri-arrow-right-line"></i></div></div>
+          </a>
+
+          <a href="{% url 'student_pdf_tests' %}" class="nav-card">
+            <div class="nc-icon"><i class="ri-file-text-line"></i></div>
+            <div class="nc-label">Aptitude Tests</div>
+            <div class="nc-desc">Practice papers &amp; logic tests</div>
+            <div class="nc-foot"><span class="nc-action">Practice →</span><div class="nc-arr"><i class="ri-arrow-right-line"></i></div></div>
+          </a>
+
+          <a href="{% url 'mock_interviews:student_dashboard' %}" class="nav-card">
+            <div class="nc-icon"><i class="ri-mic-line"></i></div>
+            <div class="nc-label">Mock Interviews</div>
+            <div class="nc-desc">HR &amp; technical rounds with AI</div>
+            <div class="nc-foot"><span class="nc-action">Start →</span><div class="nc-arr"><i class="ri-arrow-right-line"></i></div></div>
+          </a>
+
+          <a href="{% url 'student_gd_sessions' %}" class="nav-card">
+            <div class="nc-icon"><i class="ri-discuss-line"></i></div>
+            <div class="nc-label">GD Sessions</div>
+            <div class="nc-desc">Group discussions &amp; debates</div>
+            <div class="nc-foot"><span class="nc-action">Join →</span><div class="nc-arr"><i class="ri-arrow-right-line"></i></div></div>
+          </a>
+
+          <a href="{% url 'resumes:dashboard' %}" class="nav-card">
+            <div class="nc-icon"><i class="ri-file-user-line"></i></div>
+            <div class="nc-label">Resume Builder</div>
+            <div class="nc-desc">Build ATS-friendly resumes</div>
+            <div class="nc-foot"><span class="nc-action">Build →</span><div class="nc-arr"><i class="ri-arrow-right-line"></i></div></div>
+          </a>
+
+          <a href="{% url 'student_notifications' %}" class="nav-card">
+            <div class="nc-icon"><i class="ri-notification-3-line"></i></div>
+            <div class="nc-label">Notifications</div>
+            <div class="nc-desc">Updates &amp; schedule changes</div>
+            <div class="nc-foot"><span class="nc-action">Inbox →</span><div class="nc-arr"><i class="ri-arrow-right-line"></i></div></div>
+          </a>
+
+          <a href="{% url 'student_placement_drives' %}" class="nav-card">
+            <div class="nc-icon"><i class="ri-building-2-line"></i></div>
+            <div class="nc-label">Drives List</div>
+            <div class="nc-desc">Browse all career opportunities</div>
+            <div class="nc-foot"><span class="nc-action">Browse →</span><div class="nc-arr"><i class="ri-arrow-right-line"></i></div></div>
+          </a>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

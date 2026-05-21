@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eligible Participants - {{ test.title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .status-completed { background: #dcfce7; color: #15803d; }
+        .status-pending { background: #fef9c3; color: #a16207; }
+        
+        .header-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex: 1;
+        }
+        .stat-card h3 { margin: 0; font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
+        .stat-card p { margin: 5px 0 0; font-size: 1.5rem; font-weight: 800; color: #1e293b; }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar Include -->
+        {% include 'menu_coordinator.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <a href="{% url 'manage_pdf_tests' %}" style="text-decoration: none; color: #64748b; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; margin-bottom: 5px;">
+                        <i class="fas fa-arrow-left"></i> Back to Manage Tests
+                    </a>
+                    <h1>Eligible Participants</h1>
+                    <p style="color: #64748b; margin-top: 5px;">Test: <strong>{{ test.title }}</strong></p>
+                </div>
+                <div class="user-info">
+                    <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+                </div>
+            </header>
+
+            <section class="content-section">
+                <!-- Targeting Info -->
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 15px; border-radius: 10px; margin-bottom: 25px; display: flex; align-items: center; gap: 15px;">
+                    <i class="fas fa-bullseye" style="font-size: 20px;"></i>
+                    <div>
+                        <strong style="display: block; font-size: 0.9rem;">Targeting Criteria:</strong>
+                        <span style="font-size: 0.85rem;">
+                            {% if test.target_type == 'everyone' %}
+                                All active and approved students are eligible.
+                            {% elif test.target_type == 'department' %}
+                                Eligible for students in <strong>{{ test.target_department.name }}</strong> department.
+                            {% elif test.target_type == 'drive' %}
+                                Eligible for students matching <strong>{{ test.target_drive.company_name }}</strong> criteria.
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Stats summary -->
+                <div class="header-stats">
+                    <div class="stat-card">
+                        <h3>Total Eligible</h3>
+                        <p>{{ stats.total }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Attempted</h3>
+                        <p>{{ stats.attempted }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Remaining</h3>
+                        <p>{{ stats.remaining }}</p>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Student Name</th>
+                                <th>Department</th>
+                                <th>Year / Batch</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student_item in eligible_students %}
+                            <tr>
+                                <td>{{ student_item.profile.roll_no }}</td>
+                                <td>
+                                    <div style="font-weight: 600;">{{ student_item.profile.user.get_full_name }}</div>
+                                    <div style="font-size: 0.8rem; color: #64748b;">{{ student_item.profile.user.email }}</div>
+                                </td>
+                                <td>{{ student_item.profile.user.department.name }}</td>
+                                <td>Year {{ student_item.profile.year }} / Batch {{ student_item.profile.batch }}</td>
+                                <td>
+                                    {% if student_item.completed %}
+                                        <span class="status-badge status-completed">Completed</span>
+                                    {% else %}
+                                        <span class="status-badge status-pending">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if student_item.completed %}
+                                        <a href="{% url 'view_test_results' test.id %}" class="test-btn test-btn-sm test-btn-info">View Result</a>
+                                    {% else %}
+                                        <span style="color: #94a3b8; font-size: 0.85rem; font-style: italic;">No attempt yet</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                                    No students match the eligibility criteria for this test.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,98 @@
+{% extends "resumes/base.html" %}
+
+{% block title %}My Resumes{% endblock %}
+
+{% block content %}
+<div class="resumes-list-section">
+    <h2>My Resumes</h2>
+    <p class="subtitle">Manage your uploaded and AI-generated resumes</p>
+
+    {% if resumes %}
+        <div class="resumes-grid">
+            {% for resume in resumes %}
+                <div class="resume-card">
+                    <div class="resume-header">
+                        <h3>
+                            {% if resume.resume_type == 'uploaded' %}
+                                📎 Uploaded Resume
+                            {% else %}
+                                🤖 AI Generated Resume
+                            {% endif %}
+                        </h3>
+                        <span class="resume-date">{{ resume.created_at|date:"M d, Y" }}</span>
+                    </div>
+
+                    <div class="resume-body">
+                        {% if resume.resume_type == 'uploaded' %}
+                            <p><strong>File:</strong> {{ resume.get_filename }}</p>
+                            <p><strong>Text Extracted:</strong> 
+                                {% if resume.extracted_text %}
+                                    <span class="badge badge-success">Yes</span>
+                                {% else %}
+                                    <span class="badge badge-warning">No</span>
+                                {% endif %}
+                            </p>
+                        {% else %}
+                            <p><strong>Name:</strong> {{ resume.full_name }}</p>
+                            <p><strong>Generated:</strong> {{ resume.created_at|date:"M d, Y H:i" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="resume-actions">
+                        {% if resume.resume_type == 'uploaded' %}
+                            {% if resume.extracted_text %}
+                                <a href="{% url 'resumes:ats_check' resume.id %}" 
+                                   class="btn btn-small btn-primary">
+                                    Check ATS Score
+                                </a>
+                            {% endif %}
+                            {% if resume.file %}
+                                <a href="{% url 'resumes:download_pdf' resume.id %}" 
+                                   class="btn btn-small btn-secondary">
+                                    Download
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'resumes:preview' resume.id %}" 
+                               class="btn btn-small btn-primary">
+                                Preview
+                            </a>
+                            {% if resume.file %}
+                                <a href="{% url 'resumes:download_pdf' resume.id %}" 
+                                   class="btn btn-small btn-secondary">
+                                    Download PDF
+                                </a>
+                            {% else %}
+                                <a href="{% url 'resumes:generate_pdf' resume.id %}" 
+                                   class="btn btn-small btn-success">
+                                    Generate PDF
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <div class="resume-scores">
+                        {% if resume.ats_scores.all %}
+                            <p><strong>ATS Scores:</strong></p>
+                            {% for score in resume.ats_scores.all|slice:":3" %}
+                                <a href="{% url 'resumes:ats_result' score.id %}" 
+                                   class="score-badge score-{{ score.get_score_category|lower|cut:" " }}">
+                                    {{ score.score }}/100 - {{ score.get_score_category }}
+                                </a>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>You haven't uploaded or created any resumes yet.</p>
+            <div class="empty-actions">
+                <a href="{% url 'resumes:upload' %}" class="btn btn-primary">Upload Resume</a>
+                <a href="{% url 'resumes:builder' %}" class="btn btn-secondary">Build Resume with AI</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

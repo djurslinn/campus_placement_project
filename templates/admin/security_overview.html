@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security & Access Control - CPTS Admin</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .security-card {
+            background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+            border: 1px solid #f1f5f9; margin-bottom: 30px;
+        }
+        .security-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+        .security-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .danger-zone { border: 2px solid #fee2e2; background: #fffafb; }
+        .admin-list-table { width: 100%; border-collapse: collapse; }
+        .admin-list-table th { text-align: left; padding: 12px; color: #64748b; font-size: 0.8rem; border-bottom: 2px solid #f1f5f9; }
+        .admin-list-table td { padding: 12px; font-size: 0.85rem; border-bottom: 1px solid #f8fafc; }
+        .btn-action { padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.75rem; transition: 0.2s; cursor: pointer; border: none; }
+        .btn-view { background: #e0e7ff; color: #4338ca; }
+        .btn-view:hover { background: #c7d2fe; }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        {% include 'menu_admin.html' %}
+
+        <div class="main-content">
+            <header class="dashboard-header" style="background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 40px;">
+                <h1 style="margin: 0; color: #1e293b; font-size: 1.5rem; font-weight: 800;">Security & Access Control</h1>
+            </header>
+
+            <section class="content-section" style="padding: 35px 40px;">
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" style="margin-bottom: 20px; border-radius: 12px; padding: 15px; font-weight: 600;">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <!-- System Health & Status -->
+                    <div class="security-card">
+                        <div class="security-header">
+                            <div class="security-icon" style="background: #ecfdf5; color: #10b981;"><i class="fas fa-check-shield"></i></div>
+                            <h2 style="margin: 0; font-size: 1.2rem; color: #1e293b;">Access Summary</h2>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8fafc; border-radius: 12px;">
+                                <span style="font-weight: 700; color: #64748b;">Inactive User Accounts</span>
+                                <span style="background: #ef4444; color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 800;">{{ inactive_users }}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8fafc; border-radius: 12px;">
+                                <span style="font-weight: 700; color: #64748b;">Unapproved Student Profiles</span>
+                                <span style="background: #f59e0b; color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 800;">{{ unapproved_students }}</span>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <a href="{% url 'admin_user_management' %}" class="btn-action btn-view" style="display: inline-block; width: 100%; text-align: center; padding: 12px;">Navigate to User Manager</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Privilege Alert -->
+                    <div class="security-card danger-zone">
+                        <div class="security-header">
+                            <div class="security-icon" style="background: #fee2e2; color: #ef4444;"><i class="fas fa-user-lock"></i></div>
+                            <h2 style="margin: 0; font-size: 1.2rem; color: #1e293b;">High Privilege Access</h2>
+                        </div>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px; line-height: 1.5;">The following users have **Administrative Powers** or **Superuser Status**. These accounts can bypass all permissions and modify system core data.</p>
+                        <table class="admin-list-table">
+                            <thead>
+                                <tr>
+                                    <th>Administrator</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for adm in admins %}
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 700; color: #1e293b;">{{ adm.email }}</div>
+                                        <div style="font-size: 0.75rem; color: #94a3b8;">{{ adm.role|title }}{% if adm.is_superuser %} (Superuser){% endif %}</div>
+                                    </td>
+                                    <td>
+                                        <span style="font-weight: 700; font-size: 0.75rem; color: #10b981;">ACTIVE</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="security-card" style="margin-top: 30px; background: #1e293b; color: white;">
+                    <div class="security-header">
+                        <div class="security-icon" style="background: rgba(255,255,255,0.1); color: #6366f1;"><i class="fas fa-server"></i></div>
+                        <h2 style="margin: 0; font-size: 1.2rem; color: white;">Security Audit Controls</h2>
+                    </div>
+                    <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 25px;">System-wide maintenance and audit tools for the Campus Placement Training System.</p>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                        <a href="/admin/accounts/course/" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; text-decoration: none; color: white; display: flex; flex-direction: column; gap: 10px;">
+                            <i class="fas fa-graduation-cap" style="color: #6366f1;"></i>
+                            <span style="font-weight: 700;">Department Core Data</span>
+                            <span style="font-size: 0.75rem; color: #64748b;">Manage degree types and lists</span>
+                        </a>
+                        <a href="/admin/core/placementdrive/" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; text-decoration: none; color: white; display: flex; flex-direction: column; gap: 10px;">
+                            <i class="fas fa-building" style="color: #6366f1;"></i>
+                            <span style="font-weight: 700;">Global Drive Audit</span>
+                            <span style="font-size: 0.75rem; color: #64748b;">Review all historical applications</span>
+                        </a>
+                        <a href="/admin/auth/group/" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; text-decoration: none; color: white; display: flex; flex-direction: column; gap: 10px;">
+                            <i class="fas fa-key" style="color: #6366f1;"></i>
+                            <span style="font-weight: 700;">Permission Groups</span>
+                            <span style="font-size: 0.75rem; color: #64748b;">Modify coordinator rights</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+
+</html>

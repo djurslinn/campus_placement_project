@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take Test: {{ test.title }} - Campus Placement Training System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .exam-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .pdf-viewer {
+            flex: 1;
+            border-right: 1px solid #ccc;
+            height: 100%;
+        }
+
+        .answer-sheet {
+            width: 350px;
+            background: #f9fafb;
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 2px solid #ddd;
+        }
+
+        .question-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+        }
+
+        .question-num {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .options {
+            display: flex;
+            gap: 10px;
+            justify-content: space-around;
+        }
+
+        .option-label {
+            cursor: pointer;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .option-label:hover {
+            background-color: #f3f4f6;
+        }
+
+        input[type="radio"]:checked+span {
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .submit-section {
+            margin-top: 20px;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        .timer {
+            position: fixed;
+            top: 10px;
+            right: 370px;
+            background: #ef4444;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="timer" id="timer">Loading...</div>
+
+    <div class="exam-container">
+        <!-- PDF Viewer -->
+        <div class="pdf-viewer">
+            <embed src="{{ test.pdf_file.url }}#toolbar=0" type="application/pdf" width="100%" height="100%" />
+            <noembed>
+                <div style="padding: 20px; text-align: center;">
+                    <p>It seems your browser cannot display the PDF directly.</p>
+                    <a href="{{ test.pdf_file.url }}" target="_blank" class="btn btn-secondary">Open PDF in New Tab</a>
+                </div>
+            </noembed>
+        </div>
+
+        <!-- Answer Sheet -->
+        <div class="answer-sheet">
+            <h2 style="margin-top: 0;">Answer Sheet</h2>
+            <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">Use the PDF on the left to read questions and
+                mark your answers here.</p>
+
+            <form method="POST" id="examForm">
+                {% csrf_token %}
+
+                {% for i in range %}
+                <div class="question-item">
+                    <span class="question-num">Question {{ i }}</span>
+                    <div class="options">
+                        <label class="option-label">
+                            <input type="radio" name="q_{{ i }}" value="A"> <span>A</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q_{{ i }}" value="B"> <span>B</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q_{{ i }}" value="C"> <span>C</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q_{{ i }}" value="D"> <span>D</span>
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="submit-section">
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 1.1em;"
+                        onclick="return confirm('Submit Test? You cannot change answers later.')">Submit Test</button>
+                    <a href="{% url 'student_pdf_tests' %}"
+                        style="display: block; margin-top: 10px; color: #666; font-size: 0.9em;">Cancel/Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Timer Script -->
+    <script>
+        var durationMinutes = {{ test.duration_minutes }};
+        var timeLeft = durationMinutes * 60; // seconds
+
+        var timerElement = document.getElementById('timer');
+
+        var timerInterval = setInterval(function () {
+            var minutes = Math.floor(timeLeft / 60);
+            var seconds = timeLeft % 60;
+
+            // Format 00:00
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            timerElement.textContent = minutes + ":" + seconds;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("Time's up! Submitting your test automatically.");
+                document.getElementById('examForm').submit();
+            }
+
+            timeLeft--;
+        }, 1000);
+    </script>
+</body>
+
+</html>

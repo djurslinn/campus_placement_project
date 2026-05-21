@@ -1,0 +1,375 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Interview Report - Campus Placement Training System</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --border: #e8eaf2;
+            --ink-1: #1b1e2e;
+            --ink-2: #58607a;
+            --ink-3: #9ea6bc;
+            --primary: #4f6ef7;
+            --primary-lt: #eef0fe;
+            --primary-dk: #3a56d9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --r: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--ink-1);
+            margin: 0;
+        }
+
+        .shell {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 28px;
+            margin: 0;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--r);
+            border: 1px solid var(--border);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .overall-score-card {
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dk));
+            color: white;
+            border: none;
+        }
+
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            display: grid;
+            place-items: center;
+            margin: 0 auto 16px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .performance-tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .tag-excellent {
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        .tag-good {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .tag-ni {
+            background: #fff1f2;
+            color: #e11d48;
+        }
+
+        .analysis-box {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .analysis-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--ink-3);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .eval-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .eval-item {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .eval-item:last-child {
+            border-bottom: none;
+        }
+
+        .factor-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .factor-item {
+            text-align: center;
+        }
+
+        .factor-label {
+            font-size: 10px;
+            color: var(--ink-3);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .factor-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--ink-1);
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            margin: 2px;
+        }
+
+        .pill-strength {
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        .pill-weakness {
+            background: #fff1f2;
+            color: #e11d48;
+        }
+
+        .pill-suggestion {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        @media (max-width: 900px) {
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        {% include 'menu_student.html' %}
+
+        <main class="main-content" style="margin-left: 260px;">
+            <div class="header">
+                <a href="{% url 'mock_interviews:student_dashboard' %}"
+                    style="font-size: 13px; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 4px; margin-bottom: 8px;">
+                    <i class="ri-arrow-left-line"></i> Back to Tasks
+                </a>
+                <h1>Performance Report</h1>
+            </div>
+
+            {% if not evaluations %}
+            <div
+                style="text-align: center; padding: 60px; background: white; border-radius: 16px; border: 1px solid var(--border);">
+                <div style="font-size: 48px; color: var(--ink-3); margin-bottom: 20px;"><i
+                        class="ri-bar-chart-box-line"></i></div>
+                <h3 style="font-family: 'Poppins', sans-serif;">No Reports Available</h3>
+                <p style="color: var(--ink-2);">You need to participate in mock interviews and receive feedback to see
+                    your report.</p>
+            </div>
+            {% else %}
+            <div class="report-grid">
+                <div class="report-main">
+                    <div class="card">
+                        <div class="card-title">Latest Evaluation Highlights</div>
+                        <div class="factor-grid">
+                            <div class="factor-item">
+                                <div class="factor-label">Comm</div>
+                                <div class="factor-value">{{ latest_eval.communication }}</div>
+                            </div>
+                            <div class="factor-item">
+                                <div class="factor-label">Conf</div>
+                                <div class="factor-value">{{ latest_eval.confidence }}</div>
+                            </div>
+                            <div class="factor-item">
+                                <div class="factor-label">Tech</div>
+                                <div class="factor-value">{{ latest_eval.technical }}</div>
+                            </div>
+                            <div class="factor-item">
+                                <div class="factor-label">Body</div>
+                                <div class="factor-value">{{ latest_eval.body_language }}</div>
+                            </div>
+                            <div class="factor-item">
+                                <div class="factor-label">PS</div>
+                                <div class="factor-value">{{ latest_eval.problem_solving }}</div>
+                            </div>
+                        </div>
+
+                        <div class="analysis-box">
+                            <div class="analysis-label">Strengths</div>
+                            {% for s in strengths %}
+                            <span class="pill pill-strength"><i class="ri-checkbox-circle-line"></i>
+                                {{ s }}</span>
+                            {% empty %}
+                            <span style="font-size: 12px; color: var(--ink-3);">Keep working to identify key
+                                strengths.</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="analysis-box">
+                            <div class="analysis-label">Areas for Improvement</div>
+                            {% for w in weaknesses %}
+                            <span class="pill pill-weakness"><i class="ri-error-warning-line"></i> {{ w }}</span>
+                            {% empty %}
+                            <span style="font-size: 12px; color: var(--ink-3);">No critical weaknesses
+                                identified.</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="analysis-box" style="background: #fffbeb; border: 1px solid #fef3c7;">
+                            <div class="analysis-label" style="color: #92400e;">Recommendations</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+                                {% for sug in suggestions %}
+                                <span class="pill pill-suggestion"><i class="ri-lightbulb-line"></i> {{ sug }}</span>
+                                {% endfor %}
+                            </div>
+                            <p
+                                style="font-size: 13px; color: #92400e; margin-top: 10px; font-weight: 500; border-top: 1px solid #fef3c7; padding-top: 10px;">
+                                {{ improvement_summary }}
+                            </p>
+                        </div>
+
+                        <div class="analysis-box">
+                            <div class="analysis-label">Latest Partner Feedback</div>
+                            <p style="font-size: 14px; font-style: italic; color: var(--ink-2); line-height: 1.6;">
+                                "{{ latest_eval.feedback|default:"No detailed feedback provided by the partner." }}"
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="card" style="padding: 0;">
+                        <div class="card-header" style="padding: 24px; border-bottom: 1px solid var(--border);">
+                            <h2 style="font-family: 'Poppins', sans-serif; font-size: 18px; margin: 0;">Evaluation
+                                History</h2>
+                        </div>
+                        <div class="eval-list">
+                            {% for eval in evaluations %}
+                            <div class="eval-item">
+                                <div>
+                                    <div style="font-weight: 600;">{{ eval.session.label|default:"Mock Session" }}</div>
+                                    <div style="font-size: 12px; color: var(--ink-3);">
+                                        {{ eval.submitted_at|date:"M d, Y" }} · Partner:
+                                        {{ eval.evaluator.user.get_full_name }}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 700; color: var(--primary);">
+                                        {{ eval.average_score|floatformat:1 }} / 10</div>
+                                    <div
+                                        style="font-size: 11px; font-weight: 600; color: {% if eval.performance_level == 'Excellent' %}var(--success){% elif eval.performance_level == 'Good' %}var(--primary){% else %}var(--danger){% endif %};">
+                                        {{ eval.performance_level }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-sidebar">
+                    <div class="card overall-score-card">
+                        <div class="stat-label" style="color: rgba(255,255,255,0.7); margin-bottom: 12px;">Overall
+                            Average</div>
+                        <div class="score-circle">
+                            {{ overall_avg|floatformat:1 }}
+                        </div>
+                        <div style="font-weight: 600; font-size: 18px; margin-bottom: 8px;">{{ performance_level }}
+                        </div>
+                        <div style="font-size: 12px; opacity: 0.8;">Based on {{ evaluations.count }} mock interview
+                            rounds</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title" style="font-size: 14px;"><i class="ri-guide-line"></i> Category Guide
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                                <span>Excellent</span>
+                                <span class="performance-tag tag-excellent">8.0 - 10</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                                <span>Good</span>
+                                <span class="performance-tag tag-good">6.0 - 7.9</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                                <span>Needs Improvement</span>
+                                <span class="performance-tag tag-ni">Below 6.0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</body>
+
+</html>

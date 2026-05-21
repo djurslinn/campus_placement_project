@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aptitude Tests - Campus Placement Training System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+
+    <style>
+        :root {
+            --bg:           #f4f6fb;
+            --surface:      #fff;
+            --border:       #e8eaf2;
+            --ink-1:        #1b1e2e;
+            --ink-2:        #58607a;
+            --ink-3:        #9ea6bc;
+            --primary:      #4f6ef7;
+            --primary-lt:   #eef0fe;
+            --gradient:     linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --radius-card:  14px;
+            --radius-input: 10px;
+            --sb-w:         240px;
+            --ease:         cubic-bezier(.4,0,.2,1);
+            --shadow-sm:    0 1px 4px rgba(27,30,46,.06), 0 2px 12px rgba(27,30,46,.04);
+            --shadow-md:    0 4px 20px rgba(27,30,46,.10), 0 1px 4px rgba(27,30,46,.06);
+            --shadow-btn:   0 4px 14px rgba(79,110,247,.35);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--ink-1);
+            font-size: 14px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Shell ──────────────────────────────────────────── */
+        .shell {
+            margin-left: var(--sb-w);
+            width: calc(100vw - var(--sb-w));
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* ── Topbar ─────────────────────────────────────────── */
+        .topbar {
+            position: sticky; top: 0; z-index: 200;
+            height: 58px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 8px rgba(27,30,46,.05);
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 0 28px; gap: 16px;
+        }
+        .topbar__left {
+            display: flex; align-items: center; gap: 12px; min-width: 0;
+        }
+        .topbar__icon {
+            width: 34px; height: 34px; border-radius: 9px;
+            background: var(--gradient);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; flex-shrink: 0;
+        }
+        .topbar__title {
+            font-family: 'Poppins', sans-serif;
+            font-size: .95rem; font-weight: 700; color: var(--ink-1);
+            white-space: nowrap;
+        }
+        .topbar__sep { width: 1px; height: 18px; background: var(--border); flex-shrink: 0; }
+        .topbar__sub { font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+
+        .topbar__right { display: flex; align-items: center; gap: 9px; flex-shrink: 0; }
+
+        .dash-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 15px;
+            background: var(--primary-lt); color: var(--primary);
+            border: 1px solid #c5cefb; border-radius: var(--radius-input);
+            font-size: 13px; font-weight: 600; text-decoration: none;
+            transition: all 200ms var(--ease);
+        }
+        .dash-btn:hover { background: #e3e7fd; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(79,110,247,.18); }
+        .dash-btn i { font-size: 15px; }
+
+        /* ── Content ────────────────────────────────────────── */
+        .content {
+            flex: 1;
+            padding: 20px 28px 56px;
+            display: flex; flex-direction: column; gap: 16px;
+        }
+
+        /* ── Alerts ─────────────────────────────────────────── */
+        .messages { display: flex; flex-direction: column; gap: 8px; }
+        .alert {
+            display: flex; align-items: center; gap: 9px;
+            padding: 11px 15px; border-radius: var(--radius-input);
+            font-size: 13.5px; font-weight: 500; border: 1px solid transparent;
+        }
+        .alert-success { background: #edfbf3; color: #1a7a49; border-color: #b8f0d2; }
+        .alert-error   { background: #fff3f3; color: #c0392b; border-color: #ffc9c9; }
+        .alert-info    { background: var(--primary-lt); color: var(--primary); border-color: #c5cefb; }
+        .alert-warning { background: #fff9ec; color: #b46a00; border-color: #fde8a0; }
+
+        /* ── Stats strip ────────────────────────────────────── */
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            animation: fadeInUp .4s var(--ease) .04s both;
+        }
+        .stat-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-card); box-shadow: var(--shadow-sm);
+            padding: 14px 16px;
+            display: flex; align-items: center; gap: 12px;
+            transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+        }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .stat-icon {
+            width: 40px; height: 40px; border-radius: 11px;
+            background: var(--gradient);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 18px; flex-shrink: 0;
+        }
+        .stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--ink-3); margin-bottom: 2px; }
+        .stat-value { font-family: 'Poppins', sans-serif; font-size: 1.25rem; font-weight: 800; color: var(--ink-1); line-height: 1; }
+
+        /* ── Section heading ────────────────────────────────── */
+        .section-head {
+            display: flex; align-items: center; gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .section-bar { width: 3px; height: 20px; border-radius: 3px; background: var(--primary); flex-shrink: 0; }
+        .section-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: .95rem; font-weight: 700; color: var(--ink-1);
+        }
+        .section-count {
+            padding: 2px 9px; border-radius: 20px;
+            font-size: 10.5px; font-weight: 700;
+            background: var(--primary-lt); color: var(--primary);
+        }
+
+        /* ── Test card ──────────────────────────────────────── */
+        .test-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-sm);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 24px;
+            padding: 20px 22px;
+            border-left: 3px solid var(--primary);
+            transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+            animation: fadeInUp .38s var(--ease) both;
+        }
+        .test-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+        /* Attempted card — muted accent */
+        .test-card--done {
+            border-left-color: #22c55e;
+            opacity: .88;
+        }
+
+        .test-card__title {
+            font-family: 'Poppins', sans-serif;
+            font-size: .95rem; font-weight: 700; color: var(--ink-1);
+            margin-bottom: 5px;
+        }
+        .test-card__desc {
+            font-size: 13px; color: var(--ink-2);
+            line-height: 1.55; margin-bottom: 12px;
+        }
+        .test-card__meta {
+            display: flex; flex-wrap: wrap; gap: 14px;
+        }
+        .meta-item {
+            display: flex; align-items: center; gap: 5px;
+            font-size: 12px; color: var(--ink-3);
+        }
+        .meta-item i { color: var(--primary); font-size: 13px; }
+
+        /* ── Action zone ────────────────────────────────────── */
+        .test-action {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 9px;
+            flex-shrink: 0; min-width: 130px;
+        }
+
+        /* Score pill (attempted) */
+        .score-pill {
+            display: flex; flex-direction: column; align-items: center;
+            background: #edfbf3; border: 1px solid #b8f0d2;
+            border-radius: var(--radius-input);
+            padding: 8px 16px; width: 100%; text-align: center;
+        }
+        .score-pill__num {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.05rem; font-weight: 800; color: #1a7a49; line-height: 1;
+        }
+        .score-pill__label {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .5px; color: #27ae60; margin-top: 2px;
+        }
+
+        /* Buttons */
+        .btn-start {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            width: 100%; padding: 10px;
+            background: var(--gradient); color: #fff;
+            border: none; border-radius: var(--radius-input);
+            font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+            text-decoration: none; cursor: pointer;
+            transition: all 200ms var(--ease);
+        }
+        .btn-start:hover { transform: translateY(-1px); box-shadow: var(--shadow-btn); }
+        .btn-start i { font-size: 15px; }
+
+        .btn-done {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            width: 100%; padding: 9px;
+            background: #f3f4f8; color: var(--ink-3);
+            border: 1px solid var(--border); border-radius: var(--radius-input);
+            font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600;
+            cursor: not-allowed; text-decoration: none;
+        }
+        .btn-done i { font-size: 14px; }
+
+        /* ── Empty state ────────────────────────────────────── */
+        .empty-state {
+            text-align: center; padding: 56px 24px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-card);
+        }
+        .empty-state i {
+            font-size: 40px; display: block; margin-bottom: 12px;
+            background: var(--gradient);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .empty-state h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: .9rem; font-weight: 700; color: var(--ink-2); margin-bottom: 5px;
+        }
+        .empty-state p { font-size: 12.5px; color: var(--ink-3); }
+
+        /* ── Footer ─────────────────────────────────────────── */
+        .page-footer {
+            border-top: 1px solid var(--border);
+            padding: 16px 28px; text-align: center;
+            font-size: 12px; color: var(--ink-3);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
+    </style>
+</head>
+
+<body>
+    {% include 'menu_student.html' %}
+
+    <div class="shell">
+
+        <!-- ══ Topbar ═════════════════════════════════════════ -->
+        <div class="topbar">
+            <div class="topbar__left">
+                <div class="topbar__icon"><i class="ri-file-list-3-line"></i></div>
+                <span class="topbar__title">Aptitude Tests</span>
+                <div class="topbar__sep"></div>
+                <span class="topbar__sub">{{ test_list|length }} test{{ test_list|length|pluralize }} available</span>
+            </div>
+            <div class="topbar__right">
+                <a href="{% url 'student_dashboard' %}" class="dash-btn">
+                    <i class="ri-arrow-left-s-line"></i>Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- ══ Content ════════════════════════════════════════ -->
+        <div class="content">
+
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Stats strip -->
+            <div class="stats-strip">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="ri-file-list-3-line"></i></div>
+                    <div>
+                        <div class="stat-label">Total Tests</div>
+                        <div class="stat-value">{{ test_list|length }}</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="ri-checkbox-circle-line"></i></div>
+                    <div>
+                        <div class="stat-label">Attempted</div>
+                        <div class="stat-value">
+                            {% with done=test_list|length %}
+                            {{ test_list|length }}
+                            {% endwith %}
+                            {# replace with actual count from context if available #}
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="ri-time-line"></i></div>
+                    <div>
+                        <div class="stat-label">Pending</div>
+                        <div class="stat-value">—</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="ri-trophy-line"></i></div>
+                    <div>
+                        <div class="stat-label">Best Score</div>
+                        <div class="stat-value">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section heading -->
+            <div class="section-head">
+                <div class="section-bar"></div>
+                <span class="section-name">Available Tests</span>
+                <span class="section-count">{{ test_list|length }}</span>
+            </div>
+
+            <!-- Test cards -->
+            {% for item in test_list %}
+            <div class="test-card {% if item.attempted %}test-card--done{% endif %}"
+                 style="animation-delay: {{ forloop.counter0 }}00ms;">
+
+                <div>
+                    <div class="test-card__title">{{ item.test.title }}</div>
+                    <div class="test-card__desc">{{ item.test.description|truncatewords:20 }}</div>
+                    <div class="test-card__meta">
+                        <div class="meta-item">
+                            <i class="ri-timer-line"></i>{{ item.test.duration_minutes }} mins
+                        </div>
+                        <div class="meta-item">
+                            <i class="ri-question-line"></i>{{ item.test.total_questions }} questions
+                        </div>
+                        <div class="meta-item">
+                            <i class="ri-calendar-line"></i>{{ item.test.created_at|date:"M d, Y" }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="test-action">
+                    {% if item.attempted %}
+                        <div class="score-pill">
+                            <span class="score-pill__num">{{ item.message }}</span>
+                            <span class="score-pill__label">Score</span>
+                        </div>
+                        <span class="btn-done">
+                            <i class="ri-check-double-line"></i>Attempted
+                        </span>
+                    {% else %}
+                        <a href="{% url 'take_pdf_test' item.test.id %}" class="btn-start">
+                            <i class="ri-play-circle-line"></i>Start Test
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% empty %}
+            <div class="empty-state">
+                <i class="ri-file-list-3-line"></i>
+                <h3>No tests available</h3>
+                <p>Check back soon — new aptitude tests will be added here.</p>
+            </div>
+            {% endfor %}
+
+        </div><!-- /content -->
+
+        <footer class="page-footer">&copy; 2024 Campus Placement Training System</footer>
+    </div>
+</body>
+</html>

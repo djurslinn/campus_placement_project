@@ -1,0 +1,762 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mock Interview Coordinator – Campus Placement Training System</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+
+    <style>
+        /* ══════════════════════════════════
+       CPTS DESIGN TOKENS
+    ══════════════════════════════════ */
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --border: #e8eaf2;
+            --ink-1: #1b1e2e;
+            --ink-2: #58607a;
+            --ink-3: #9ea6bc;
+            --primary: #4f6ef7;
+            --primary-lt: #eef0fe;
+            --primary-dk: #3a56d9;
+            --grad-a: #667eea;
+            --grad-b: #764ba2;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #e83d68;
+            --r: 14px;
+            --ease: cubic-bezier(.4, 0, .2, 1);
+            --dur: 200ms;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--ink-1);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Shell ── */
+        .shell {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Main Content ── */
+        .main-content {
+            flex: 1;
+            padding: 36px 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeInUp .45s var(--ease) both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Page Header ── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .page-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--ink-1);
+        }
+
+        .page-sub {
+            font-size: 13px;
+            color: var(--ink-3);
+            margin-top: 3px;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 16px;
+            /* reduced horizontal padding */
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            width: fit-content;
+            cursor: pointer;
+            white-space: nowrap;
+            /* keeps text + icon on one line */
+            transition: opacity var(--dur), transform var(--dur), box-shadow var(--dur);
+        }
+
+        .btn-primary:hover {
+            opacity: .92;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, .38);
+        }
+
+        .btn-primary i {
+            font-size: 15px;
+        }
+
+        /* ── Toast Messages ── */
+        .toast-wrap {
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            background: var(--primary-lt);
+            color: var(--primary);
+            border: 1px solid #c7d2fe;
+            font-size: 13px;
+            font-weight: 500;
+            border-left: 4px solid var(--primary);
+            animation: fadeInUp .3s var(--ease);
+        }
+
+        /* ── Stats Grid ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 20px 22px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: box-shadow var(--dur), transform var(--dur);
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 8px 24px rgba(79, 110, 247, .12);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 13px;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+            color: #fff;
+        }
+
+        .si-blue {
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+        }
+
+        .si-green {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+
+        .stat-lbl {
+            font-size: 11px;
+            color: var(--ink-3);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .stat-val {
+            font-family: 'Poppins', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--ink-1);
+            line-height: 1.1;
+        }
+
+        /* ── Sessions Card ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(20, 24, 60, .04);
+        }
+
+        .card-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--ink-1);
+        }
+
+        /* ── Table ── */
+        .session-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .session-table thead tr {
+            background: var(--bg);
+        }
+
+        .session-table th {
+            padding: 12px 20px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .session-table tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background var(--dur);
+        }
+
+        .session-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .session-table tbody tr:hover {
+            background: var(--bg);
+        }
+
+        .session-table td {
+            padding: 14px 20px;
+            font-size: 13px;
+            color: var(--ink-2);
+            vertical-align: middle;
+        }
+
+        /* ── Badges ── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge-success::before {
+            background: #22c55e;
+        }
+
+        .badge-completed {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .badge-completed::before {
+            background: #94a3b8;
+        }
+
+        /* ── View Details Button ── */
+        .btn-view {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 13px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background var(--dur), border-color var(--dur), box-shadow var(--dur);
+        }
+
+        .btn-view:hover {
+            background: var(--primary-lt);
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(79, 110, 247, .15);
+        }
+
+        /* ── Empty State ── */
+        .empty-cell {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--ink-3);
+            font-size: 13px;
+        }
+
+        .empty-cell i {
+            font-size: 36px;
+            display: block;
+            margin-bottom: 10px;
+            color: var(--ink-3);
+        }
+
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(20, 24, 60, .45);
+            backdrop-filter: blur(5px);
+            place-items: center;
+            padding: 16px;
+        }
+
+        .modal.active {
+            display: grid;
+            animation: fadeOverlay .25s var(--ease);
+        }
+
+        @keyframes fadeOverlay {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 24px 64px rgba(20, 24, 60, .28);
+            animation: slideUp .3s var(--ease);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(28px) scale(.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Modal gradient header */
+        .modal-head {
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            padding: 24px 28px;
+            color: #fff;
+            position: relative;
+        }
+
+        .modal-head-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-head-sub {
+            font-size: 12px;
+            opacity: .8;
+            margin-top: 3px;
+        }
+
+        .modal-head-icon {
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .15);
+            backdrop-filter: blur(4px);
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+        }
+
+        /* Modal body */
+        .modal-body {
+            padding: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink-2);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-group label i {
+            font-size: 14px;
+            color: var(--primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            color: var(--ink-1);
+            outline: none;
+            transition: border-color var(--dur), box-shadow var(--dur);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 110, 247, .12);
+        }
+
+        .form-control::placeholder {
+            color: var(--ink-3);
+        }
+
+        /* Modal footer buttons */
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 11px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--ink-2);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background var(--dur), border-color var(--dur);
+        }
+
+        .btn-cancel:hover {
+            background: #fff2f5;
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .btn-generate {
+            flex: 2;
+            padding: 11px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity var(--dur), transform var(--dur), box-shadow var(--dur);
+        }
+
+        .btn-generate:hover {
+            opacity: .92;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, .35);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        {% include 'menu_coordinator.html' %}
+
+        <main class="main-content" style="margin-left:260px;">
+
+            <!-- ── Page Header ── -->
+            <div class="header">
+                <div>
+                    <div class="page-title">Mock Interviews</div>
+                    <div class="page-sub">Manage and generate peer-to-peer interview sessions.</div>
+                </div>
+                <button class="btn-primary" onclick="toggleModal(true)">
+                    <i class="ri-add-line"></i> Generate Mock Interview Session
+                </button>
+            </div>
+
+            <!-- ── Messages ── -->
+            {% if messages %}
+            <div class="toast-wrap">
+                {% for message in messages %}
+                <div class="toast">
+                    <i class="ri-information-line"></i>
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- ── Stats Grid ── -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon si-blue"><i class="ri-calendar-event-line"></i></div>
+                    <div>
+                        <div class="stat-lbl">Total Sessions</div>
+                        <div class="stat-val">{{ total_sessions }}</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon si-green"><i class="ri-checkbox-circle-line"></i></div>
+                    <div>
+                        <div class="stat-lbl">Active Sessions</div>
+                        <div class="stat-val">{{ active_sessions }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Sessions Table Card ── -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Recent Sessions</div>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="session-table">
+                        <thead>
+                            <tr>
+                                <th>Session Title</th>
+                                <th>Date Created</th>
+                                <th>Filter (Dept / Year)</th>
+                                <th>Pairs</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for session in sessions %}
+                            <tr>
+                                <td style="font-weight:600; color:var(--ink-1);">
+                                    {{ session.label|default:"Mock Session" }}
+                                </td>
+                                <td>{{ session.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    {% if session.department %}{{ session.department.name }}{% else %}—{% endif %} /
+                                    {% if session.year %}Year {{ session.year }}{% else %}—{% endif %}
+                                </td>
+                                <td>
+                                    <span style="font-weight:600; color:var(--ink-1);">{{ session.pairs.count }}</span>
+                                    <span style="color:var(--ink-3); font-size:11px;"> pairs</span>
+                                </td>
+                                <td>
+                                    {% if session.status == 'active' %}
+                                    <span class="badge badge-success">Active</span>
+                                    {% else %}
+                                    <span class="badge badge-completed">Completed</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'mock_interviews:session_detail' session.id %}" class="btn-view">
+                                        <i class="ri-eye-line"></i> View Details
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="empty-cell">
+                                    <i class="ri-calendar-todo-line"></i>
+                                    No sessions generated yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+
+    <!-- ════════════════════════════════════════
+       GENERATE SESSION MODAL
+       Logic 100% preserved:
+       id="sessionModal" | toggleModal(true/false)
+       action → {% url 'mock_interviews:coordinator_dashboard' %}
+       fields → label, department (courses loop), year
+  ════════════════════════════════════════ -->
+    <div id="sessionModal" class="modal">
+        <div class="modal-content">
+
+            <!-- Gradient Header -->
+            <div class="modal-head">
+                <div class="modal-head-title">Generate New Session</div>
+                <div class="modal-head-sub">Configure and pair students for mock interviews</div>
+                <div class="modal-head-icon"><i class="ri-group-line"></i></div>
+            </div>
+
+            <!-- Form Body -->
+            <div class="modal-body">
+                <form action="{% url 'mock_interviews:coordinator_dashboard' %}" method="POST">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="id_label"><i class="ri-file-text-line"></i> Session Label</label>
+                        {{ form.label }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_target_type"><i class="ri-user-settings-line"></i> Target Audience</label>
+                        {{ form.target_type }}
+                    </div>
+
+                    <div class="form-group" id="dept_filter_group" style="display:none;">
+                        <label for="id_department"><i class="ri-building-2-line"></i> Specific Department</label>
+                        {{ form.department }}
+                    </div>
+
+                    <div class="form-group" id="year_filter_group">
+                        <label for="id_year"><i class="ri-calendar-line"></i> Filter by Year (Optional)</label>
+                        {{ form.year }}
+                    </div>
+
+                    <div class="form-group" id="drive_filter_group" style="display:none;">
+                        <label for="id_target_drive"><i class="ri-briefcase-line"></i> Specific Placement Drive</label>
+                        {{ form.target_drive }}
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" onclick="toggleModal(false)">
+                            <i class="ri-close-line"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn-generate">
+                            <i class="ri-magic-line"></i> Generate Pairs
+                        </button>
+                    </div>
+
+                    <script>
+                        function toggleTargetFields(select) {
+                            const deptGroup = document.getElementById('dept_filter_group');
+                            const driveGroup = document.getElementById('drive_filter_group');
+                            const yearGroup = document.getElementById('year_filter_group');
+                            
+                            if (select.value === 'department') {
+                                deptGroup.style.display = 'block';
+                                driveGroup.style.display = 'none';
+                                yearGroup.style.display = 'block';
+                            } else if (select.value === 'drive') {
+                                deptGroup.style.display = 'none';
+                                driveGroup.style.display = 'block';
+                                yearGroup.style.display = 'none'; // Drive has its own year/batch criteria
+                            } else {
+                                deptGroup.style.display = 'none';
+                                driveGroup.style.display = 'none';
+                                yearGroup.style.display = 'block';
+                            }
+                        }
+
+                        // Initialize
+                        window.addEventListener('DOMContentLoaded', () => {
+                            const targetSelect = document.getElementById('id_target_type');
+                            if (targetSelect) toggleTargetFields(targetSelect);
+                        });
+                    </script>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        /* Original toggleModal logic — unchanged */
+        function toggleModal(show) {
+            document.getElementById('sessionModal').classList.toggle('active', show);
+        }
+
+        /* Close on overlay click */
+        document.getElementById('sessionModal').addEventListener('click', function (e) {
+            if (e.target === this) toggleModal(false);
+        });
+
+        /* Close on Escape */
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') toggleModal(false); });
+    </script>
+</body>
+
+</html>

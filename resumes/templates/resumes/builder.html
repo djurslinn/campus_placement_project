@@ -1,0 +1,503 @@
+{% extends "resumes/base.html" %}
+{% load static %}
+
+{% block title %}Resume Builder{% endblock %}
+
+{% block extra_css %}
+<style>
+    .formset-section {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        background: #f9f9f9;
+    }
+
+    .formset-entry {
+        border: 1px solid #e0e0e0;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 3px;
+        background: white;
+    }
+
+    .section-header {
+        background: #007bff;
+        color: white;
+        padding: 10px 15px;
+        margin: 20px 0 15px 0;
+        border-radius: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="mb-4">
+                <i class="fas fa-magic"></i> AI-Powered Resume Builder
+            </h2>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="POST" id="resumeBuilderForm">
+                {% csrf_token %}
+
+                <!-- Personal Information -->
+                <div class="section-header">
+                    <h5 class="mb-0"><i class="fas fa-user"></i> Personal Information</h5>
+                </div>
+                <div class="row">
+                    {% for field in personal_form %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <div class="text-danger">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Professional Summary -->
+                <div class="section-header">
+                    <h5 class="mb-0"><i class="fas fa-paragraph"></i> Professional Summary</h5>
+                </div>
+                <div class="mb-3">
+                    {{ summary_form.summary }}
+                    {% if summary_form.summary.errors %}
+                    <div class="text-danger">{{ summary_form.summary.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Education -->
+                <div class="section-header">
+                    <h5 class="mb-0"><i class="fas fa-graduation-cap"></i> Education</h5>
+                </div>
+                <div class="formset-section" id="education-formset" data-prefix="education">
+                    {{ education_formset.management_form }}
+                    {% if education_formset.non_form_errors %}
+                    <div class="alert alert-danger">{{ education_formset.non_form_errors }}</div>
+                    {% endif %}
+                    <div id="education-forms">
+                        {% for form in education_formset %}
+                        <div class="formset-entry education-form">
+                            {% for field in form %}
+                            {% if field.name == 'DELETE' %}
+                            <!-- Render DELETE checkbox but hide it visually so JS can toggle it -->
+                            <span style="display:none;">{{ field }}</span>
+                            {% else %}
+                            <div class="mb-2">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                <div class="text-danger">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            <button type="button" class="btn btn-danger btn-sm mt-2"
+                                onclick="removeForm(this, 'education')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="addForm('education')">
+                        <i class="fas fa-plus"></i> Add Education
+                    </button>
+                    <!-- Empty Form Template -->
+                    <div id="empty-form-education" style="display:none;">
+                        <div class="formset-entry education-form">
+                            {% for field in education_formset.empty_form %}
+                            {% if field.name == 'DELETE' %}
+                            <span style="display:none;">{{ field }}</span>
+                            {% else %}
+                            <div class="mb-2">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            <button type="button" class="btn btn-danger btn-sm mt-2"
+                                onclick="removeForm(this, 'education')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Experience -->
+                <div class="section-header">
+                    <h5 class="mb-0"><i class="fas fa-briefcase"></i> Experience</h5>
+                </div>
+                <div class="formset-section" id="experience-formset" data-prefix="experience">
+                    {{ experience_formset.management_form }}
+                    {% if experience_formset.non_form_errors %}
+                    <div class="alert alert-danger">{{ experience_formset.non_form_errors }}</div>
+                    {% endif %}
+                    <div id="experience-forms">
+                        {% for form in experience_formset %}
+                        <div class="formset-entry experience-form">
+                            {% for field in form %}
+                            {% if field.name == 'DELETE' %}
+                            <span style="display:none;">{{ field }}</span>
+                            {% else %}
+                            <div class="mb-2">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                <div class="text-danger">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            <button type="button" class="btn btn-danger btn-sm mt-2"
+                                onclick="removeForm(this, 'experience')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="addForm('experience')">
+                        <i class="fas fa-plus"></i> Add Experience
+                    </button>
+                    <!-- Empty Form Template -->
+                    <div id="empty-form-experience" style="display:none;">
+                        <div class="formset-entry experience-form">
+                            {% for field in experience_formset.empty_form %}
+                            {% if field.name == 'DELETE' %}
+                            <span style="display:none;">{{ field }}</span>
+                            {% else %}
+                            <div class="mb-2">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            <button type="button" class="btn btn-danger btn-sm mt-2"
+                                onclick="removeForm(this, 'experience')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects -->
+                <div class="section-header">
+                    <h5 class="mb-0"><i class="fas fa-project-diagram"></i> Projects</h5>
+                </div>
+                <div class="formset-section" id="project-formset" data-prefix="project">
+                    {{ project_formset.management_form }}
+                    {% if project_formset.non_form_errors %}
+                    <div class="alert alert-danger">{{ project_formset.non_form_errors }}</div>
+                    {% endif %}
+                    <div id="project-forms">
+                        {% for form in project_formset %}
+                        <div class="formset-entry project-form">
+                            {% for field in form %}
+                            {% if field.name == 'DELETE' %}
+                            <span style="display:none;">{{ field }}</span>
+                            {% else %}
+                            <div class="mb-2">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                <div class="text-danger">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            <button type="button" class="btn btn-danger btn-sm mt-2"
+                                onclick="removeForm(this, 'project')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="addForm('project')">
+                        <i class="fas fa-plus"></i> Add Project
+                    </button>
+                    <!-- Empty Form Template -->
+                    <div id="empty-form-project" style="display:none;">
+                        <div class="formset-entry project-form">
+                            {% for field in project_formset.empty_form %}
+                            {% if field.name == 'DELETE' %}
+                            <span style="display:none;">{{ field }}</span>
+                            {% else %}
+                            <div class="mb-2">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            <button type="button" class="btn btn-danger btn-sm mt-2"
+                                onclick="removeForm(this, 'project')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills -->
+                <div class="section-header">
+                    <h5 class="mb-0"><i class="fas fa-tools"></i> Skills</h5>
+                </div>
+                <div class="row">
+                    {% for field in skills_form %}
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <div class="text-danger">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Certifications -->
+                <div class="section-header">
+                    <h5 class="mb-0"><i class="fas fa-certificate"></i> Certifications</h5>
+                </div>
+                <div class="formset-section" id="certification-formset" data-prefix="certification">
+                    {{ certification_formset.management_form }}
+                    {% if certification_formset.non_form_errors %}
+                    <div class="alert alert-danger">{{ certification_formset.non_form_errors }}</div>
+                    {% endif %}
+                    <div id="certification-forms">
+                        {% for form in certification_formset %}
+                        <div class="formset-entry certification-form">
+                            {% for field in form %}
+                            {% if field.name == 'DELETE' %}
+                            <span style="display:none;">{{ field }}</span>
+                            {% else %}
+                            <div class="mb-2">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                <div class="text-danger">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            <button type="button" class="btn btn-danger btn-sm mt-2"
+                                onclick="removeForm(this, 'certification')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="addForm('certification')">
+                        <i class="fas fa-plus"></i> Add Certification
+                    </button>
+                    <!-- Empty Form Template -->
+                    <div id="empty-form-certification" style="display:none;">
+                        <div class="formset-entry certification-form">
+                            {% for field in certification_formset.empty_form %}
+                            {% if field.name == 'DELETE' %}
+                            <span style="display:none;">{{ field }}</span>
+                            {% else %}
+                            <div class="mb-2">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            <button type="button" class="btn btn-danger btn-sm mt-2"
+                                onclick="removeForm(this, 'certification')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Languages -->
+                <div class="section-header">
+                    <h5 class="mb-0"><i class="fas fa-language"></i> Languages</h5>
+                </div>
+                <div class="formset-section" id="language-formset" data-prefix="language">
+                    {{ language_formset.management_form }}
+                    {% if language_formset.non_form_errors %}
+                    <div class="alert alert-danger">{{ language_formset.non_form_errors }}</div>
+                    {% endif %}
+                    <div id="language-forms">
+                        {% for form in language_formset %}
+                        <div class="formset-entry language-form">
+                            {% for field in form %}
+                            {% if field.name == 'DELETE' %}
+                            <span style="display:none;">{{ field }}</span>
+                            {% else %}
+                            <div class="mb-2">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                <div class="text-danger">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            <button type="button" class="btn btn-danger btn-sm mt-2"
+                                onclick="removeForm(this, 'language')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="addForm('language')">
+                        <i class="fas fa-plus"></i> Add Language
+                    </button>
+                    <!-- Empty Form Template -->
+                    <div id="empty-form-language" style="display:none;">
+                        <div class="formset-entry language-form">
+                            {% for field in language_formset.empty_form %}
+                            {% if field.name == 'DELETE' %}
+                            <span style="display:none;">{{ field }}</span>
+                            {% else %}
+                            <div class="mb-2">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            <button type="button" class="btn btn-danger btn-sm mt-2"
+                                onclick="removeForm(this, 'language')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Achievements -->
+                <div class="section-header">
+                    <h5 class="mb-0"><i class="fas fa-trophy"></i> Achievements</h5>
+                </div>
+                <div class="formset-section" id="achievement-formset" data-prefix="achievement">
+                    {{ achievement_formset.management_form }}
+                    {% if achievement_formset.non_form_errors %}
+                    <div class="alert alert-danger">{{ achievement_formset.non_form_errors }}</div>
+                    {% endif %}
+                    <div id="achievement-forms">
+                        {% for form in achievement_formset %}
+                        <div class="formset-entry achievement-form">
+                            {% for field in form %}
+                            {% if field.name == 'DELETE' %}
+                            <span style="display:none;">{{ field }}</span>
+                            {% else %}
+                            <div class="mb-2">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                <div class="text-danger">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            <button type="button" class="btn btn-danger btn-sm mt-2"
+                                onclick="removeForm(this, 'achievement')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="addForm('achievement')">
+                        <i class="fas fa-plus"></i> Add Achievement
+                    </button>
+                    <!-- Empty Form Template -->
+                    <div id="empty-form-achievement" style="display:none;">
+                        <div class="formset-entry achievement-form">
+                            {% for field in achievement_formset.empty_form %}
+                            {% if field.name == 'DELETE' %}
+                            <span style="display:none;">{{ field }}</span>
+                            {% else %}
+                            <div class="mb-2">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            <button type="button" class="btn btn-danger btn-sm mt-2"
+                                onclick="removeForm(this, 'achievement')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Section -->
+                <div class="d-flex justify-content-between mt-4 mb-4">
+                    <a href="{% url 'resumes:dashboard' %}" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-file-pdf"></i> Generate Resume PDF
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addForm(prefix) {
+        // Get the total forms count
+        let totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
+        let currentCount = parseInt(totalForms.value);
+
+        // Get the empty form template
+        let emptyForm = document.getElementById('empty-form-' + prefix).innerHTML;
+
+        // Replace __prefix__ with the current count
+        let newFormHtml = emptyForm.replace(/__prefix__/g, currentCount);
+
+        // Append the new form
+        document.getElementById(prefix + '-forms').insertAdjacentHTML('beforeend', newFormHtml);
+
+        // Update total forms count
+        totalForms.value = currentCount + 1;
+    }
+
+    function removeForm(button, prefix) {
+        // Find the form container
+        let formEntry = button.closest('.formset-entry');
+
+        // Handle Django's DELETE field if it exists (for existing forms)
+        let deleteField = formEntry.querySelector('input[name$="-DELETE"]');
+
+        if (deleteField) {
+            // If it's an existing form (submitted previously), we check the delete box and hide it
+            deleteField.checked = true;
+            formEntry.style.display = 'none';
+        } else {
+            // If it's a new form (not yet submitted), we can just remove it from DOM
+            // However, removing from DOM messes up indices if we aren't careful.
+            // A simpler approach for this "append-only" style is to just hide it and set values to empty 
+            // OR strictly speaking, we should re-index.
+            // But Django formsets can handle gaps if we enable management form properly, 
+            // OR we just assume "DELETE" checkbox is present in all forms (initial and extra) due to can_delete=True
+
+            // Fortunately, can_delete=True is set in forms.py. 
+            // So the empty_form template SHOULD have a DELETE field if we render it.
+            // Let's check my template above: I included {{ field.as_hidden }} for DELETE.
+
+            let possibleDelete = formEntry.querySelector('input[name$="-DELETE"]');
+            if (possibleDelete) {
+                possibleDelete.checked = true;
+                formEntry.style.display = 'none';
+            } else {
+                // Fallback for purely client-side added elements without ID?
+                formEntry.remove();
+                // We'd ideally decrement TOTAL_FORMS but that's risky with indices.
+                // Keeping it simple: if it has a DELETE field, use it.
+            }
+        }
+    }
+</script>
+{% endblock %}

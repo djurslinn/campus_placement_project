@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Departments - CPTS Admin</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --surface: #ffffff;
+            --bg: #f8fafc;
+            --border: #e2e8f0;
+            --ink-1: #1e293b;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--ink-1); }
+        .dashboard-wrapper { display: flex; min-height: 100vh; }
+        .main-content { flex: 1; margin-left: 260px; padding: 40px; }
+
+        .card { background: white; padding: 30px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
+        .form-control { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 12px; font-size: 0.95rem; }
+        .form-control:focus { border-color: var(--primary); outline: none; }
+
+        .btn-submit { background: var(--primary); color: white; padding: 12px 24px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
+        
+        .course-list { margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .course-card { background: white; padding: 20px; border-radius: 15px; border-left: 5px solid var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .course-card h3 { margin: 0; font-size: 1.1rem; }
+        .course-card p { color: #64748b; margin: 5px 0 0; font-size: 0.85rem; }
+        .badge { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-right: 5px; }
+        .badge-ug { background: #e0e7ff; color: #4338ca; }
+        .badge-pg { background: #fef2f2; color: #dc2626; }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        {% include 'menu_admin.html' %}
+
+        <div class="main-content">
+            <header style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 style="font-size: 2rem; font-weight: 800;">Departments & Courses</h1>
+                    <p style="color: #64748b;">Configure the academic structure of the system</p>
+                </div>
+                <a href="{% url 'admin_dashboard' %}" style="text-decoration: none; color: var(--primary); font-weight: 700;">← Back to Dash</a>
+            </header>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" style="background: #ecfdf5; color: #059669; padding: 15px; border-radius: 12px; margin-bottom: 30px; font-weight: 600;">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+
+            <div class="card">
+                <h2 style="margin-bottom: 25px; font-size: 1.25rem;">Add New Department</h2>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select name="category" class="form-control" required>
+                                <option value="UG">Undergraduate (UG)</option>
+                                <option value="PG">Postgraduate (PG)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Type (e.g. B.Tech, M.BA)</label>
+                            <input type="text" name="type" class="form-control" placeholder="e.g. B.Sc." required>
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label class="form-label">Full Name of Department</label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g. Computer Science and Engineering" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Total Years</label>
+                            <select name="year" class="form-control" required>
+                                <option value="1">1 Year</option>
+                                <option value="2">2 Years</option>
+                                <option value="3">3 Years</option>
+                                <option value="4" selected>4 Years</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit">Register Department</button>
+                </form>
+            </div>
+
+            <div class="course-list">
+                {% for course in courses %}
+                <div class="course-card">
+                    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                        <span class="badge badge-{{ course.category|lower }}">{{ course.category }}</span>
+                        <span class="badge" style="background: #f1f5f9; color: #64748b;">{{ course.year }} Years</span>
+                    </div>
+                    <h3>{{ course.type }} - {{ course.name }}</h3>
+                    <p>Department ID: #{{ course.id }}</p>
+                </div>
+                {% empty %}
+                <p style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 40px;">No departments registered yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

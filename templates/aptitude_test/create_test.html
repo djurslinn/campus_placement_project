@@ -1,0 +1,589 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if is_edit %}Edit Aptitude Test{% else %}Create Aptitude Test{% endif %} – Campus Placement Training System</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --border: #e8eaf2;
+            --ink-1: #1b1e2e;
+            --ink-2: #58607a;
+            --ink-3: #9ea6bc;
+            --primary: #4f6ef7;
+            --primary-lt: #eef0fe;
+            --primary-dk: #3a56d9;
+            --grad-a: #667eea;
+            --grad-b: #764ba2;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #e83d68;
+            --r: 16px;
+            --ease: cubic-bezier(.4, 0, .2, 1);
+            --dur: 200ms;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--ink-1);
+            min-height: 100vh;
+        }
+
+        .shell { display: flex; min-height: 100vh; }
+
+        .main-content {
+            flex: 1;
+            padding: 24px 32px;
+            max-width: 1400px; /* Wider to allow two-columns */
+            margin-left: 260px;
+            animation: fadeIn .5s var(--ease);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* header */
+        .page-header {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .page-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        /* Form Card */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            box-shadow: 0 10px 30px rgba(20, 24, 60, 0.05);
+            overflow: hidden;
+            height: calc(100vh - 120px); /* Fill screen */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-head {
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            padding: 12px 20px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .card-head i { font-size: 18px; padding: 8px; background: rgba(255,255,255,0.15); border-radius: 8px; backdrop-filter: blur(4px); }
+        .card-head h2 { font-size: 14px; font-family: 'Poppins', sans-serif; font-weight: 600; }
+
+        .card-body { padding: 0; flex: 1; display: flex; overflow: hidden; }
+
+        /* Split-screen Layout */
+        .page-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Left Side: Controls & Answer Key */
+        .side-panel {
+            width: 450px;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        /* Right Side: PDF Viewer */
+        .preview-panel {
+            flex: 1;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .viewer-header {
+            padding: 10px 20px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ink-2);
+        }
+
+        iframe#pdf-viewer {
+            width: 100%;
+            flex: 1;
+            border: none;
+        }
+
+        .empty-viewer {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            color: var(--ink-3);
+            text-align: center;
+            padding: 40px;
+        }
+        .empty-viewer i { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+
+        .form-group { margin-bottom: 16px; }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--ink-3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        label i { color: var(--primary); font-size: 14px; }
+
+        .form-control, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--ink-1);
+            background: #fff;
+            transition: all var(--dur);
+            outline: none;
+        }
+        .form-control:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-lt);
+        }
+
+        .form-textarea { height: 100px; resize: vertical; }
+
+        .help-text { font-size: 12px; color: var(--ink-3); margin-top: 6px; }
+        .error-msg { color: var(--danger); font-size: 12px; margin-top: 6px; font-weight: 500; }
+
+        /* Target Group Styling */
+        .target-box {
+            background: var(--bg);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+        .target-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: end; }
+
+        /* Answer Key Section */
+        .generator-section {
+            background: #fafbff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 32px;
+        }
+        .gen-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .gen-title { font-size: 15px; font-weight: 700; color: var(--ink-1); display: flex; align-items: center; gap: 8px; }
+        .gen-title i { color: var(--success); }
+
+        .gen-controls { display: flex; gap: 12px; align-items: center; background: #fff; padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
+        .gen-controls input { border: none; font-weight: 600; width: 60px; text-align: center; font-size: 16px; color: var(--primary); }
+        .btn-load { background: var(--primary); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
+
+        .ans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            max-height: 350px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .ans-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border: 1px solid #f1f5f9;
+            border-radius: 10px;
+            background: #fff;
+            transition: all 0.2s;
+        }
+        .ans-row:hover { border-color: var(--primary-lt); background: #fbfcfe; }
+
+        .ans-num { font-weight: 700; color: var(--ink-3); font-size: 12px; width: 25px; }
+
+        .ans-opts { display: flex; gap: 6px; }
+        .ans-opt {
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 12px; font-weight: 700; color: var(--ink-2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ans-opt:hover { background: var(--bg); border-color: var(--ink-3); }
+        .ans-opt.selected { background: var(--primary); color: #fff; border-color: var(--primary); transform: scale(1.05); }
+
+        /* Buttons */
+        .footer-actions { margin-top: 40px; display: flex; gap: 16px; }
+        
+        .btn-submit {
+            flex: 1;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.25);
+            transition: all var(--dur);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-submit:hover { opacity: 0.95; transform: translateY(-2px); box-shadow: 0 12px 24px rgba(102, 126, 234, 0.35); }
+
+        .btn-back {
+            padding: 16px 24px;
+            border-radius: 14px;
+            background: #fff;
+            border: 1px solid var(--border);
+            color: var(--ink-2);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all var(--dur);
+        }
+        .btn-back:hover { background: var(--bg); border-color: var(--ink-3); }
+
+        /* Modal / Utility */
+        #id_answer_key_input { display: none; }
+
+        /* Hide Scrollbar */
+        .ans-grid::-webkit-scrollbar { width: 6px; }
+        .ans-grid::-webkit-scrollbar-track { background: transparent; }
+        .ans-grid::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        {% include 'menu_coordinator.html' %}
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">{% if is_edit %}Edit Aptitude Test{% else %}Create Aptitude Test{% endif %}</h1>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" class="btn-back" onclick="togglePreview()" style="padding: 10px 16px; font-size: 13px; color: var(--primary); border-color: var(--primary-lt);">
+                        <i class="ri-eye-line"></i> <span id="toggle-text">Hide Preview</span>
+                    </button>
+                    <a href="{% url 'manage_pdf_tests' %}" class="btn-back" style="padding: 10px 16px; font-size: 13px;">
+                        <i class="ri-arrow-left-line"></i> Back
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-head">
+                    <i class="ri-edit-2-line"></i>
+                    <h2>Configure Questions & Answer Key</h2>
+                </div>
+
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" id="createTestForm" style="width: 100%; display: flex;">
+                        {% csrf_token %}
+
+                        <div class="page-layout">
+                            <!-- Panels -->
+                            <div class="side-panel">
+                                <!-- Group 1: Identity -->
+                                <div class="form-group">
+                                    <label for="id_title">Test Title</label>
+                                    <input type="text" name="title" id="id_title" value="{{ form.title.value|default:'' }}" class="form-control" placeholder="e.g. Set A" required>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div class="form-group">
+                                        <label for="id_duration_minutes">Time (Min)</label>
+                                        <input type="number" name="duration_minutes" id="id_duration_minutes" value="{{ form.duration_minutes.value|default:60 }}" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="id_pdf_file">Upload PDF</label>
+                                        <div style="display: flex; gap: 8px;">
+                                            <input type="file" name="pdf_file" id="id_pdf_file" class="form-control" accept=".pdf" onchange="previewPDF(this)" {% if not is_edit %}required{% endif %}>
+                                            <button type="button" class="btn-load" onclick="triggerPDFReload()" style="padding: 0 12px; height: 42px; background: var(--bg); color: var(--ink-2); border: 1px solid var(--border);"><i class="ri-refresh-line"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Targeting -->
+                                <div class="target-box" style="padding: 15px; margin-bottom: 20px;">
+                                    <label style="margin-bottom: 10px;">Visibility</label>
+                                    <select name="target_type" id="id_target_type" class="form-select" onchange="toggleTargetFields(this)" style="margin-bottom: 10px;">
+                                        {% for val, lbl in form.fields.target_type.choices %}
+                                            <option value="{{ val }}" {% if form.target_type.value == val %}selected{% elif not form.target_type.value and val == 'everyone' %}selected{% endif %}>{{ lbl }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="dept_group" style="display: none; margin-top: 10px;">
+                                        <select name="target_department" id="id_target_department" class="form-select">
+                                            {% for val, lbl in form.fields.target_department.choices %}
+                                                <option value="{{ val }}" {% if form.target_department.value|stringformat:"s" == val|stringformat:"s" %}selected{% endif %}>{{ lbl }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div id="drive_group" style="display: none; margin-top: 10px;">
+                                        <select name="target_drive" id="id_target_drive" class="form-select">
+                                            {% for val, lbl in form.fields.target_drive.choices %}
+                                                <option value="{{ val }}" {% if form.target_drive.value|stringformat:"s" == val|stringformat:"s" %}selected{% endif %}>{{ lbl }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Answer Key Generator UI -->
+                                <div class="generator-section" style="margin-top: 0; background: #fff; padding: 0; border: none;">
+                                    <div class="gen-header" style="background: var(--bg); padding: 10px; border-radius: 10px; margin-bottom: 15px;">
+                                        <div class="gen-title" style="font-size: 13px;">Answers</div>
+                                        <div class="gen-controls" style="padding: 5px;">
+                                            <input type="number" id="numQuestions" value="{% if is_edit %}{{ test.total_questions }}{% else %}10{% endif %}" min="1" style="width: 45px; font-size: 13px;">
+                                            <button type="button" class="btn-load" onclick="generateRows()" style="padding: 4px 10px;">Sync</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="ans-grid" id="ansGrid" style="border: 1px solid var(--border); min-height: 200px;">
+                                        <!-- Rows -->
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn-submit" style="margin-top: 24px; padding: 12px;">
+                                    <i class="ri-checkbox-circle-line"></i> {% if is_edit %}Save Changes{% else %}Create Test{% endif %}
+                                </button>
+                            </div>
+
+                            <div class="preview-panel">
+                                <div class="viewer-header">
+                                    <span><i class="ri-file-search-line"></i> Question Paper Preview</span>
+                                    <span id="file-name" style="opacity: 0.7;">No file selected</span>
+                                </div>
+                                <div id="preview-container" style="flex: 1; display: flex; flex-direction: column;">
+                                    {% if is_edit and test.pdf_file %}
+                                        <iframe id="pdf-viewer" src="{{ test.pdf_file.url }}#toolbar=0"></iframe>
+                                    {% else %}
+                                        <div class="empty-viewer" id="empty-state">
+                                            <i class="ri-file-pdf-line"></i>
+                                            <p>Select a PDF file to preview it here while setting answers.</p>
+                                        </div>
+                                        <iframe id="pdf-viewer" style="display: none;"></iframe>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden Field -->
+                        <textarea name="answer_key_input" id="id_answer_key_input" style="display:none;">{{ form.answer_key_input.value|default:'' }}</textarea>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function previewPDF(input) {
+            const file = input.files[0];
+            const viewer = document.getElementById('pdf-viewer');
+            const emptyState = document.getElementById('empty-state');
+            const fileNameLabel = document.getElementById('file-name');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    viewer.src = e.target.result + "#toolbar=0";
+                    viewer.style.display = 'block';
+                    if (emptyState) emptyState.style.display = 'none';
+                    fileNameLabel.textContent = file.name;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function triggerPDFReload() {
+            const input = document.getElementById('id_pdf_file');
+            if (input.files.length > 0) {
+                previewPDF(input);
+            } else {
+                {% if is_edit and test.pdf_file %}
+                    document.getElementById('pdf-viewer').src = "{{ test.pdf_file.url }}#toolbar=0";
+                {% else %}
+                    alert("Please select a file first.");
+                {% endif %}
+            }
+        }
+
+        function togglePreview() {
+            const panel = document.querySelector('.preview-panel');
+            const btnText = document.getElementById('toggle-text');
+            const sidePanel = document.querySelector('.side-panel');
+
+            if (panel.style.display === 'none') {
+                panel.style.display = 'flex';
+                btnText.textContent = 'Hide Preview';
+                sidePanel.style.width = '450px';
+            } else {
+                panel.style.display = 'none';
+                btnText.textContent = 'Show Preview';
+                sidePanel.style.width = '100%';
+            }
+        }
+
+        let answerData = {};
+
+        function toggleTargetFields(select) {
+            const deptGroup = document.getElementById('dept_group');
+            const driveGroup = document.getElementById('drive_group');
+            
+            if (select.value === 'department') {
+                deptGroup.style.display = 'block';
+                driveGroup.style.display = 'none';
+            } else if (select.value === 'drive') {
+                deptGroup.style.display = 'none';
+                driveGroup.style.display = 'block';
+            } else {
+                deptGroup.style.display = 'none';
+                driveGroup.style.display = 'none';
+            }
+        }
+
+        function generateRows(prefillData = null) {
+            const n = document.getElementById('numQuestions').value;
+            if (!n || n < 1) {
+                alert("Please enter a valid number of questions.");
+                return;
+            }
+
+            const grid = document.getElementById('ansGrid');
+            grid.innerHTML = '';
+
+            if (prefillData) {
+                answerData = prefillData;
+            }
+
+            for (let i = 1; i <= n; i++) {
+                const row = document.createElement('div');
+                row.className = 'ans-row';
+                const selectedVal = answerData[i] || '';
+
+                row.innerHTML = `
+                    <span class="ans-num">${i}.</span>
+                    <div class="ans-opts">
+                        <div class="ans-opt ${selectedVal === 'A' ? 'selected' : ''}" data-q="${i}" data-v="A">A</div>
+                        <div class="ans-opt ${selectedVal === 'B' ? 'selected' : ''}" data-q="${i}" data-v="B">B</div>
+                        <div class="ans-opt ${selectedVal === 'C' ? 'selected' : ''}" data-q="${i}" data-v="C">C</div>
+                        <div class="ans-opt ${selectedVal === 'D' ? 'selected' : ''}" data-q="${i}" data-v="D">D</div>
+                    </div>
+                `;
+                grid.appendChild(row);
+            }
+
+            // Click listener
+            grid.addEventListener('click', function(e) {
+                const opt = e.target.closest('.ans-opt');
+                if (!opt) return;
+
+                const q = opt.getAttribute('data-q');
+                const v = opt.getAttribute('data-v');
+                
+                // toggle or set? Setting is usually better for answer keys
+                // Unselect others in same question
+                grid.querySelectorAll(`.ans-opt[data-q="${q}"]`).forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                
+                answerData[q] = v;
+                updateHiddenField();
+            });
+
+            updateHiddenField();
+        }
+
+        function updateHiddenField() {
+            const n = document.getElementById('numQuestions').value;
+            let parts = [];
+            for (let i = 1; i <= n; i++) {
+                if (answerData[i]) {
+                    parts.push(`${i}:${answerData[i]}`);
+                }
+            }
+            document.getElementById('id_answer_key_input').value = parts.join(',');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Init targeting
+            const targetSelect = document.getElementById('id_target_type');
+            if (targetSelect) toggleTargetFields(targetSelect);
+
+            // Prefill if editing
+            const existingKey = document.getElementById('id_answer_key_input').value;
+            if (existingKey) {
+                const prefill = {};
+                existingKey.split(',').forEach(p => {
+                    const sub = p.split(':');
+                    if (sub.length === 2) prefill[sub[0].trim()] = sub[1].trim().toUpperCase();
+                });
+                
+                // Set question count based on prefill if available
+                const count = Object.keys(prefill).length;
+                if (count > 0) {
+                    document.getElementById('numQuestions').value = Math.max(...Object.keys(prefill).map(Number));
+                }
+                
+                generateRows(prefill);
+            } else {
+                generateRows(); // default rows
+            }
+        });
+
+        document.getElementById('createTestForm').onsubmit = function() {
+            const n = document.getElementById('numQuestions').value;
+            const answeredCount = Object.keys(answerData).length;
+
+            if (answeredCount < n && answeredCount > 0) {
+                return confirm(`You have only set answers for ${answeredCount} out of ${n} questions. Continue?`);
+            } else if (answeredCount === 0) {
+                alert("Please set the answer key for the test.");
+                return false;
+            }
+            return true;
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Campus Placement Training System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .btn-submit {
+            width: 100%;
+            margin-top: 20px;
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover {
+            background: #5568d3;
+        }
+
+        /* Custom Multi-Select Dropdown */
+        .custom-select-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .select-trigger {
+            width: 100%;
+            padding: 12px 15px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95em;
+            color: #4a5568;
+            transition: all 0.3s;
+            min-height: 48px;
+        }
+
+        .select-trigger:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .select-trigger.active {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .select-trigger::after {
+            content: '▼';
+            font-size: 0.8em;
+            color: #a0aec0;
+            transition: transform 0.3s;
+        }
+
+        .select-trigger.active::after {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            padding: 8px;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: slideDown 0.2s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .dropdown-item:hover {
+            background: #f7fafc;
+        }
+
+        /* Selected State */
+        .dropdown-item.selected {
+            background-color: #007bff !important;
+            color: white !important;
+        }
+
+        .dropdown-item input[type="checkbox"] {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: white;
+        }
+
+        .dropdown-item.selected label {
+            color: white;
+        }
+
+        .dropdown-item label {
+            cursor: pointer;
+            flex-grow: 1;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar Include -->
+        {% include 'menu_coordinator.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <h1>{{ title }}</h1>
+                <div class="user-info">
+                    <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+                </div>
+            </header>
+
+            <section class="content-section">
+                <div class="form-container">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Company Name</label>
+                                {{ form.company_name }}
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                {{form.category}}
+                            </div>
+                            <div class="form-group">
+                                <label>Job Role</label>
+                                {{ form.job_role }}
+                            </div>
+                            <div class="form-group">
+                                <label>Package (LPA)</label>
+                                {{ form.package }}
+                            </div>
+                            <div class="form-group">
+                                <label>Min CGPA</label>
+                                {{ form.min_cgpa }}
+                            </div>
+                            <div class="form-group full-width"
+                                style="background: #f0f7ff; padding: 15px; border-radius: 10px; border: 1px dashed #667eea; margin-bottom: 20px;">
+                                <label
+                                    style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: #1e40af;">
+                                    {{ form.is_for_all_departments }}
+                                    <strong>Open to All Departments / Courses</strong>
+                                </label>
+                                <p style="font-size: 0.8em; color: #64748b; margin: 5px 0 0 28px;">If checked, specific
+                                    department selection below will be ignored.</p>
+                            </div>
+
+                            <div class="form-group full-width" id="deptSelectionGroup">
+                                <label>Eligible Departments</label>
+                                <small style="display: block; color: #666; margin-bottom: 5px;">
+                                    {{ form.eligible_departments.help_text }}</small>
+
+                                <div class="custom-select-container">
+                                    <div class="select-trigger" id="deptSelectTrigger">
+                                        <span id="triggerText">Select Departments</span>
+                                    </div>
+                                    <div class="dropdown-menu" id="deptDropdown">
+                                        {% for choice in form.eligible_departments %}
+                                        <div class="dropdown-item">
+                                            {{ choice.tag }}
+                                            <label for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Eligible Batch (Admission Year)</label>
+                                {{ form.eligible_batch }}
+                            </div>
+                            <div class="form-group">
+                                <label>Eligible Year (Study Year)</label>
+                                {{ form.eligible_year }}
+                            </div>
+                            <div class="form-group">
+                                <label>Registration Link (Optional)</label>
+                                {{ form.registration_link }}
+                            </div>
+                            <div class="form-group">
+                                <label>Registration Deadline</label>
+                                {{ form.registration_deadline }}
+                            </div>
+                            <div class="form-group">
+                                <label>Drive Date</label>
+                                {{ form.drive_date }}
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Description</label>
+                                {{ form.description }}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-submit">Save Drive Information</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="dashboard-footer">
+                <p>&copy; 2024 Campus Placement Training System</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const trigger = document.getElementById('deptSelectTrigger');
+            const dropdown = document.getElementById('deptDropdown');
+            const triggerText = document.getElementById('triggerText');
+            const items = document.querySelectorAll('.dropdown-item');
+
+            if (trigger) {
+                // Toggle dropdown visibility
+                trigger.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('show');
+                    trigger.classList.toggle('active');
+                });
+
+                // Prevent dropdown from closing when clicking inside
+                dropdown.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function () {
+                    dropdown.classList.remove('show');
+                    trigger.classList.remove('active');
+                });
+
+                // Update label and styles when a checkbox is clicked
+                function updateSelection() {
+                    const selectedNames = [];
+                    items.forEach(item => {
+                        const checkbox = item.querySelector('input[type="checkbox"]');
+                        if (checkbox && checkbox.checked) {
+                            selectedNames.push(item.querySelector('label').innerText);
+                            item.classList.add('selected');
+                        } else {
+                            item.classList.remove('selected');
+                        }
+                    });
+
+                    if (selectedNames.length > 0) {
+                        triggerText.innerText = selectedNames.join(', ');
+                    } else {
+                        triggerText.innerText = 'Select Departments';
+                    }
+                }
+
+                // Attach listeners to items
+                items.forEach(item => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    if (checkbox) {
+                        // Clicking the entire item toggles the checkbox
+                        item.addEventListener('click', function (e) {
+                            if (e.target !== checkbox) {
+                                checkbox.checked = !checkbox.checked;
+                            }
+                            updateSelection();
+                        });
+
+                        checkbox.addEventListener('change', updateSelection);
+                    }
+                });
+
+                // Initial update for edit mode
+                updateSelection();
+            }
+
+            // All Departments Toggle
+            const allDeptsCheckbox = document.querySelector('input[name="is_for_all_departments"]');
+            const deptGroup = document.getElementById('deptSelectionGroup');
+
+            if (allDeptsCheckbox && deptGroup) {
+                function toggleDeptGroup() {
+                    if (allDeptsCheckbox.checked) {
+                        deptGroup.style.opacity = '0.5';
+                        deptGroup.style.pointerEvents = 'none';
+                    } else {
+                        deptGroup.style.opacity = '1';
+                        deptGroup.style.pointerEvents = 'auto';
+                    }
+                }
+
+                allDeptsCheckbox.addEventListener('change', toggleDeptGroup);
+                toggleDeptGroup(); // Initial state
+            }
+        });
+    </script>
+</body>
+
+</html>

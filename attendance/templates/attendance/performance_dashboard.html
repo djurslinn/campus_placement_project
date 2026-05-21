@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Performance Insights – Student</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+    <style>
+        /* ══════════════════════════════════════════════
+           TOKENS
+        ══════════════════════════════════════════════ */
+        :root {
+            --bg: #f1f5f9;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --border: #e2e8f0;
+            --border-2: #cbd5e1;
+
+            --text: #0f172a;
+            --text-sub: #475569;
+            --text-muted: #94a3b8;
+
+            --primary: #4f46e5;
+            --primary-lt: #eef2ff;
+            --primary-dark: #3730a3;
+
+            --green: #16a34a;
+            --green-lt: #dcfce7;
+
+            --amber: #b45309;
+            --amber-lt: #fef3c7;
+
+            --red: #dc2626;
+            --red-lt: #fee2e2;
+
+            --violet: #7c3aed;
+            --violet-lt: #ede9fe;
+
+            --cyan: #0891b2;
+            --cyan-lt: #cffafe;
+
+            --r: 14px;
+            --r-sm: 9px;
+            --sh: 0 1px 3px rgba(0, 0, 0, .08), 0 1px 2px rgba(0, 0, 0, .04);
+            --sh-md: 0 4px 16px rgba(0, 0, 0, .08);
+            --sidebar-w: 260px;
+        }
+
+        /* ══════════════════════════════════════════════
+           RESET / BASE
+        ══════════════════════════════════════════════ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3,
+        .label {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* ══════════════════════════════════════════════
+           LAYOUT
+        ══════════════════════════════════════════════ */
+        .page {
+            margin-left: var(--sidebar-w);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        /* ── Header ── */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -.02em;
+        }
+
+        .page-header p {
+            font-size: .8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .header-btns {
+            display: flex;
+            gap: .5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: var(--r-sm);
+            font-size: .8rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            text-decoration: none;
+            border: 1.5px solid var(--border-2);
+            background: var(--surface);
+            color: var(--text-sub);
+            transition: background .15s, border-color .15s, color .15s;
+        }
+
+        .btn:hover {
+            background: var(--surface-2);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: var(--red);
+            color: #fff;
+            border-color: var(--red);
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+            color: #fff;
+        }
+
+        /* ── Grid ── */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.25rem;
+        }
+
+        .col-3 {
+            grid-column: span 3;
+        }
+
+        .col-4 {
+            grid-column: span 4;
+        }
+
+        .col-5 {
+            grid-column: span 5;
+        }
+
+        .col-6 {
+            grid-column: span 6;
+        }
+
+        .col-7 {
+            grid-column: span 7;
+        }
+
+        .col-8 {
+            grid-column: span 8;
+        }
+
+        .col-12 {
+            grid-column: span 12;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r);
+            padding: 1.25rem 1.5rem;
+            box-shadow: var(--sh);
+            transition: box-shadow .2s;
+        }
+
+        .card:hover {
+            box-shadow: var(--sh-md);
+        }
+
+        .card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.1rem;
+        }
+
+        .card-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: .8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .card-title i {
+            font-size: 1rem;
+        }
+
+        /* ── Badge ── */
+        .badge {
+            font-size: .68rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+
+        .b-green {
+            background: var(--green-lt);
+            color: var(--green);
+        }
+
+        .b-amber {
+            background: var(--amber-lt);
+            color: var(--amber);
+        }
+
+        .b-red {
+            background: var(--red-lt);
+            color: var(--red);
+        }
+
+        .b-primary {
+            background: var(--primary-lt);
+            color: var(--primary);
+        }
+
+        .b-violet {
+            background: var(--violet-lt);
+            color: var(--violet);
+        }
+
+        .b-cyan {
+            background: var(--cyan-lt);
+            color: var(--cyan);
+        }
+
+        /* ══════════════════════════════════════════════
+           COMPONENTS
+        ══════════════════════════════════════════════ */
+
+        /* ── Donut Score ── */
+        .donut-wrap {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: .75rem auto 1rem;
+        }
+
+        .donut-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .donut-num {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .donut-sub {
+            font-size: .65rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: .05em;
+            margin-top: 2px;
+        }
+
+        /* ── Progress bar ── */
+        .prog-row {
+            margin-bottom: .75rem;
+        }
+
+        .prog-top {
+            display: flex;
+            justify-content: space-between;
+            font-size: .78rem;
+            color: var(--text-sub);
+            margin-bottom: 5px;
+        }
+
+        .prog-top span:last-child {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .prog-track {
+            height: 6px;
+            background: var(--bg);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .prog-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1.3s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        /* ── Stat block ── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: .6rem;
+            margin-top: .85rem;
+        }
+
+        .stat-block {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: .6rem .75rem;
+            text-align: center;
+        }
+
+        .stat-block .sv {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .stat-block .sl {
+            font-size: .65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* ── Suggestion strip ── */
+        .tip {
+            background: var(--surface-2);
+            border-left: 3px solid var(--primary);
+            border-radius: 0 var(--r-sm) var(--r-sm) 0;
+            padding: .65rem .85rem;
+            font-size: .78rem;
+            color: var(--text-sub);
+            margin-top: .9rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .suggestions-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .suggestion-section {
+            background: var(--surface-2);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid var(--border);
+        }
+
+        .suggestion-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .suggestion-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .suggestion-item {
+            display: flex;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            line-height: 1.5;
+        }
+
+        .suggestion-item i {
+            color: var(--primary);
+            margin-top: 2px;
+            font-size: 1rem;
+        }
+
+        .suggestion-section.s-improve .suggestion-title { color: var(--amber); }
+        .suggestion-section.s-improve i { color: var(--amber); }
+
+        .tip strong {
+            display: block;
+            font-size: .68rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .tip.t-red {
+            border-left-color: var(--red);
+            background: var(--red-lt);
+        }
+
+        .tip.t-amber {
+            border-left-color: var(--amber);
+            background: var(--amber-lt);
+        }
+
+        .tip.t-green {
+            border-left-color: var(--green);
+            background: var(--green-lt);
+        }
+
+        /* ── Data list ── */
+        .dlist {
+            list-style: none;
+        }
+
+        .ditem {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: .82rem;
+            color: var(--text-sub);
+        }
+
+        .ditem:last-child {
+            border-bottom: none;
+        }
+
+        .ditem span:first-child {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* ── Table ── */
+        .perf-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .8rem;
+        }
+
+        .perf-table th {
+            text-align: left;
+            font-size: .68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--text-muted);
+            padding: 7px 10px;
+            border-bottom: 1.5px solid var(--border);
+        }
+
+        .perf-table td {
+            padding: 11px 10px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-sub);
+            vertical-align: middle;
+        }
+
+        .perf-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .perf-table td:first-child {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .perf-table tr {
+            transition: background .12s;
+        }
+
+        .perf-table tr:hover td {
+            background: var(--surface-2);
+        }
+
+        /* mini bar inside table */
+        .mini-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mini-bar-track {
+            width: 56px;
+            height: 5px;
+            background: var(--bg);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .mini-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        /* ── Probability Dial ── */
+        .prob-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: .5rem 0 .25rem;
+        }
+
+        .prob-num {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .prob-label {
+            font-size: .72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+        }
+
+        .prob-desc {
+            font-size: .8rem;
+            color: var(--text-sub);
+            text-align: center;
+            margin-top: .75rem;
+            line-height: 1.55;
+        }
+
+        /* ── SVG Circle ── */
+        .svg-ring {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .svg-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .svg-ring .ring-bg {
+            fill: none;
+            stroke: var(--bg);
+            stroke-width: 8;
+        }
+
+        .svg-ring .ring-val {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 339.29;
+            transition: stroke-dashoffset 1.4s ease-out;
+        }
+
+        .svg-ring .ring-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* ── Drive suggestion card ── */
+        .drive-card {
+            background: var(--surface-2);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: .85rem 1rem;
+            margin-bottom: .65rem;
+        }
+
+        .drive-card .dc-company {
+            font-weight: 600;
+            color: var(--text);
+            font-size: .88rem;
+        }
+
+        .drive-card .dc-role {
+            font-size: .78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .drive-card .dc-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: .65rem;
+        }
+
+        .drive-card .dc-pkg {
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--green);
+        }
+
+        /* ── GD feedback block ── */
+        .gd-block {
+            background: var(--violet-lt);
+            border-left: 4px solid var(--violet);
+            border-radius: 0 var(--r-sm) var(--r-sm) 0;
+            padding: 1rem 1.1rem;
+        }
+
+        .gd-block .gd-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: .65rem;
+        }
+
+        .gd-block .gd-topic {
+            font-weight: 600;
+            font-size: .88rem;
+        }
+
+        .gd-block .gd-quote {
+            font-style: italic;
+            color: var(--text-sub);
+            font-size: .82rem;
+            line-height: 1.6;
+        }
+
+        /* ── Mock Interview card accent ── */
+        .mi-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: .6rem;
+            margin-bottom: 1.1rem;
+        }
+
+        .mi-stat {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: .7rem .8rem;
+            text-align: center;
+        }
+
+        .mi-stat .mi-val {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.55rem;
+            font-weight: 700;
+            line-height: 1;
+            color: var(--text);
+        }
+
+        .mi-stat .mi-lbl {
+            font-size: .63rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* ── Interview timeline ── */
+        .mi-timeline {
+            list-style: none;
+            margin-top: .5rem;
+        }
+
+        .mi-entry {
+            display: flex;
+            align-items: flex-start;
+            gap: .8rem;
+            padding: .75rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: .8rem;
+        }
+
+        .mi-entry:last-child {
+            border-bottom: none;
+        }
+
+        .mi-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+            font-size: .8rem;
+        }
+
+        .mi-dot.completed {
+            background: var(--green-lt);
+            color: var(--green);
+        }
+
+        .mi-dot.scheduled {
+            background: var(--primary-lt);
+            color: var(--primary);
+        }
+
+        .mi-dot.cancelled {
+            background: var(--red-lt);
+            color: var(--red);
+        }
+
+        .mi-entry-body .mi-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .mi-entry-body .mi-time {
+            color: var(--text-muted);
+            font-size: .72rem;
+            margin-top: 1px;
+        }
+
+        /* ── MI feedback block ── */
+        .mi-feedback {
+            background: #f0fdf4;
+            border-left: 4px solid var(--green);
+            border-radius: 0 var(--r-sm) var(--r-sm) 0;
+            padding: .85rem 1rem;
+            font-size: .82rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+            margin-top: 1rem;
+        }
+
+        .mi-feedback strong {
+            display: block;
+            font-size: .68rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--green);
+            margin-bottom: 4px;
+        }
+
+        /* ── Attendance log ── */
+        .att-log {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .att-log::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .att-log::-webkit-scrollbar-track {
+            background: var(--surface-2);
+        }
+
+        .att-log::-webkit-scrollbar-thumb {
+            background: var(--border-2);
+            border-radius: 4px;
+        }
+
+        /* ── Radar chart holder ── */
+        .chart-box {
+            position: relative;
+        }
+
+        /* ── Tabs ── */
+        .tab-row {
+            display: flex;
+            gap: .35rem;
+            margin-bottom: 1rem;
+            border-bottom: 1.5px solid var(--border);
+            padding-bottom: .6rem;
+        }
+
+        .tab-btn {
+            padding: 5px 14px;
+            border-radius: var(--r-sm);
+            font-size: .78rem;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-lt);
+            color: var(--primary);
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+        .chart-box {
+    position: relative;
+}
+
+.chart-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    font-weight: 600;
+    color: #2563eb; /* blue */
+}
+
+        /* ── Animated number ── */
+        .count-up {
+            display: inline-block;
+        }
+
+        /* ── Tooltip trigger ── */
+        [data-tip] {
+            position: relative;
+            cursor: pointer;
+        }
+
+        [data-tip]::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text);
+            color: #fff;
+            font-size: .7rem;
+            padding: 4px 8px;
+            border-radius: 5px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .15s;
+            z-index: 100;
+        }
+
+        [data-tip]:hover::after {
+            opacity: 1;
+        }
+
+        /* ── Suggestions Modal ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: var(--surface);
+            border-radius: var(--r);
+            width: 100%;
+            max-width: 850px;
+            box-shadow: var(--sh-md);
+            overflow: hidden;
+            animation: modalIn 0.3s ease-out;
+            border: 1.5px solid var(--border);
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1.5px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--surface-2);
+        }
+
+        .modal-header h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--red);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .suggestion-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .suggestion-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .suggestion-title {
+            font-size: .8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-bottom: .75rem;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .s-good .suggestion-title { color: var(--green); }
+        .s-improve .suggestion-title { color: var(--amber); }
+
+        .suggestion-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .suggestion-item {
+            display: flex;
+            gap: 12px;
+            padding: 10px 14px;
+            background: var(--surface-2);
+            border-radius: var(--r-sm);
+            font-size: .85rem;
+            color: var(--text-sub);
+            border-left: 3.5px solid transparent;
+            line-height: 1.5;
+        }
+
+        .s-good .suggestion-item { border-left-color: var(--green); background: #f0fdf4; }
+        .s-improve .suggestion-item { border-left-color: var(--amber); background: #fffbeb; }
+
+        .suggestion-item i {
+            margin-top: 2px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1080px) {
+
+            .col-3,
+            .col-4,
+            .col-5,
+            .col-6,
+            .col-7,
+            .col-8,
+            .col-12 {
+                grid-column: span 12;
+            }
+
+            .page {
+                margin-left: 0;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'menu_student.html' %}
+
+    <div class="page" style="margin-left: var(--sb-w);">
+
+        <!-- ═══ HEADER ═══ -->
+        <header class="page-header">
+            <div>
+                <h1>Performance Insights</h1>
+                <p>Comprehensive analysis of your placement readiness</p>
+            </div>
+            <div class="header-btns" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                <div style="display: flex; gap: 8px;">
+                    <a href="{% url 'student_dashboard' %}" class="btn">
+                        <i class="ri-arrow-left-line"></i> Dashboard
+                    </a>
+                    <a href="{% url 'logout' %}" class="btn btn-danger">
+                        <i class="ri-logout-box-line"></i> Logout
+                    </a>
+                </div>
+                <button onclick="toggleModal('suggestionsModal')" class="btn" style="background: linear-gradient(135deg, var(--violet) 0%, var(--primary) 100%); color: white; border: none; width: fit-content; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);">
+                    <i class="ri-sparkling-2-fill"></i> AI Insights
+                </button>
+            </div>
+        </header>
+
+        <!-- ═══ ROW 1: Probability | Attendance | Skills ═══ -->
+        <div class="grid">
+
+            <!-- 1. Placement Probability -->
+            <div class="card col-4">
+                <div class="card-head">
+                    <span class="card-title">
+                        <i class="ri-bar-chart-2-line" style="color:var(--primary);"></i>
+                        Placement Probability
+                    </span>
+                    <button onclick="toggleModal('suggestionsModal')"
+                        style="padding: 4px 8px; font-size: 0.72rem; height: 26px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-sub); cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 600; transition: all 0.2s;">
+                        <i class="ri-lightbulb-line" style="color:var(--amber);"></i> View Suggestions
+                    </button>
+                </div>
+
+                <div class="prob-wrap">
+                    <div class="prob-num" style="color:{{ analysis.color }};">
+                        <span class="count-up" data-target="{{ analysis.probability }}">{{ analysis.probability }}</span>%
+                    </div>
+                    <div class="prob-label" style="color:{{ analysis.color }};">{{ analysis.status }} Readiness</div>
+                    <p class="prob-desc">{{ analysis.recommendation }}</p>
+                </div>
+
+                <!-- Mini radar -->
+                <div class="chart-box" style="height:130px; margin-top:.5rem;">
+                    <canvas id="radarMini"></canvas>
+                </div>
+            </div>
+
+            <!-- 2. Attendance -->
+            <div class="card col-4">
+                <div class="card-head">
+                    <span class="card-title">
+                        <i class="ri-calendar-check-line" style="color:var(--green);"></i>
+                        Attendance
+                    </span>
+                    <span
+                        class="badge {% if attendance_percentage >= 85 %}b-green{% elif attendance_percentage >= 75 %}b-amber{% else %}b-red{% endif %}">
+                        {{ attendance_percentage }}%
+                    </span>
+                </div>
+
+                <div class="svg-ring" data-tip="Attendance Rate">
+                    <svg viewBox="0 0 120 120" width="120" height="120">
+                        <circle class="ring-bg" cx="60" cy="60" r="54" />
+                        <circle class="ring-val" cx="60" cy="60" r="54"
+                            style="stroke-dashoffset: calc(339.29 - (339.29 * {{ attendance_percentage }}) / 100);
+                                   stroke: {% if attendance_percentage >= 85 %}var(--green){% elif attendance_percentage >= 75 %}var(--amber){% else %}var(--red){% endif %};" />
+                    </svg>
+                    <div class="ring-text">{{ attendance_percentage }}%</div>
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat-block" style="grid-column: span 2;">
+                        <div class="sv" style="color:var(--green);">{{ attended_sessions }}</div>
+                        <div class="sl">Present</div>
+                    </div>
+                
+                    <div class="stat-block" style="grid-column: span 2;">
+                        <div class="sv">{{ total_sessions }}</div>
+                        <div class="sl">Total Sessions</div>
+                    </div>
+                </div>
+
+                <div
+                    class="tip
+                    {% if attendance_percentage < 75 %}t-red{% elif attendance_percentage < 85 %}t-amber{% else %}t-green{% endif %}">
+                    <strong>Insight</strong>
+                    {% if attendance_percentage < 75 %} Below 75% eligibility threshold — urgent improvement required.
+                        {% elif attendance_percentage < 85 %} Within safe zone. Stay consistent for all placement
+                        drives. {% else %} Excellent record — a strong positive signal to recruiters. {% endif %}
+                </div>
+
+                <!-- AI Tips for Attendance -->
+                {% if ai_insights.module_tips.attendance %}
+                <div class="tip" style="border-left-color: var(--cyan); background: var(--cyan-lt); margin-top: 0.5rem;">
+                    <strong>AI Recommendation</strong>
+                    {% for tip in ai_insights.module_tips.attendance %}
+                        <p style="font-size: 0.72rem; margin-top:2px;">• {{ tip }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+                <!-- 3. Skills Overview -->
+                <div class="card col-4">
+                    <div class="card-head">
+                        <span class="card-title">
+                            <i class="ri-brain-line" style="color:var(--amber);"></i>
+                            Skills Overview
+                        </span>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="tab-row">
+                        <button class="tab-btn active" onclick="switchTab(event,'skills','tab-apt')">Aptitude</button>
+                        <button class="tab-btn" onclick="switchTab(event,'skills','tab-gd')">GD</button>
+                    </div>
+
+                  <div id="tab-apt" class="tab-pane active">
+    <div class="prog-row">
+        <div class="prog-top">
+            <span>Avg Score</span>
+            <span>{{ aptitude_stats.avg_score }}%</span>
+        </div>
+        <div class="prog-track">
+            <div class="prog-fill"
+                style="width:{{ aptitude_stats.avg_score }}%;background:var(--green);">
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-box" style="height:110px; position:relative;">
+        <canvas id="aptDoughnut"></canvas>
+        <!-- Center Score -->
+        <div class="chart-center">
+            {{ aptitude_stats.avg_score }}%
+        </div>
+    </div>
+
+    <ul class="dlist" style="margin-top:.5rem;">
+        <li class="ditem">
+            <span>Tests Completed</span>
+            <span class="badge b-primary">
+                {{ aptitude_stats.total_tests }}
+            </span>
+        </li>
+    </ul>
+
+    <!-- AI Tips for Aptitude -->
+    {% if ai_insights.module_tips.aptitude %}
+    <div class="tip" style="border-left-color: var(--primary); background: var(--primary-lt); margin-top: 0.8rem;">
+        <strong>Improvement Tips</strong>
+        {% for tip in ai_insights.module_tips.aptitude %}
+            <p style="font-size: 0.72rem; margin-top:2px;">• {{ tip }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+                    <div id="tab-gd" class="tab-pane">
+                        <div class="prog-row">
+                            <div class="prog-top"><span>Avg Score</span><span>{{ gd_stats.avg_score }}/10</span></div>
+                            <div class="prog-track">
+                                <div class="prog-fill"
+                                    style="width:calc({{ gd_stats.avg_score }} * 10%);background:var(--violet);"></div>
+                            </div>
+                        </div>
+                        <div class="chart-box" style="height:110px;">
+                            <canvas id="gdDoughnut"></canvas>
+                        </div>
+                        
+                        <!-- AI Tips for GD -->
+                        {% if ai_insights.module_tips.gd %}
+                        <div class="tip" style="border-left-color: var(--violet); background: var(--violet-lt); margin-top: 0.8rem;">
+                            <strong>Personalized Feedback</strong>
+                            {% for tip in ai_insights.module_tips.gd %}
+                                <p style="font-size: 0.72rem; margin-top:2px;">• {{ tip }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+
+                <!-- ═══ ROW 3: Mock Interview Analysis (FULL WIDTH) ═══ -->
+                <!-- Mock Interview Section -->
+                <div class="card col-12" style="margin-top:0;">
+                    <div class="card-head">
+                        <span class="card-title">
+                            <i class="ri-user-voice-line" style="color:var(--cyan);"></i>
+                            Mock Interview Analysis
+                        </span>
+                        {% if mock_interview_stats.total > 0 %}
+                        <span class="badge b-cyan">{{ mock_interview_stats.total }} Interview{{ mock_interview_stats.total|pluralize }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if mock_interview_stats.total > 0 %}
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 1rem 0;">
+                        <!-- Category Analysis Radar -->
+                        <div style="width: 100%; max-width: 600px; display:flex; flex-direction:column; align-items:center;">
+                            <div class="card-title" style="margin-bottom:1.5rem; align-self:center;">
+                                <i class="ri-radar-line" style="color:var(--cyan);"></i> Category Performance Analysis
+                            </div>
+                            <div class="chart-box" style="height:350px; width:100%;">
+                                <canvas id="miRadar"></canvas>
+                            </div>
+                            {% if mock_interview_stats.analysis.overall_avg > 0 %}
+                            <div style="margin-top:1.5rem; text-align:center;">
+                                <div class="badge b-cyan" style="font-size:1rem; padding: 6px 20px; border-radius: 30px;">
+                                    Overall Performance Score: {{ mock_interview_stats.analysis.overall_avg }}/10
+                                </div>
+                                <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.8rem;">
+                                    {{ mock_interview_stats.analysis.performance_level }} Readiness
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- AI Tips for Interviews -->
+                {% if ai_insights.module_tips.mock_interview %}
+                <div class="card col-12" style="margin-top: 1rem; border-left: 5px solid var(--cyan); background: var(--cyan-lt);">
+                    <div class="card-title" style="margin-bottom: 0.5rem; color: var(--cyan);">
+                        <i class="ri-sparkling-fill"></i> Professional Growth Tips
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        {% for tip in ai_insights.module_tips.mock_interview %}
+                        <div style="font-size: 0.82rem; color: var(--text-sub); display: flex; gap: 8px;">
+                            <i class="ri-check-double-line" style="color: var(--cyan); margin-top: 2px;"></i>
+                            <span>{{ tip }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div style="text-align:center; color:var(--text-muted); padding:2.5rem 0;">
+                    <i class="ri-user-voice-line"
+                        style="font-size:2.5rem; display:block; margin-bottom:.6rem; color:var(--cyan);"></i>
+                    <p style="font-size:.88rem; font-weight:500; margin-bottom:.3rem;">No mock interviews scheduled yet
+                    </p>
+                    <p style="font-size:.78rem;">Contact your coordinator to arrange a practice session.</p>
+                </div>
+                {% endif %}
+            </div>
+
+           
+                <!-- GD Metrics bars -->
+              
+                <div class="att-log">
+                    <ul class="dlist">
+                        {% for item in attendance_data %}
+                        <li class="ditem">
+                            <div>
+                                <div style="font-weight:500;">{{ item.session.title }}</div>
+                                <div style="font-size:.72rem; color:var(--text-muted);">{{ item.session.date }}
+                                </div>
+                            </div>
+                            {% if item.is_present %}
+                            <span class="badge b-green"><i class="ri-checkbox-circle-line"></i> Present</span>
+                            {% else %}
+                            <span class="badge b-red"><i class="ri-close-circle-line"></i> Absent</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+        </div><!-- /grid -->
+
+
+    </div><!-- /page -->
+
+
+    <!-- ═══ SUGGESTIONS MODAL ═══ -->
+    <div id="suggestionsModal" class="modal-overlay" onclick="if(event.target === this) toggleModal('suggestionsModal')">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="ri-magic-line" style="color:var(--primary);"></i> Placement Recommendations</h3>
+                <button class="modal-close" onclick="toggleModal('suggestionsModal')"><i class="ri-close-line"></i></button>
+            </div>
+            <div class="modal-body">
+                <!-- Detailed AI Suggestion -->
+                <div style="background: var(--primary-lt); border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem; border: 1px dashed var(--primary);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: var(--primary);">
+                        <i class="ri-ai-generate" style="font-size: 1.5rem;"></i>
+                        <h4 style="margin: 0; font-size: 1rem;">Holistic Performance Summary</h4>
+                    </div>
+                    <p style="font-size: 0.9rem; line-height: 1.7; color: var(--text-sub); margin: 0;">
+                        {{ ai_insights.detailed_summary }}
+                    </p>
+                </div>
+
+                <!-- Suggestions Grid -->
+                <div class="suggestions-row">
+                    <!-- Good Areas -->
+                    <div class="suggestion-section">
+                        <div class="suggestion-title">
+                            <i class="ri-checkbox-circle-fill" style="color: var(--green);"></i> Key Strengths
+                        </div>
+                        <ul class="suggestion-list">
+                            {% if ai_insights.strengths %}
+                                {% for item in ai_insights.strengths %}
+                                    <li class="suggestion-item">
+                                        <i class="ri-medal-line"></i>
+                                        <span><strong>[{{ item.module }}]</strong> {{ item.text }}</span>
+                                    </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="suggestion-item">
+                                    <i class="ri-information-line"></i>
+                                    <span>Participate in more activities to build your profile strengths.</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    <!-- Improvement Suggestions -->
+                    <div class="suggestion-section s-improve">
+                        <div class="suggestion-title">
+                            <i class="ri-error-warning-fill"></i> Suggested Improvements
+                        </div>
+                        <ul class="suggestion-list">
+                            {% if ai_insights.improvements %}
+                                {% for item in ai_insights.improvements %}
+                                    <li class="suggestion-item">
+                                        <i class="ri-arrow-right-up-line"></i>
+                                        <span><strong>[{{ item.module }}]</strong> {{ item.text }}</span>
+                                    </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="suggestion-item">
+                                    <i class="ri-check-line"></i>
+                                    <span>No major improvements needed. Keep consistent!</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Improvement Summary -->
+                <div class="tip" style="margin-top: 1.5rem; border-left: 3px solid var(--primary); background: var(--primary-lt);">
+                    <strong>Placement Readiness Overview</strong>
+                    <span style="font-size: 0.82rem; color: var(--text-sub); line-height: 1.6;">
+                        You have a {{ analysis.probability }}% probability of being placed. 
+                        {{ analysis.recommendation }}
+                        {% if mock_interview_stats.analysis.improvement_summary %}
+                            <br><br><strong>Interview Expert Note:</strong> {{ mock_interview_stats.analysis.improvement_summary }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ── Toggle Modal ───────────────────────── */
+        function toggleModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('active');
+        }
+
+        /* ── Tabs ─────────────────────────────────── */
+        function switchTab(e, group, targetId) {
+            document.querySelectorAll('#' + targetId).forEach(p => p.classList.remove('active'));
+            e.currentTarget.closest('.card').querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            e.currentTarget.closest('.card').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(targetId).classList.add('active');
+            e.currentTarget.classList.add('active');
+        }
+
+        /* ── Animated count-up ───────────────────── */
+        document.querySelectorAll('.count-up').forEach(el => {
+            const target = parseFloat(el.dataset.target) || 0;
+            const dur = 1400;
+            const start = performance.now();
+            const tick = now => {
+                const p = Math.min((now - start) / dur, 1);
+                el.textContent = Math.round(p * target);
+                if (p < 1) requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        });
+
+        /* ── Chart defaults ──────────────────────── */
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = '#e2e8f0';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.font.size = 11;
+
+        /* ── 1. Radar mini (probability card) ────── */
+        // radar_vals list pre-computed in the view (all values on 0-100 scale)
+        new Chart(document.getElementById('radarMini'), {
+            type: 'radar',
+            data: {
+                labels: ['Attendance', 'Aptitude', 'GD', 'Mock Interview', 'Overall'],
+                datasets: [{
+                    data: {{ radar_vals }},
+            backgroundColor: 'rgba(79,70,229,.12)',
+            borderColor: '#4f46e5',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: '#4f46e5'
+        }]
+            },
+            options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                r: {
+                    min: 0, max: 100,
+                    ticks: { display: false },
+                    grid: { color: '#e2e8f0' },
+                    pointLabels: { font: { size: 10 }, color: '#94a3b8' }
+                }
+            }
+        }
+        });
+
+        /* ── 2. Aptitude bar (Skills tab) ─────────── */
+        // quant / logical / verbal pre-computed in the view
+        new Chart(document.getElementById("aptDoughnut"), {
+    type: "doughnut",
+    data: {
+        datasets: [{
+            data: [
+                {{ aptitude_stats.avg_score|default:0 }},
+                100 - {{ aptitude_stats.avg_score|default:0 }}
+            ],
+            backgroundColor: ["#f59e0b", "#2a2a2a"],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        cutout: "70%",
+        plugins: {
+            legend: { display: false }
+        }
+    }
+});
+
+        /* ── 3. GD Doughnut ──────────────────────── */
+        // avg_score_pct (0-100) and avg_score_remaining pre-computed in the view
+        new Chart(document.getElementById('gdDoughnut'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Score', 'Remaining'],
+                datasets: [{
+                    data: [{{ gd_stats.avg_score_pct }}, {{ gd_stats.avg_score_remaining }}],
+            backgroundColor: ['#7c3aed', '#f1f5f9'],
+            borderWidth: 0,
+            cutout: '75%'
+        }]
+            },
+            options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }
+            },
+            animation: { duration: 1600, easing: 'easeOutQuart' }
+        },
+            plugins: [{
+                id: 'center-text',
+                afterDraw(chart) {
+                    const { width, height, ctx } = chart;
+                    ctx.save();
+                    ctx.font = "700 1.1rem 'Poppins', sans-serif";
+                    ctx.fillStyle = '#0f172a';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText("{{ gd_stats.avg_score }}/10", width / 2, height / 2);
+                    ctx.restore();
+                }
+            }]
+        });
+        /* ── 4. Mock Interview Doughnut ─────────── */
+        // All counts pre-computed in the view — no arithmetic needed here
+        const miCompleted = {{ mock_interview_stats.completed }};
+        const miScheduled = {{ mock_interview_stats.scheduled }};
+        const miCancelled = {{ mock_interview_stats.cancelled }};
+        const miTotal = {{ mock_interview_stats.total }};
+        const miCanvas = document.getElementById('miDoughnut');
+        if (miCanvas) {
+            new Chart(miCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'Upcoming', 'Cancelled'],
+                    datasets: [{
+                        data: miTotal > 0 ? [miCompleted, miScheduled, miCancelled] : [1],
+                        backgroundColor: miTotal > 0
+                            ? ['#16a34a', '#4f46e5', '#dc2626']
+                            : ['#e2e8f0'],
+                        borderWidth: 0,
+                        cutout: '70%'
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: { font: { size: 10 }, boxWidth: 10, padding: 8 }
+                        },
+                        tooltip: { enabled: miTotal > 0 }
+                    },
+                    animation: { duration: 1200, easing: 'easeOutQuart' }
+                },
+                plugins: [{
+                    id: 'mi-center',
+                    afterDraw(chart) {
+                        const { width, height, ctx } = chart;
+                        ctx.save();
+                        ctx.font = "700 1rem 'Poppins', sans-serif";
+                        ctx.fillStyle = '#0f172a';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(miTotal > 0 ? miCompleted + '/' + miTotal : '—', width / 2, height / 2 - 12);
+                        ctx.font = "500 0.6rem 'Inter', sans-serif";
+                        ctx.fillStyle = '#94a3b8';
+                        ctx.fillText('done', width / 2, height / 2 + 8);
+                        ctx.restore();
+                    }
+                }]
+            });
+        }
+        /* ── 5. Mock Interview Radar (Category Analysis) ─ */
+        const miAnalysisAvgs = {
+            communication: {{ mock_interview_stats.analysis.avgs.communication|default:0 }},
+            confidence: {{ mock_interview_stats.analysis.avgs.confidence|default:0 }},
+            technical: {{ mock_interview_stats.analysis.avgs.technical|default:0 }},
+            body_language: {{ mock_interview_stats.analysis.avgs.body_language|default:0 }},
+            problem_solving: {{ mock_interview_stats.analysis.avgs.problem_solving|default:0 }}
+        };
+
+        const miRadarCanvas = document.getElementById('miRadar');
+        if (miRadarCanvas) {
+            new Chart(miRadarCanvas, {
+                type: 'radar',
+                data: {
+                    labels: ['Communication', 'Confidence', 'Technical', 'Body Language', 'Problem Solving'],
+                    datasets: [{
+                        label: 'Performance Score',
+                        data: [
+                            miAnalysisAvgs.communication,
+                            miAnalysisAvgs.confidence,
+                            miAnalysisAvgs.technical,
+                            miAnalysisAvgs.body_language,
+                            miAnalysisAvgs.problem_solving
+                        ],
+                        backgroundColor: 'rgba(8, 145, 178, 0.2)',
+                        borderColor: '#0891b2',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#0891b2',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#0891b2'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + '/10';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 10,
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 2,
+                                display: false
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 10,
+                                    weight: '500'
+                                },
+                                color: '#475569'
+                            },
+                            grid: {
+                                color: '#e2e8f0'
+                            },
+                            angleLines: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

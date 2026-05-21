@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Coordinator</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        {% include 'menu_coordinator.html' %}
+
+        <div class="main-content">
+            <header class="dashboard-header">
+                <h1>Edit Profile</h1>
+                <div class="user-info">
+                    <a href="{% url 'coordinator_dashboard' %}" class="btn" style="background: #f0f2f5; color: #1e293b;">Back to Dashboard</a>
+                </div>
+            </header>
+
+            <section class="content-section" style="padding: 40px;">
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="register-container" style="max-width: 800px; margin: 0 auto;">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="profile-preview-section" style="text-align: center; margin-bottom: 30px;">
+                            <div class="profile-img-large" style="width: 120px; height: 120px; margin: 0 auto 15px; border-radius: 50%; overflow: hidden; border: 4px solid #6366f1;">
+                                {% if request.user.profile_picture %}
+                                    <img src="{{ request.user.profile_picture.url }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                    <div style="width: 100%; height: 100%; background: #eee; display: flex; align-items: center; justify-content: center; color: #666; font-size: 3rem;">
+                                        {{ request.user.first_name|first|default:request.user.email|first|upper }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <p style="color: #64748b; font-size: 0.9rem;">Update your profile picture and personal information</p>
+                        </div>
+
+                        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="form-group">
+                                <label>First Name</label>
+                                {{ form.first_name }}
+                                {{ form.first_name.errors }}
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name</label>
+                                {{ form.last_name }}
+                                {{ form.last_name.errors }}
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label>Email Address</label>
+                                {{ form.email }}
+                                {{ form.email.errors }}
+                        </div>
+
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label>Profile Picture</label>
+                            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                                {{ form.profile_picture }}
+                                {{ form.profile_picture.errors }}
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 30px; display: flex; gap: 15px;">
+                            <button type="submit" class="btn btn-primary" style="margin: 0;">Save Changes</button>
+                            <a href="{% url 'coordinator_dashboard' %}" class="btn" style="background: #f1f5f9; color: #475569; margin: 0;">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <footer class="dashboard-footer">
+                <p>&copy; 2024 Campus Placement Training System</p>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>

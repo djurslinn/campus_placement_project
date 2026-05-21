@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ full_name }} - Resume</title>
+    <style>
+        /* ── RESET & BASE ─────────────────────────────────────── */
+        @page {
+            size: A4;
+            margin: 0.5cm;
+        }
+
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #1a1a1a;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+        }
+
+        a { color: #333; text-decoration: none; }
+
+        /* ── HEADER ───────────────────────────────────────────── */
+        .resume-header {
+            padding: 20px 30px 15px;
+            border-bottom: 2px solid #333;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .name {
+            font-size: 28px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .contact-info {
+            font-size: 10px;
+            color: #444;
+        }
+
+        .sep {
+            color: #999;
+            padding: 0 8px;
+        }
+
+        /* ── BODY: two-column table ────────────────────────────── */
+        .resume-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .col-left {
+            width: 68%;
+            padding: 10px 20px 10px 30px;
+            vertical-align: top;
+            border-right: 1px solid #eee;
+        }
+
+        .col-right {
+            width: 32%;
+            padding: 10px 30px 10px 20px;
+            vertical-align: top;
+        }
+
+        /* ── SECTION ──────────────────────────────────────────── */
+        .section { margin-bottom: 20px; }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #000;
+            border-bottom: 1px solid #333;
+            padding-bottom: 3px;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        /* ── SUMMARY ──────────────────────────────────────────── */
+        .summary-text {
+            font-size: 10.5px;
+            text-align: justify;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        /* ── ENTRY ────────────────────────────────────────────── */
+        .entry { margin-bottom: 15px; }
+        
+        .entry-header-table {
+            width: 100%;
+            margin-bottom: 2px;
+        }
+
+        .entry-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .entry-duration {
+            font-size: 10px;
+            color: #666;
+            text-align: right;
+            font-style: italic;
+        }
+
+        .entry-sub {
+            font-size: 10.5px;
+            color: #444;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .entry-desc {
+            font-size: 10px;
+            color: #222;
+            text-align: justify;
+            line-height: 1.4;
+        }
+
+        .project-tech {
+            font-size: 9.5px;
+            color: #666;
+            font-style: italic;
+            margin-top: 2px;
+        }
+
+        /* ── RIGHT COLUMN ─────────────────────────────────────── */
+        .skill-block { margin-bottom: 12px; }
+
+        .skill-category-label {
+            font-size: 10.5px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .skill-list {
+            font-size: 10px;
+            color: #444;
+            line-height: 1.4;
+        }
+
+        .list-item {
+            font-size: 10px;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .item-dot {
+            color: #000;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .cert-issuer {
+            color: #666;
+            font-size: 9px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── HEADER ─────────────────────────────────────────────── -->
+    <div class="resume-header">
+        <div class="name">{{ full_name }}</div>
+        <div class="contact-info">
+            {% if address %}{{ address }}{% endif %}
+            {% if phone %}
+                {% if address %}<span class="sep">|</span>{% endif %}
+                {{ phone }}
+            {% endif %}
+            {% if email %}
+                <span class="sep">|</span> {{ email }}
+            {% endif %}
+        </div>
+        <div class="contact-info" style="margin-top: 5px;">
+            {% if linkedin %}
+                LinkedIn: {{ linkedin }}
+            {% endif %}
+            {% if github %}
+                {% if linkedin %}<span class="sep">|</span>{% endif %}
+                GitHub: {{ github }}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ── BODY ───────────────────────────────────────────────── -->
+    <table class="resume-table">
+        <tr>
+            <!-- ── LEFT COLUMN ──────────────────────────────────── -->
+            <td class="col-left">
+                {% if summary %}
+                <div class="section">
+                    <div class="section-title">Professional Summary</div>
+                    <div class="summary-text">{{ summary }}</div>
+                </div>
+                {% endif %}
+
+                {% if experience %}
+                <div class="section">
+                    <div class="section-title">Work Experience</div>
+                    {% for exp in experience %}
+                    <div class="entry">
+                        <table class="entry-header-table">
+                            <tr>
+                                <td class="entry-title">{{ exp.role }}</td>
+                                <td class="entry-duration">{{ exp.duration }}</td>
+                            </tr>
+                        </table>
+                        <div class="entry-sub">{{ exp.company }}</div>
+                        <div class="entry-desc">{{ exp.description }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if education %}
+                <div class="section">
+                    <div class="section-title">Education</div>
+                    {% for edu in education %}
+                    <div class="entry">
+                        <table class="entry-header-table">
+                            <tr>
+                                <td class="entry-title">{{ edu.degree }}</td>
+                                <td class="entry-duration">{{ edu.year }}</td>
+                            </tr>
+                        </table>
+                        <div class="entry-sub">
+                            {{ edu.institution }}
+                            {% if edu.cgpa %}<span class="sep">|</span> GPA: {{ edu.cgpa }}{% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if projects %}
+                <div class="section">
+                    <div class="section-title">Key Projects</div>
+                    {% for project in projects %}
+                    <div class="entry">
+                        <div class="entry-title">{{ project.title }}</div>
+                        {% if project.tech_stack %}
+                        <div class="project-tech"><strong>Technologies:</strong> {{ project.tech_stack }}</div>
+                        {% endif %}
+                        <div class="entry-desc">{{ project.description }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </td>
+
+            <!-- ── RIGHT COLUMN ─────────────────────────────────── -->
+            <td class="col-right">
+                {% if skills %}
+                <div class="section">
+                    <div class="section-title">Skills</div>
+                    {% if skills.technical %}
+                    <div class="skill-block">
+                        <div class="skill-category-label">Technical Mastery</div>
+                        <div class="skill-list">{{ skills.technical }}</div>
+                    </div>
+                    {% endif %}
+                    {% if skills.tools %}
+                    <div class="skill-block">
+                        <div class="skill-category-label">Tools & Frameworks</div>
+                        <div class="skill-list">{{ skills.tools }}</div>
+                    </div>
+                    {% endif %}
+                    {% if skills.soft %}
+                    <div class="skill-block">
+                        <div class="skill-category-label">Core Competencies</div>
+                        <div class="skill-list">{{ skills.soft }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if certifications %}
+                <div class="section">
+                    <div class="section-title">Certifications</div>
+                    {% for cert in certifications %}
+                    <div class="list-item">
+                        <span class="item-dot">•</span>
+                        <strong>{{ cert.name }}</strong>
+                        <span class="cert-issuer">{{ cert.issuer }} {% if cert.date %}| {{ cert.date }}{% endif %}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if achievements %}
+                <div class="section">
+                    <div class="section-title">Achievements</div>
+                    {% for achievement in achievements %}
+                    <div class="list-item">
+                        <span class="item-dot">•</span>
+                        {{ achievement.title }}
+                        {% if achievement.description %}<br><small>{{ achievement.description }}</small>{% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if languages %}
+                <div class="section">
+                    <div class="section-title">Languages</div>
+                    {% for lang in languages %}
+                    <div class="list-item">
+                        <span class="item-dot">•</span>
+                        {{ lang.language }} ({{ lang.proficiency }})
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

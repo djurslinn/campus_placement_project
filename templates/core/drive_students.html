@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drive Participants - Campus Placement Training System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .data-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .summary-banner {
+            background: #f0f7ff;
+            border-left: 5px solid #2563eb;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 13px 14px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; }
+        th { background: #f8f9fa; color: #667eea; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.4px; }
+
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.82em; font-weight: 600; }
+        .badge-info    { background: #e0f2fe; color: #0369a1; }
+        .badge-success { background: #dcfce7; color: #15803d; }
+
+        /* ── Checkbox row highlighting ── */
+        .student-row { transition: background 0.15s; cursor: pointer; }
+        .student-row:hover { background: #f8fafc; }
+        .student-row.selected { background: #eff6ff !important; }
+
+        input[type="checkbox"].big-cb {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #3b82f6;
+            margin: 0;
+            display: block;
+        }
+        input[type="checkbox"]#selectAll {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #3b82f6;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar Include -->
+        {% include 'menu_coordinator.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <a href="{% url 'manage_drives' %}" style="text-decoration: none; color: #64748b;"><i class="fas fa-chevron-left"></i></a>
+                    <h1 style="margin: 0;">{{ drive.company_name }} <span style="font-weight: 300; font-size: 0.7em; color: #64748b;">/ {{ drive.job_role }}</span></h1>
+                </div>
+                <div class="user-info">
+                    <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+                </div>
+            </header>
+
+            <section class="content-section">
+                <div class="summary-banner">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h3 style="color: #1e40af; margin-bottom: 5px;">Drive Shortlist & Participation</h3>
+                            <p>Total Eligible Candidates: <strong>{{ total_eligible }}</strong></p>
+                            <p>Total Applications Received: <strong>{{ total_applied }}</strong></p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 2.5em; font-weight: 800; color: #2563eb;">
+                                {{ participation_percentage }}%
+
+                            </div>
+                            <div style="font-size: 0.8em; color: #64748b; text-transform: uppercase; font-weight: 700;">
+                                Participation Rate</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: #2563eb; width: {{ participation_percentage|stringformat:'.1f' }}%; height: 100%;"></div>
+                    </div>
+                </div>
+
+                <form method="POST" action="{% url 'mark_students_placed_bulk' drive.id %}" id="bulkForm">
+                    {% csrf_token %}
+                    <div class="data-section">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; flex-wrap: wrap; gap: 20px;">
+                            <div style="flex: 1; min-width: 300px;">
+                                <h2 style="margin: 0 0 15px; font-size: 1.1rem;">Eligible Candidates List</h2>
+                                <div style="display: flex; gap: 10px;">
+                                    <div style="position: relative; flex: 1;">
+                                        <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
+                                        <input type="text" id="studentTableSearch" placeholder="Search name or roll no..." 
+                                            style="width: 100%; padding: 10px 12px 10px 35px; border: 1px solid #d1d5db; border-radius: 8px; outline: none; font-size: 0.9rem;">
+                                    </div>
+                                    <select id="statusTableFilter" style="padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; outline: none; font-size: 0.9rem; min-width: 150px;">
+                                        <option value="all">All Status</option>
+                                        <option value="applied">Applied</option>
+                                        <option value="not_applied">Not Applied</option>
+                                        <option value="placed">Placed here</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+                                <div id="selectionCounter" style="font-size: 0.85rem; font-weight: 700; color: #2563eb; background: #dbeafe; padding: 5px 12px; border-radius: 20px; display: none;">
+                                    0 Selected
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="padding: 10px 20px; font-weight: 700; box-shadow: 0 4px 12px rgba(37,99,235,0.2);">
+                                    <i class="fas fa-check-circle"></i> Mark Selected as Placed
+                                </button>
+                            </div>
+                        </div>
+                        <table id="studentsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px; text-align: center;">
+                                        <label title="Select all applied students" style="cursor:pointer; display:block; padding: 4px;">
+                                            <input type="checkbox" id="selectAll" class="big-cb">
+                                        </label>
+                                    </th>
+                                    <th>Student Name</th>
+                                    <th>Roll No</th>
+                                    <th>Course</th>
+                                    <th>CGPA</th>
+                                    <th>Application Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in eligible_students %}
+                                 <tr class="student-row" data-student-id="{{ student.id }}" 
+                                    data-name="{{ student.user.get_full_name|lower }}" 
+                                    data-roll="{{ student.roll_no|lower }}"
+                                    data-applied="{% if student.has_applied %}applied{% else %}not_applied{% endif %}"
+                                    data-placed="{% if student.application.status == 'placed' %}placed{% endif %}">
+                                    <td style="text-align:center;">
+                                        <label style="display:inline-flex; align-items:center; justify-content:center; width:100%; cursor:pointer;" onclick="event.stopPropagation();">
+                                            <input type="checkbox" name="selected_students" value="{{ student.id }}"
+                                                class="student-checkbox big-cb">
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 700; color: #1e293b;">{{ student.user.get_full_name }}</div>
+                                        <div style="font-size: 0.75em; color: #64748b;">{{ student.user.email }}</div>
+                                    </td>
+                                    <td><code>{{ student.roll_no }}</code></td>
+                                    <td>{{ student.user.department.name|default:"Not Set" }}</td>
+                                    <td><strong>{{ student.cgpa }}</strong></td>
+                                    <td>
+                                        {% if student.has_applied %}
+                                            {% if student.application.status == 'placed' %}
+                                                <span class="badge badge-success" style="box-shadow: 0 2px 4px rgba(21,128,61,0.1);">✓ Placed in this Drive</span>
+                                            {% elif student.application.status == 'rejected' %}
+                                                <span class="badge" style="background:#fee2e2;color:#991b1b;">× Rejected</span>
+                                            {% else %}
+                                                <span class="badge badge-info">Applied</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge" style="background:#f1f5f9;color:#64748b;">Shortlisted/Not Applied</span>
+                                        {% endif %}
+
+                                        {% if student.placement_status == 'placed' and student.application.status != 'placed' %}
+                                            <div style="font-size: 0.7em; color: #d97706; margin-top: 4px; font-weight: 600;">
+                                                <i class="fas fa-exclamation-triangle"></i> Already Placed Elsewhere
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" style="text-align:center; padding: 40px; color:#64748b;">No eligible students found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+
+                <script>
+                    const bulkForm = document.getElementById('bulkForm');
+                    const selectAll = document.getElementById('selectAll');
+                    const checkboxes = document.querySelectorAll('.student-checkbox');
+                    const counter = document.getElementById('selectionCounter');
+
+                    function updateCounter() {
+                        const checkedCount = document.querySelectorAll('.student-checkbox:checked').length;
+                        if (checkedCount > 0) {
+                            counter.textContent = checkedCount + ' Selected';
+                            counter.style.display = 'block';
+                        } else {
+                            counter.style.display = 'none';
+                        }
+                    }
+
+                    // Select-All controls all student checkboxes
+                    selectAll.addEventListener('change', function() {
+                        checkboxes.forEach(cb => {
+                            cb.checked = this.checked;
+                            cb.closest('tr').classList.toggle('selected', this.checked);
+                        });
+                        updateCounter();
+                    });
+
+                    // Clicking anywhere on a row toggles its checkbox
+                    document.querySelectorAll('.student-row').forEach(function(row) {
+                        row.addEventListener('click', function(e) {
+                            // Don't toggle if user clicked directly on the checkbox/label
+                            if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') return;
+                            const cb = row.querySelector('.student-checkbox');
+                            if (cb) {
+                                cb.checked = !cb.checked;
+                                row.classList.toggle('selected', cb.checked);
+                                updateCounter();
+                            }
+                        });
+                    });
+
+                    // Keep row highlight in sync when checkbox changes directly
+                    checkboxes.forEach(function(cb) {
+                        cb.addEventListener('change', function() {
+                            this.closest('tr').classList.toggle('selected', this.checked);
+                            updateCounter();
+                        });
+                    });
+                    
+                    
+                    // Table Filtering Logic
+                    const tableSearch = document.getElementById('studentTableSearch');
+                    const tableFilter = document.getElementById('statusTableFilter');
+                    const tableRows = Array.from(document.querySelectorAll('#studentsTable tbody tr.student-row'));
+
+                    function filterTable() {
+                        const searchTerm = tableSearch.value.toLowerCase();
+                        const filterVal = tableFilter.value;
+
+                        tableRows.forEach(row => {
+                            const name = row.getAttribute('data-name');
+                            const roll = row.getAttribute('data-roll');
+                            const applied = row.getAttribute('data-applied');
+                            const placed = row.getAttribute('data-placed');
+
+                            const matchesSearch = name.includes(searchTerm) || roll.includes(searchTerm);
+                            
+                            let matchesFilter = true;
+                            if (filterVal === 'applied') matchesFilter = applied === 'applied';
+                            else if (filterVal === 'not_applied') matchesFilter = applied === 'not_applied';
+                            else if (filterVal === 'placed') matchesFilter = placed === 'placed';
+
+                            if (matchesSearch && matchesFilter) {
+                                row.style.display = '';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+                    }
+
+                    tableSearch.addEventListener('input', filterTable);
+                    tableFilter.addEventListener('change', filterTable);
+
+                    bulkForm.addEventListener('submit', function(e) {
+                        const checkedCount = document.querySelectorAll('.student-checkbox:checked').length;
+                        if (checkedCount === 0) {
+                            e.preventDefault();
+                            alert('Please select at least one student to mark as placed.');
+                        } else {
+                            if (!confirm(`Are you sure you want to mark ${checkedCount} student(s) as PLACED for this drive?`)) {
+                                e.preventDefault();
+                            }
+                        }
+                    });
+                </script>
+            </section>
+
+            <!-- Footer -->
+            <footer class="dashboard-footer">
+                <p>&copy; 2024 Campus Placement Training System</p>
+            </footer>
+        </div>
+    </div>
+</body>
+
+</html>

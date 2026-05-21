@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ student.get_full_name }} — Student Detail</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+
+    <style>
+        :root {
+            --bg:          #f4f6fb;
+            --surface:     #fff;
+            --border:      #e8eaf2;
+            --ink-1:       #1b1e2e;
+            --ink-2:       #58607a;
+            --ink-3:       #9ea6bc;
+            --primary:     #4f6ef7;
+            --primary-lt:  #eef0fe;
+            --gradient:    linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --radius-card: 14px;
+            --radius-in:   10px;
+            --sb-w:        240px;
+            --ease:        cubic-bezier(.4,0,.2,1);
+            --sh-sm:       0 1px 4px rgba(27,30,46,.06), 0 2px 12px rgba(27,30,46,.04);
+            --sh-md:       0 4px 24px rgba(27,30,46,.11), 0 1px 4px rgba(27,30,46,.06);
+            --sh-btn:      0 4px 14px rgba(79,110,247,.35);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--ink-1);
+            font-size: 14px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Shell ──────────────────────────────────────────── */
+        .shell {
+            margin-left: var(--sb-w);
+            width: calc(100vw - var(--sb-w));
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* ── Topbar ─────────────────────────────────────────── */
+        .topbar {
+            position: sticky; top: 0; z-index: 200;
+            height: 58px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 8px rgba(27,30,46,.05);
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 0 28px; gap: 16px; flex-shrink: 0;
+        }
+        .topbar-l { display: flex; align-items: center; gap: 11px; min-width: 0; }
+        .back-btn {
+            width: 32px; height: 32px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--ink-2); font-size: 16px; text-decoration: none;
+            transition: all 200ms var(--ease); flex-shrink: 0;
+        }
+        .back-btn:hover { background: var(--primary-lt); color: var(--primary); border-color: #c5cefb; }
+
+        .topbar-icon {
+            width: 34px; height: 34px; border-radius: 9px;
+            background: var(--gradient);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; flex-shrink: 0;
+        }
+        .topbar-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: .95rem; font-weight: 700; color: var(--ink-1); white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis; max-width: 280px;
+        }
+        .topbar-sep { width: 1px; height: 18px; background: var(--border); flex-shrink: 0; }
+        .topbar-sub { font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+        .topbar-r { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+        .t-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 15px; border-radius: var(--radius-in);
+            font-size: 13px; font-weight: 600;
+            text-decoration: none; border: none; cursor: pointer;
+            transition: all 200ms var(--ease);
+        }
+        .t-btn i { font-size: 15px; }
+        .t-btn-primary { background: var(--primary-lt); color: var(--primary); border: 1px solid #c5cefb; }
+        .t-btn-primary:hover { background: #e3e7fd; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(79,110,247,.18); }
+        .t-btn-ghost   { background: transparent; color: var(--ink-2); border: 1px solid var(--border); }
+        .t-btn-ghost:hover { background: var(--bg); transform: translateY(-1px); }
+
+        /* ── Page body ──────────────────────────────────────── */
+        .body {
+            flex: 1; padding: 24px 28px 60px;
+            display: flex; flex-direction: column; gap: 20px;
+        }
+
+        /* ── Hero banner ────────────────────────────────────── */
+        .hero {
+            background: var(--gradient);
+            border-radius: 18px;
+            padding: 28px 30px;
+            display: flex; align-items: center; gap: 24px;
+            box-shadow: 0 6px 28px rgba(102,126,234,.28);
+            animation: fadeInUp .4s var(--ease) both;
+            position: relative; overflow: hidden;
+        }
+        /* Decorative circles */
+        .hero::before, .hero::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,.07);
+        }
+        .hero::before { width: 220px; height: 220px; top: -60px; right: -40px; }
+        .hero::after  { width: 140px; height: 140px; bottom: -50px; right: 120px; }
+
+        .hero-avatar {
+            width: 80px; height: 80px; border-radius: 50%;
+            border: 3px solid rgba(255,255,255,.4);
+            object-fit: cover; flex-shrink: 0;
+            position: relative; z-index: 1;
+        }
+        .hero-avatar-placeholder {
+            width: 80px; height: 80px; border-radius: 50%;
+            border: 3px solid rgba(255,255,255,.35);
+            background: rgba(255,255,255,.18);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem; font-weight: 800; color: #fff;
+            flex-shrink: 0; position: relative; z-index: 1;
+        }
+        .hero-info { flex: 1; z-index: 1; min-width: 0; }
+        .hero-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem; font-weight: 800; color: #fff;
+            margin-bottom: 3px; line-height: 1.2;
+        }
+        .hero-roll { font-size: 13px; color: rgba(255,255,255,.72); margin-bottom: 12px; }
+        .hero-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+        .hero-tag {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(255,255,255,.18);
+            color: #fff; border-radius: 20px;
+            padding: 4px 12px; font-size: 12px; font-weight: 600;
+        }
+        .hero-tag i { font-size: 12px; }
+
+        .hero-status { z-index: 1; flex-shrink: 0; }
+        .status-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 20px;
+            font-size: 12.5px; font-weight: 700;
+        }
+        .status-pill::before {
+            content: ''; width: 7px; height: 7px;
+            border-radius: 50%; flex-shrink: 0;
+        }
+        .status-placed  { background: rgba(255,255,255,.2); color: #fff; border: 1px solid rgba(255,255,255,.35); }
+        .status-placed::before  { background: #86efac; }
+        .status-other   { background: rgba(255,255,255,.12); color: rgba(255,255,255,.8); border: 1px solid rgba(255,255,255,.2); }
+        .status-other::before   { background: #fde68a; }
+
+        /* ── Stats row ──────────────────────────────────────── */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(4,1fr); gap: 12px;
+            animation: fadeInUp .4s var(--ease) .08s both;
+        }
+        .sc {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-card); box-shadow: var(--sh-sm);
+            padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+            transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+        }
+        .sc:hover { transform: translateY(-2px); box-shadow: var(--sh-md); }
+        .sc-ico {
+            width: 40px; height: 40px; border-radius: 11px;
+            background: var(--gradient);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 18px; flex-shrink: 0;
+        }
+        .sc-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--ink-3); margin-bottom: 2px; }
+        .sc-val { font-family: 'Poppins', sans-serif; font-size: 1.25rem; font-weight: 800; color: var(--ink-1); line-height: 1; }
+
+        /* ── Two-col grid ───────────────────────────────────── */
+        .two-col {
+            display: grid; grid-template-columns: 340px 1fr; gap: 20px;
+            animation: fadeInUp .4s var(--ease) .12s both;
+            align-items: start;
+        }
+
+        /* ── Card base ──────────────────────────────────────── */
+        .card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-card); box-shadow: var(--sh-sm);
+            overflow: hidden;
+        }
+        .card-head {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 9px;
+        }
+        .card-head-icon {
+            width: 30px; height: 30px; border-radius: 8px;
+            background: var(--gradient);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 14px; flex-shrink: 0;
+        }
+        .card-head-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: .88rem; font-weight: 700; color: var(--ink-1);
+        }
+        .card-body { padding: 18px 20px; }
+
+        /* ── Detail rows ────────────────────────────────────── */
+        .detail-list { display: flex; flex-direction: column; gap: 0; }
+        .detail-row {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; padding: 11px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .detail-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .detail-row:first-child { padding-top: 0; }
+        .d-label {
+            display: flex; align-items: center; gap: 7px;
+            font-size: 12.5px; font-weight: 600; color: var(--ink-3);
+            flex-shrink: 0; min-width: 120px;
+        }
+        .d-label i { color: var(--primary); font-size: 14px; }
+        .d-value {
+            font-size: 13px; font-weight: 600; color: var(--ink-1);
+            text-align: right; word-break: break-all;
+        }
+        .d-value a { color: var(--primary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+        .d-value a:hover { text-decoration: underline; }
+
+        /* ── Right column stack ─────────────────────────────── */
+        .right-stack { display: flex; flex-direction: column; gap: 18px; }
+
+        /* ── Applications block ─────────────────────────────── */
+        .applications-block {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px; padding: 16px 18px;
+            background: var(--primary-lt);
+            border: 1px solid #c5cefb;
+            border-radius: var(--radius-in);
+        }
+        .applications-block__left { display: flex; align-items: center; gap: 12px; }
+        .applications-block__ico {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: var(--gradient);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 17px; flex-shrink: 0;
+        }
+        .applications-block__count {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem; font-weight: 800; color: var(--primary); line-height: 1;
+        }
+        .applications-block__label { font-size: 12px; color: var(--primary); font-weight: 500; }
+        .view-link {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 12.5px; font-weight: 600; color: var(--primary);
+            text-decoration: none; padding: 6px 13px;
+            background: var(--surface); border: 1px solid #c5cefb;
+            border-radius: 20px; transition: all 200ms var(--ease);
+        }
+        .view-link:hover { background: #e3e7fd; transform: translateY(-1px); }
+        .view-link i { font-size: 13px; }
+
+        /* ── Notification form ──────────────────────────────── */
+        .notif-form-wrap {
+            background: #fdf2f8; border: 1px solid #fce7f3;
+            border-radius: var(--radius-card); overflow: hidden;
+        }
+        .notif-head {
+            padding: 13px 20px; border-bottom: 1px solid #fce7f3;
+            display: flex; align-items: center; gap: 9px;
+        }
+        .notif-head-icon {
+            width: 30px; height: 30px; border-radius: 8px;
+            background: linear-gradient(135deg, #ec4899, #be185d);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 14px; flex-shrink: 0;
+        }
+        .notif-head-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: .88rem; font-weight: 700; color: #be185d;
+        }
+        .notif-head-sub { font-size: 11.5px; color: #e879a8; margin-left: auto; white-space: nowrap; }
+
+        .notif-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-label {
+            font-size: 11.5px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .5px; color: #be185d;
+        }
+        .form-input {
+            width: 100%; padding: 10px 13px;
+            border: 1px solid #fce7f3; border-radius: var(--radius-in);
+            background: var(--surface); color: var(--ink-1);
+            font-family: 'Inter', sans-serif; font-size: 13.5px;
+            transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease);
+            outline: none; resize: vertical;
+        }
+        .form-input:focus { border-color: #ec4899; box-shadow: 0 0 0 3px rgba(236,72,153,.12); }
+
+        .btn-send {
+            display: inline-flex; align-items: center; gap: 7px;
+            align-self: flex-start;
+            padding: 10px 22px;
+            background: linear-gradient(135deg, #ec4899, #be185d);
+            color: #fff; border: none; border-radius: var(--radius-in);
+            font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700;
+            cursor: pointer; transition: all 200ms var(--ease);
+        }
+        .btn-send:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(236,72,153,.35); }
+        .btn-send i { font-size: 15px; }
+
+        /* ── Badges ─────────────────────────────────────────── */
+        .badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 11.5px; font-weight: 700;
+        }
+        .badge-success  { background: #edfbf3; color: #1a7a49; border: 1px solid #b8f0d2; }
+        .badge-warning  { background: #fff9ec; color: #b46a00; border: 1px solid #fde8a0; }
+
+        /* ── Footer ─────────────────────────────────────────── */
+        .page-footer { border-top: 1px solid var(--border); padding: 16px 28px; text-align: center; font-size: 12px; color: var(--ink-3); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
+    </style>
+</head>
+
+<body>
+    {% include 'menu_coordinator.html' %}
+
+    <div class="shell">
+
+        <!-- ══ Topbar ═════════════════════════════════════════ -->
+        <div class="topbar">
+            <div class="topbar-l">
+                <a href="{% url 'manage_students' %}" class="back-btn"><i class="ri-arrow-left-line"></i></a>
+                <div class="topbar-icon"><i class="ri-user-3-line"></i></div>
+                <span class="topbar-title">{{ student.get_full_name }}</span>
+                <div class="topbar-sep"></div>
+                <span class="topbar-sub">Student Detail</span>
+            </div>
+            <div class="topbar-r">
+                <a href="{% url 'manage_students' %}" class="t-btn t-btn-primary">
+                    <i class="ri-team-line"></i>All Students
+                </a>
+                <a href="{% url 'logout' %}" class="t-btn t-btn-ghost">
+                    <i class="ri-logout-box-r-line"></i>Logout
+                </a>
+            </div>
+        </div>
+
+        <div class="body">
+
+            <!-- ── Hero Banner ────────────────────────────────── -->
+            <div class="hero">
+                {% if student.studentprofile.profile_picture %}
+                <img src="{{ student.studentprofile.profile_picture.url }}" class="hero-avatar" alt="{{ student.get_full_name }}">
+                {% else %}
+                <div class="hero-avatar-placeholder">{{ student.get_full_name|first }}</div>
+                {% endif %}
+
+                <div class="hero-info">
+                    <div class="hero-name">{{ student.get_full_name }}</div>
+                    <div class="hero-roll">{{ student.studentprofile.roll_no }} &nbsp;·&nbsp; {{ student.email }}</div>
+                    <div class="hero-tags">
+                        <span class="hero-tag"><i class="ri-building-2-line"></i>{{ student.department.name|default:"N/A" }}</span>
+                        <span class="hero-tag"><i class="ri-calendar-line"></i>Year {{ student.studentprofile.year }}</span>
+                        <span class="hero-tag"><i class="ri-book-open-line"></i>Batch {{ student.studentprofile.batch|default:"N/A" }}</span>
+                        {% if student.studentprofile.phone %}
+                        <span class="hero-tag"><i class="ri-phone-line"></i>{{ student.studentprofile.phone }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="hero-status">
+                    <span class="status-pill {% if student.studentprofile.placement_status == 'placed' %}status-placed{% else %}status-other{% endif %}">
+                        {{ student.studentprofile.get_placement_status_display }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- ── Stats row ──────────────────────────────────── -->
+            <div class="stats-row">
+                <div class="sc">
+                    <div class="sc-ico"><i class="ri-bar-chart-2-line"></i></div>
+                    <div><div class="sc-lbl">CGPA</div><div class="sc-val">{{ student.studentprofile.cgpa }}</div></div>
+                </div>
+                <div class="sc">
+                    <div class="sc-ico"><i class="ri-calendar-check-line"></i></div>
+                    <div><div class="sc-lbl">Attendance</div><div class="sc-val">{{ attendance_present }}<span style="font-size:.9rem;color:var(--ink-3)">/{{ attendance_total }}</span></div></div>
+                </div>
+                <div class="sc">
+                    <div class="sc-ico"><i class="ri-discuss-line"></i></div>
+                    <div><div class="sc-lbl">Avg GD Score</div><div class="sc-val">{{ gd_avg|floatformat:1|default:"—" }}</div></div>
+                </div>
+                <div class="sc">
+                    <div class="sc-ico"><i class="ri-file-list-3-line"></i></div>
+                    <div><div class="sc-lbl">Avg Aptitude</div><div class="sc-val">{{ aptitude_avg|floatformat:1|default:"0.0" }}<span style="font-size:.9rem;color:var(--ink-3)">%</span></div></div>
+                </div>
+            </div>
+
+            <!-- ── Two-column layout ───────────────────────────── -->
+            <div class="two-col">
+
+                <!-- LEFT: Profile details card -->
+                <div class="card">
+                    <div class="card-head">
+                        <div class="card-head-icon"><i class="ri-id-card-line"></i></div>
+                        <span class="card-head-title">Profile Details</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="detail-list">
+                            <div class="detail-row">
+                                <span class="d-label"><i class="ri-mail-line"></i>Email</span>
+                                <span class="d-value">{{ student.email }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="d-label"><i class="ri-building-2-line"></i>Department</span>
+                                <span class="d-value">{{ student.department.name|default:"N/A" }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="d-label"><i class="ri-graduation-cap-line"></i>Year</span>
+                                <span class="d-value">Year {{ student.studentprofile.year }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="d-label"><i class="ri-calendar-line"></i>Batch</span>
+                                <span class="d-value">{{ student.studentprofile.batch|default:"N/A" }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="d-label"><i class="ri-user-line"></i>Age</span>
+                                <span class="d-value">{{ student.studentprofile.age|default:"N/A" }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="d-label"><i class="ri-phone-line"></i>Phone</span>
+                                <span class="d-value">{{ student.studentprofile.phone|default:"N/A" }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="d-label"><i class="ri-linkedin-box-line"></i>LinkedIn</span>
+                                <span class="d-value">
+                                    {% if student.studentprofile.linkedin_url %}
+                                    <a href="{{ student.studentprofile.linkedin_url }}" target="_blank">
+                                        View Profile <i class="ri-external-link-line"></i>
+                                    </a>
+                                    {% else %}Not Provided{% endif %}
+                                </span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="d-label"><i class="ri-award-line"></i>Status</span>
+                                <span class="d-value">
+                                    <span class="badge {% if student.studentprofile.placement_status == 'placed' %}badge-success{% else %}badge-warning{% endif %}">
+                                        {{ student.studentprofile.get_placement_status_display }}
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Applications + Notification -->
+                <div class="right-stack">
+
+                    <!-- Applications -->
+                    <div class="card">
+                        <div class="card-head">
+                            <div class="card-head-icon"><i class="ri-send-plane-line"></i></div>
+                            <span class="card-head-title">Placement Applications</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="applications-block">
+                                <div class="applications-block__left">
+                                    <div class="applications-block__ico"><i class="ri-briefcase-4-line"></i></div>
+                                    <div>
+                                        <div class="applications-block__count">{{ applied_count }}</div>
+                                        <div class="applications-block__label">Drive{{ applied_count|pluralize }} Applied</div>
+                                    </div>
+                                </div>
+                                <a href="{% url 'manage_drives' %}" class="view-link">
+                                    <i class="ri-arrow-right-line"></i>View Drives
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Send Notification -->
+                    <div class="notif-form-wrap">
+                        <div class="notif-head">
+                            <div class="notif-head-icon"><i class="ri-notification-3-line"></i></div>
+                            <span class="notif-head-title">Send Personal Notification</span>
+                            <span class="notif-head-sub">Only visible to {{ student.first_name }}</span>
+                        </div>
+                        <form action="{% url 'send_personal_notification' student.id %}" method="POST">
+                            {% csrf_token %}
+                            <div class="notif-body">
+                                <div class="form-group">
+                                    <label class="form-label">Subject</label>
+                                    <input type="text" name="title" class="form-input"
+                                        placeholder="e.g., Missing Documents, Interview Scheduled" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Message</label>
+                                    <textarea name="message" rows="4" class="form-input"
+                                        placeholder="Enter your detailed message here…" required></textarea>
+                                </div>
+                                <button type="submit" class="btn-send">
+                                    <i class="ri-send-plane-fill"></i>Send Notification
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div><!-- /right-stack -->
+            </div><!-- /two-col -->
+
+        </div><!-- /body -->
+
+        <footer class="page-footer">&copy; 2024 Campus Placement Training System</footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - Campus Placement Training System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .notif-container {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+        }
+
+        .form-section,
+        .history-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .announcement-card {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+
+        .announcement-card:last-child {
+            border-bottom: none;
+        }
+
+        .announcement-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .announcement-meta {
+            font-size: 0.8em;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .announcement-body {
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .btn-send {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .notif-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar Include -->
+        {% include 'menu_coordinator.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <h1>Manage Notifications</h1>
+                <div class="user-info">
+                    <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+                </div>
+            </header>
+
+            <section class="content-section">
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="notif-container">
+                    <div class="form-section">
+                        <h2>Send New Notification</h2>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label>Title</label>
+                                {{ form.title }}
+                            </div>
+                            <div class="form-group">
+                                <label>Target Audience</label>
+                                {{ form.target_type }}
+                            </div>
+                            <div class="form-group" id="drive-group" style="display: none;">
+                                <label>Select Placement Drive</label>
+                                {{ form.drive }}
+                            </div>
+                            <div class="form-group">
+                                <label>Message Content</label>
+                                {{ form.message }}
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-send">Broadcast Notification</button>
+                        </form>
+                    </div>
+
+                    <div class="history-section">
+                        <h2>Announcement History</h2>
+                        <div class="announcement-list">
+                            {% for announce in announcements %}
+                            <div class="announcement-card">
+                                <div class="announcement-title">{{ announce.title }}</div>
+                                <div class="announcement-meta">
+                                    Sent to: {{ announce.get_target_type_display }} | {{ announce.created_at|date:"M d,
+                                    Y H:i" }}
+                                </div>
+                                <div class="announcement-body">{{ announce.message }}</div>
+                            </div>
+                            {% empty %}
+                            <p>No announcements sent yet.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="dashboard-footer">
+                <p>&copy; 2024 Campus Placement Training System</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const targetSelect = document.querySelector('select[name="target_type"]');
+            const driveGroup = document.getElementById('drive-group');
+
+            if (targetSelect) {
+                targetSelect.addEventListener('change', function () {
+                    if (this.value === 'drive') {
+                        driveGroup.style.display = 'block';
+                    } else {
+                        driveGroup.style.display = 'none';
+                    }
+                });
+
+                // Match initial state
+                if (targetSelect.value === 'drive') {
+                    driveGroup.style.display = 'block';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

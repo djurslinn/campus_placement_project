@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create GD Session - Campus Placement Training System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .help-text {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar Include -->
+        {% include 'menu_coordinator.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <h1>Create GD Session</h1>
+                <div class="user-info">
+                    <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+                </div>
+            </header>
+
+            <section class="content-section">
+                <div class="form-container">
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="form-group">
+                            <label for="id_custom_topic">Group Discussion Topic</label>
+                            {{ form.custom_topic }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_num_groups">Number of Groups</label>
+                            {{ form.num_groups }}
+                            <div class="help-text">Students will be randomly divided into these many groups</div>
+                        </div>
+
+                        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+                        <h3 style="margin-bottom: 15px;">Filter Students</h3>
+
+                        <div class="form-group">
+                            <label for="id_department">Department (Optional)</label>
+                            {{ form.department }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_year">Batch/Year (Optional)</label>
+                            {{ form.year }}
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Generate Unique Groups &
+                                Create Session</button>
+                        </div>
+                    </form>
+            </section>
+        </div>
+    </div>
+
+    {% if error_popup %}
+    <script>
+        alert("{{ error_popup|escapejs }}");
+    </script>
+    {% endif %}
+</body>
+
+</html>

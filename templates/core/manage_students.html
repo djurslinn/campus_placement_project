@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Students – Campus Placement Training System</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+
+    <style>
+        /* ══════════════════════════════════
+       CPTS DESIGN TOKENS
+    ══════════════════════════════════ */
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --border: #e8eaf2;
+            --ink-1: #1b1e2e;
+            --ink-2: #58607a;
+            --ink-3: #9ea6bc;
+            --primary: #4f6ef7;
+            --primary-lt: #eef0fe;
+            --primary-dk: #3a56d9;
+            --grad-a: #667eea;
+            --grad-b: #764ba2;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #e83d68;
+            --r: 14px;
+            --ease: cubic-bezier(.4, 0, .2, 1);
+            --dur: 200ms;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--ink-1);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Shell ── */
+        .dashboard-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 36px 32px;
+            animation: fadeInUp .45s var(--ease) both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Dashboard Header ── */
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .dashboard-header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--ink-1);
+        }
+
+        .btn-logout {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 10px;
+            background: #fff2f5;
+            color: var(--danger);
+            border: 1px solid #fecdd3;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background var(--dur), box-shadow var(--dur);
+        }
+
+        .btn-logout:hover {
+            background: #ffe4e6;
+            box-shadow: 0 4px 12px rgba(232, 61, 104, .15);
+        }
+
+        /* ── Alert / Messages ── */
+        .messages {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .alert {
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            border-left: 4px solid var(--primary);
+            background: var(--primary-lt);
+            color: var(--primary);
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #15803d;
+            border-color: #22c55e;
+        }
+
+        .alert-error {
+            background: #fff1f2;
+            color: #e11d48;
+            border-color: var(--danger);
+        }
+
+        .alert-warning {
+            background: #fef9c3;
+            color: #a16207;
+            border-color: var(--warning);
+        }
+
+        /* ── Filter Bar ── */
+        .filter-bar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(20, 24, 60, .04);
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+            color: var(--ink-3);
+        }
+
+        .form-control {
+            padding: 9px 12px;
+            min-width: 150px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            color: var(--ink-1);
+            outline: none;
+            transition: border-color var(--dur), box-shadow var(--dur);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 110, 247, .12);
+            background: var(--surface);
+        }
+
+        /* Search input with icon */
+        .search-wrap {
+            position: relative;
+        }
+
+        .search-wrap i {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--ink-3);
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .search-wrap .form-control {
+            padding-left: 34px;
+        }
+
+        /* Filter buttons */
+        .btn-search {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity var(--dur), transform var(--dur), box-shadow var(--dur);
+            width: fit-content;
+        }
+
+        .btn-search:hover {
+            opacity: .92;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, .35);
+        }
+
+        .btn-reset {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--ink-2);
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background var(--dur), border-color var(--dur);
+        }
+
+        .btn-reset:hover {
+            background: var(--surface);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* ── Table Container ── */
+        .table-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(20, 24, 60, .04);
+        }
+
+        .table-title {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--ink-1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table-title i {
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            background: var(--bg);
+        }
+
+        thead th {
+            padding: 12px 20px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background var(--dur);
+        }
+
+        tbody tr.student-row:hover {
+            background: var(--primary-lt);
+            box-shadow: inset 4px 0 0 var(--primary);
+        }
+
+        tbody td {
+            padding: 14px 20px;
+            font-size: 13px;
+            color: var(--ink-2);
+            vertical-align: top;
+        }
+
+        /* ── Student Info Cell ── */
+        .student-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            display: grid;
+            place-items: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .student-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink-1);
+            text-decoration: none;
+            transition: color var(--dur);
+        }
+
+        .student-name:hover {
+            color: var(--primary);
+        }
+
+        .student-sub {
+            font-size: 11px;
+            color: var(--ink-3);
+            margin-top: 2px;
+            line-height: 1.5;
+        }
+
+        /* ── Stats Cell ── */
+        .stats-cell {
+            font-size: 12px;
+            color: var(--ink-2);
+            line-height: 1.9;
+        }
+
+        .stats-cell strong {
+            color: var(--ink-1);
+            font-weight: 600;
+        }
+
+        /* ── Badges ── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge-success::before {
+            background: #22c55e;
+        }
+
+        .badge-warning {
+            background: #fef9c3;
+            color: #a16207;
+        }
+
+        .badge-warning::before {
+            background: var(--warning);
+        }
+
+        .badge-danger {
+            background: #fff1f2;
+            color: #e11d48;
+        }
+
+        .badge-danger::before {
+            background: var(--danger);
+        }
+
+        .badge-secondary {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .badge-secondary::before {
+            background: #94a3b8;
+        }
+
+        .badges-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        /* ── Action Buttons ── */
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .btn-approve {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity var(--dur), transform var(--dur);
+            width: fit-content;
+        }
+
+        .btn-approve:hover {
+            opacity: .9;
+            transform: translateY(-1px);
+        }
+
+        .btn-status-deactivate {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: none;
+            background: #fff1f2;
+            color: var(--danger);
+            border: 1px solid #fecdd3;
+            font-size: 11px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background var(--dur);
+            width: fit-content;
+        }
+
+        .btn-status-deactivate:hover {
+            background: #ffe4e6;
+        }
+
+        .btn-status-activate {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: none;
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            font-size: 11px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background var(--dur);
+            width: fit-content;
+        }
+
+        .btn-status-activate:hover {
+            background: #bbf7d0;
+        }
+
+        .btn-placement {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary-lt);
+            color: var(--primary);
+            border: 1px solid #c7d2fe;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background var(--dur), color var(--dur);
+            width: fit-content;
+        }
+
+        .btn-placement:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* ── Empty Row ── */
+        .empty-row td {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--ink-3);
+            font-size: 13px;
+        }
+
+        .empty-row i {
+            font-size: 36px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* ════════════════════════════════════════
+       PLACEMENT MODAL
+       Logic 100% preserved:
+       - id="placementModal"
+       - openPlacementModal() / closeModal()
+       - form id="placementForm"
+       - id="modalStudentName"
+       - id="statusSelect" + onchange="toggleDriveSelect()"
+       - id="driveSelectGroup"
+       - name="status", name="drive_id"
+       - window.onclick close
+    ════════════════════════════════════════ */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(20, 24, 60, .45);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-inner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 16px;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 440px;
+            overflow: hidden;
+            box-shadow: 0 24px 64px rgba(20, 24, 60, .28);
+            animation: slideUp .3s var(--ease);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px) scale(.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Modal gradient header */
+        .modal-header {
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            padding: 22px 24px;
+            color: #fff;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .close {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .2);
+            border: none;
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-size: 18px;
+            cursor: pointer;
+            line-height: 1;
+            transition: background var(--dur), transform var(--dur);
+        }
+
+        .close:hover {
+            background: rgba(255, 255, 255, .35);
+            transform: rotate(90deg);
+        }
+
+        /* Modal body */
+        .modal-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .modal-student-name {
+            font-size: 13px;
+            color: var(--ink-2);
+            background: var(--bg);
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .modal-student-name strong {
+            color: var(--ink-1);
+            font-weight: 600;
+        }
+
+        .modal-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .modal-form-group label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .modal-form-group label i {
+            font-size: 13px;
+            color: var(--primary);
+        }
+
+        .modal-form-group .form-control {
+            min-width: unset;
+            width: 100%;
+            background: var(--surface);
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity var(--dur), transform var(--dur), box-shadow var(--dur);
+            margin-top: 4px;
+        }
+
+        .btn-save:hover {
+            opacity: .92;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 22px rgba(102, 126, 234, .38);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px 16px;
+            }
+
+            .filter-form {
+                flex-direction: column;
+            }
+
+            .form-control {
+                min-width: unset;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        {% include 'menu_coordinator.html' %}
+
+        <div class="main-content" style="margin-left:260px;">
+
+            <!-- ── Header ── -->
+            <header class="dashboard-header">
+                <h1>Manage Students</h1>
+                <div class="user-info">
+                    <a href="{% url 'logout' %}" class="btn-logout">
+                        <i class="ri-logout-box-r-line"></i> Logout
+                    </a>
+                </div>
+            </header>
+
+            <section class="content-section">
+
+                <!-- ── Messages ── -->
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- ── Filter Bar ── -->
+                <div class="filter-bar">
+                    <form method="GET" action="{% url 'manage_students' %}" class="filter-form">
+
+                        <div class="form-group">
+                            <label>Search Students</label>
+                            <div class="search-wrap">
+                                <i class="ri-search-line"></i>
+                                <input type="text" id="studentSearchInput" name="q" value="{{ query }}"
+                                    placeholder="Name, Roll No, etc." class="form-control" style="width:220px;" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Department</label>
+                            <select name="department" class="form-control">
+                                <option value="">All Departments</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}" {% if selected_dept == dept.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ dept.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Batch (Admission)</label>
+                            <select name="batch" class="form-control">
+                                <option value="">All Batches</option>
+                                {% for b in batches %}
+                                <option value="{{ b }}" {% if selected_batch == b|stringformat:"s" %}selected{% endif %}>
+                                    {{ b }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Year (Study)</label>
+                            <select name="year" class="form-control">
+                                <option value="">All Years</option>
+                                <option value="1" {% if selected_year == "1" %}selected{% endif %}>1st Year</option>
+                                <option value="2" {% if selected_year == "2" %}selected{% endif %}>2nd Year</option>
+                                <option value="3" {% if selected_year == "3" %}selected{% endif %}>3rd Year</option>
+                                <option value="4" {% if selected_year == "4" %}selected{% endif %}>4th Year</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Sort By</label>
+                            <select name="sort" class="form-control">
+                                <option value="name" {% if selected_sort == 'name' %}selected{% endif %}>Name</option>
+                                <option value="attendance" {% if selected_sort == 'attendance' %}selected{% endif %}>
+                                    Attendance</option>
+                                <option value="gd" {% if selected_sort == 'gd' %}selected{% endif %}>GD Score</option>
+                                <option value="aptitude" {% if selected_sort == 'aptitude' %}selected{% endif %}>Aptitude
+                                    Score</option>
+                                <option value="applied" {% if selected_sort == 'applied' %}selected{% endif %}>Applied
+                                    Count</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="flex-direction:row;gap:8px;align-items:flex-end;">
+                            <button type="submit" class="btn-search">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <a href="{% url 'manage_students' %}" class="btn-reset">
+                                <i class="ri-refresh-line"></i> Reset
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- ── Table ── -->
+                <div class="table-container">
+                    <div class="table-title">
+                        <i class="ri-group-line"></i> Registered Students
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student Info</th>
+                                    <th>Performance</th>
+                                    <th>Placement</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr class="student-row" data-href="{% url 'view_student_detail' student.id %}" style="cursor: pointer;">
+
+                                    <!-- Student Info -->
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar" style="overflow: hidden;">
+                                                {% if student.studentprofile.profile_picture %}
+                                                <img src="{{ student.studentprofile.profile_picture.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                                {% else %}
+                                                {{ student.first_name|first }}{{ student.last_name|first }}
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <a href="{% url 'view_student_detail' student.id %}"
+                                                    class="student-name">
+                                                    {{ student.get_full_name }}
+                                                </a>
+                                                {% if student.studentprofile.linkedin_url %}
+                                                <a href="{{ student.studentprofile.linkedin_url }}" target="_blank" style="color: #0077b5; margin-left: 5px;" title="LinkedIn Profile">
+                                                    <i class="ri-linkedin-box-fill"></i>
+                                                </a>
+                                                {% endif %}
+                                                <div class="student-sub">
+                                                    {{ student.email }}<br />
+                                                    {{ student.studentprofile.roll_no|default:"No Roll No" }} <br />
+                                                    {{ student.department|default:"N/A" }} &middot; Batch {{ student.studentprofile.batch|default:"N/A" }} &middot; Year {{ student.studentprofile.year }}<br />
+                                                    {% if student.studentprofile.age %}Age: {{ student.studentprofile.age }}{% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- Performance -->
+                                    <td class="stats-cell">
+                                        CGPA: <strong>{{ student.studentprofile.cgpa|default:"0.00" }}</strong><br />
+                                        Attendance: <strong>{{ student.attendance_count }}/
+                                            {{student.total_sessions_count }}</strong><br />
+                                        GD Score: <strong>
+                                            {{ student.gd_score|floatformat:2|default:"N/A" }}</strong><br />
+                                        Aptitude: <strong>
+                                            {{ student.aptitude_score|floatformat:1|default:"N/A" }}%</strong><br />
+                                        Applied: <strong>{{ student.applied_count }} drives</strong>
+                                    </td>
+
+                                    <!-- Placement -->
+                                    <td>
+                                        <div class="badges-wrap">
+                                            {% if student.studentprofile.placement_status == 'placed' %}
+                                            <span class="badge badge-success">Placed</span>
+                                            <span style="font-size:11px;color:var(--ink-3);">Ready to work</span>
+                                            {% else %}
+                                            <span class="badge badge-warning">Not Placed</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+
+                                    <!-- Status -->
+                                    <td>
+                                        <div class="badges-wrap">
+                                            {% if student.studentprofile %}
+                                            {% if student.studentprofile.is_approved %}
+                                            <span class="badge badge-success">Approved</span>
+                                            {% else %}
+                                            <span class="badge badge-warning">Pending Approval</span>
+                                            {% endif %}
+                                            {% if not student.studentprofile.is_active %}
+                                            <span class="badge badge-danger">Deactivated</span>
+                                            {% else %}
+                                            <span class="badge badge-success">Active</span>
+                                            {% endif %}
+                                            {% else %}
+                                            <span class="badge badge-secondary">No Profile</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td>
+                                        <div class="action-btns">
+                                            {% if not student.studentprofile or not student.studentprofile.is_approved%}
+
+                                            <a href="{% url 'approve_student' student.id %}" class="btn-approve">
+                                                <i class="ri-checkbox-circle-line"></i> Approve
+                                            </a>
+                                            {% endif %}
+
+                                            {% if student.studentprofile.is_active %}
+                                            <a href="{% url 'toggle_student_status' student.id %}"
+                                                class="btn-status-deactivate">
+                                                <i class="ri-forbid-line"></i> Deactivate
+                                            </a>
+                                            {% else %}
+                                            <a href="{% url 'toggle_student_status' student.id %}"
+                                                class="btn-status-activate">
+                                                <i class="ri-checkbox-circle-line"></i> Activate
+                                            </a>
+                                            {% endif %}
+
+                                            <button class="btn-placement btn-placement-trigger"
+                                                data-student-id="{{ student.id }}"
+                                                data-student-name="{{ student.get_full_name }}"
+                                                data-current-status="{{ student.studentprofile.placement_status }}"
+                                                data-applied-drives='[{% for app in student.studentprofile.applications.all %}{"id": "{{ app.drive.id }}", "name": "{{ app.drive.company_name|escapejs }} - {{ app.drive.job_role|escapejs }}", "status": "{{ app.status }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'>
+                                                <i class="ri-briefcase-line"></i> Placement Status
+                                            </button>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                                {% empty %}
+                                <tr class="empty-row">
+                                    <td colspan="5">
+                                        <i class="ri-user-search-line"></i>
+                                        No students registered yet.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+        </div><!-- /main-content -->
+    </div><!-- /dashboard-wrapper -->
+
+
+    <!-- ════════════════════════════════════════
+       PLACEMENT MODAL
+       Logic 100% preserved:
+       id="placementModal" | id="placementForm"
+       id="modalStudentName" | id="statusSelect"
+       id="driveSelectGroup"
+       openPlacementModal() / closeModal() / toggleDriveSelect()
+       window.onclick close
+  ════════════════════════════════════════ -->
+    <div id="placementModal" class="modal">
+        <div class="modal-inner">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h3><i class="ri-briefcase-line" style="margin-right:6px;"></i> Assign Placement Status</h3>
+                    <button class="close" onclick="closeModal()"><i class="ri-close-line"></i></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="modal-student-name">
+                        Setting status for <strong id="modalStudentName"></strong>
+                    </div>
+
+                    <form id="placementForm" method="POST" action="">
+                        {% csrf_token %}
+
+                        <div class="modal-form-group" style="margin-bottom:14px;">
+                            <label><i class="ri-flag-line"></i> Status</label>
+                            <select name="status" id="statusSelect" class="form-control" onchange="toggleDriveSelect()">
+                                <option value="placed">Placed</option>
+                                <option value="not_placed">Not Placed</option>
+                            </select>
+                        </div>
+
+                        <div class="modal-form-group" id="driveSelectGroup" style="margin-bottom:14px;">
+                            <label><i class="ri-building-2-line"></i> Placement Drive</label>
+                            <select name="drive_id" class="form-control">
+                                <option value="">Select Drive</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-save">
+                            <i class="ri-save-line"></i> Save Changes
+                        </button>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            /* ── Placement Status Modal Trigger (original logic) ── */
+            const triggers = document.querySelectorAll('.btn-placement-trigger');
+            triggers.forEach(trigger => {
+                trigger.addEventListener('click', function () {
+                    const studentId = this.getAttribute('data-student-id');
+                    const studentName = this.getAttribute('data-student-name');
+                    const currentStatus = this.getAttribute('data-current-status');
+                    const appliedDrives = JSON.parse(this.getAttribute('data-applied-drives'));
+                    openPlacementModal(studentId, studentName, appliedDrives, currentStatus);
+                });
+            });
+
+        });
+
+        /* ── openPlacementModal (original logic) ── */
+        function openPlacementModal(studentId, studentName, appliedDrives, currentStatus) {
+            const modal = document.getElementById('placementModal');
+            const form = document.getElementById('placementForm');
+            const nameSpan = document.getElementById('modalStudentName');
+            const statusSelect = document.getElementById('statusSelect');
+            const driveSelect = document.querySelector('select[name="drive_id"]');
+
+            statusSelect.value = currentStatus || 'not_placed';
+
+            driveSelect.innerHTML = '<option value="">Select Drive</option>';
+
+            if (appliedDrives && appliedDrives.length > 0) {
+                appliedDrives.forEach(drive => {
+                    const option = document.createElement('option');
+                    option.value = drive.id;
+                    option.textContent = drive.name;
+                    if (drive.status === 'placed') { option.selected = true; }
+                    driveSelect.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.value = "";
+                option.textContent = "No drives applied";
+                option.disabled = true;
+                driveSelect.appendChild(option);
+            }
+
+            let url = "{% url 'mark_student_placed' 12345 %}".replace('12345', studentId);
+            form.action = url;
+            nameSpan.innerText = studentName;
+
+            toggleDriveSelect();
+            modal.style.display = 'block';
+        }
+
+        /* ── closeModal (original logic) ── */
+        function closeModal() {
+            document.getElementById('placementModal').style.display = 'none';
+        }
+
+        /* ── toggleDriveSelect (original logic) ── */
+        function toggleDriveSelect() {
+            const status = document.getElementById('statusSelect').value;
+            const driveGroup = document.getElementById('driveSelectGroup');
+            driveGroup.style.display = status === 'placed' ? 'flex' : 'none';
+        }
+
+        /* ── window.onclick close (original logic) ── */
+        window.onclick = function (event) {
+            const modal = document.getElementById('placementModal');
+            if (event.target == modal) { closeModal(); }
+        }
+
+        /* ── Clickable Rows ── */
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.student-row').forEach(row => {
+                row.addEventListener('click', function (e) {
+                    // Don't trigger if clicking a button, link, or modal toggle
+                    if (!e.target.closest('a') && !e.target.closest('button') && !e.target.closest('.btn-placement')) {
+                        window.location.href = this.dataset.href;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

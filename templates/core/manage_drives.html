@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Placement Drives - Campus Placement Training System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-lt: #eef2ff;
+            --primary-dk: #4f46e5;
+            --ink-1: #1e293b;
+            --ink-2: #64748b;
+            --ink-3: #94a3b8;
+            --surface: #ffffff;
+            --bg: #f8fafc;
+            --border: #e2e8f0;
+            --r: 12px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--ink-1);
+        }
+
+        h1, h2, h3 {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .main-content {
+            padding: 36px 32px;
+        }
+
+        .drive-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .drive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-auto-rows: 1fr;
+            gap: 24px;
+        }
+
+        .drive-card {
+            background: var(--surface);
+            padding: 25px;
+            border-radius: var(--r);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .drive-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .drive-card h3 {
+            color: var(--primary);
+            margin: 0 0 5px;
+            font-size: 1.25rem;
+        }
+
+        .drive-info {
+            margin: 20px 0;
+            font-size: 0.9rem;
+            color: var(--ink-2);
+            flex-grow: 1;
+        }
+
+        .drive-info div {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .label {
+            font-weight: 600;
+            color: var(--ink-1);
+            min-width: 100px;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 12px;
+            margin-top: auto;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+
+        .action-btns .btn-sm {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px; /* Force same height */
+            padding: 0 12px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--surface);
+            width: 90%;
+            max-width: 700px;
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 25px;
+            top: 25px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--ink-3);
+            transition: color 0.2s;
+        }
+
+        .close-modal:hover {
+            color: var(--ink-1);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 2rem;
+        }
+
+        .modal-body {
+            margin-top: 25px;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .detail-label {
+            font-weight: 700;
+            width: 150px;
+            color: var(--ink-2);
+        }
+
+        .detail-value {
+            flex: 1;
+            color: var(--ink-1);
+        }
+
+        .modal-desc {
+            margin-top: 25px;
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 12px;
+            line-height: 1.6;
+            color: var(--ink-2);
+            white-space: pre-wrap;
+        }
+
+        /* Search and Filter Styles */
+        .controls-wrapper {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: var(--r);
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--ink-2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .control-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            outline: none;
+            background: #fff;
+        }
+
+        .control-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        .search-input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--ink-3);
+            font-size: 1.1rem;
+        }
+
+        .search-input-wrapper input {
+            padding-left: 40px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dk); }
+        .btn-warning { background: #fbbf24; color: #000; }
+        .btn-danger { background: #ef4444; color: white; }
+
+        @media (max-width: 1024px) {
+            .controls-wrapper { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        {% include 'menu_coordinator.html' %}
+
+        <div class="main-content" style="margin-left: 260px;">
+            <header class="dashboard-header">
+                <h1>Manage Placement Drives</h1>
+                <div class="user-info">
+                    <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+                </div>
+            </header>
+
+            <section class="content-section">
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="drive-header">
+                    <h2>All Placement Drives</h2>
+                    <a href="{% url 'create_drive' %}" class="btn btn-primary btn-sm" style="width: fit-content; white-space: nowrap;">
+                        <i class="ri-add-line"></i> Create New Drive
+                    </a>
+                </div>
+
+                <!-- Search and Filter Bar -->
+                <div class="controls-wrapper">
+                    <div class="control-group" style="flex: 2;">
+                        <label for="searchInput">Search Drives</label>
+                        <div class="search-input-wrapper">
+                            <i class="ri-search-line"></i>
+                            <input type="text" id="searchInput" class="control-input" placeholder="Search company, job role...">
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="categoryFilter">Category</label>
+                        <select id="categoryFilter" class="control-input">
+                            <option value="all">All Categories</option>
+                            <option value="A">Category A</option>
+                            <option value="B">Category B</option>
+                            <option value="C">Category C</option>
+                            <option value="D">Category D</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="statusFilter">Status</label>
+                        <select id="statusFilter" class="control-input">
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="expired">Expired</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="sortBy">Sort By</label>
+                        <select id="sortBy" class="control-input">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="package_high">Package (High-Low)</option>
+                            <option value="package_low">Package (Low-High)</option>
+                            <option value="name_asc">Company (A-Z)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="drive-grid" id="driveGrid">
+                    {% for drive in drives %}
+                    <div class="drive-card" 
+                         data-company="{{ drive.company_name }}" 
+                         data-role="{{ drive.job_role }}"
+                         data-category="{{ drive.category }}"
+                         data-status="{% if drive.is_expired %}expired{% else %}active{% endif %}"
+                         data-package="{{ drive.package }}"
+                         data-date="{{ drive.created_at|date:'U' }}"
+                         data-min-cgpa="{{ drive.min_cgpa|default:'Not Required' }}"
+                         data-depts="{% if drive.is_for_all_departments %}All Departments{% else %}{{ drive.eligible_departments.all|join:', ' }}{% endif %}"
+                         data-batch="{{ drive.eligible_batch }}"
+                         data-year="{{ drive.eligible_year }}"
+                         data-deadline="{{ drive.registration_deadline|date:'M d, Y H:i' }}"
+                         data-drive-date="{{ drive.drive_date|date:'M d, Y' }}"
+                         data-description="{{ drive.description }}"
+                         onclick="openModal(this)">
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <h3>{{ drive.company_name }}</h3>
+                                <div style="display: flex; gap: 8px; margin-top: 4px;">
+                                    <span class="badge" style="background: #eef2ff; color: #4f46e5;">Category {{ drive.category }}</span>
+                                    {% if drive.is_expired %}
+                                    <span class="badge" style="background: #fff1f2; color: #e11d48;">Expired</span>
+                                    {% else %}
+                                    <span class="badge" style="background: #f0fdf4; color: #16a34a;">Active</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 1.2rem; font-weight: 800; color: #16a34a;">{{ drive.package }} LPA</div>
+                                <div style="font-size: 0.75rem; color: var(--ink-3);">{{ drive.job_role }}</div>
+                            </div>
+                        </div>
+
+                        <div class="drive-info">
+                            <div><i class="ri-graduation-cap-line"></i> <span class="label">Min CGPA:</span> {{ drive.min_cgpa|default:"Not Required" }}</div>
+                            <div><i class="ri-calendar-line"></i> <span class="label">Drive Date:</span> {{ drive.drive_date|date:"M d, Y, P" }}</div>
+                            <div><i class="ri-time-line"></i> <span class="label">Reg Deadline:</span> {{ drive.registration_deadline|date:"M d, Y, P" }}</div>
+                            <div><i class="ri-group-line"></i> <span class="label">Target:</span> 
+                                {% if drive.eligible_batch and drive.eligible_batch != 0 %}{{ drive.eligible_batch }} Batch{% else %}All Batches{% endif %}, 
+                                {% if drive.eligible_year and drive.eligible_year != 0 %}Year {{ drive.eligible_year }}{% else %}All Years{% endif %}
+                            </div>
+                        </div>
+
+                        {% if drive.registration_link %}
+                        <div style="margin-top: 5px;" onclick="event.stopPropagation()">
+                            <a href="{{ drive.registration_link }}" target="_blank" class="btn-sm" style="width: 100%; justify-content: center; background: #f8fafc; border: 1px solid var(--border); color: var(--primary);">
+                                <i class="ri-external-link-line"></i> Registration Link
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        <div class="action-btns" onclick="event.stopPropagation()">
+                            <a href="{% url 'view_drive_students' drive.id %}" class="btn-sm btn-primary">
+                                <i class="ri-team-line"></i> Participants
+                            </a>
+                            <a href="{% url 'edit_drive' drive.id %}" class="btn-sm btn-warning">
+                                <i class="ri-edit-line"></i> Edit
+                            </a>
+                            <a href="{% url 'delete_drive' drive.id %}" class="btn-sm btn-danger" onclick="return confirm('Delete this drive?')">
+                                <i class="ri-delete-bin-line"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div id="emptyMessage" style="grid-column: 1/-1; text-align: center; padding: 60px; color: var(--ink-3);">
+                        <i class="ri-inbox-line" style="font-size: 3rem; display: block; margin-bottom: 10px; opacity: 0.5;"></i>
+                        No placement drives found.
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <footer class="dashboard-footer">
+                <p>&copy; 2024 Campus Placement Training System</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="driveModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div class="modal-header">
+                <h2 id="modalCompany">Company Name</h2>
+                <div id="modalRole" style="font-size: 1.1rem; color: var(--ink-2); font-weight: 500;">Job Role</div>
+            </div>
+            
+            <div class="modal-body">
+                <div class="detail-row">
+                    <span class="detail-label">Package</span>
+                    <span class="detail-value" id="modalPackage" style="font-weight: 700; color: #16a34a;">0 LPA</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Category</span>
+                    <span class="detail-value" id="modalCategory">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Min CGPA</span>
+                    <span class="detail-value" id="modalCGPA">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Departments</span>
+                    <span class="detail-value" id="modalDepts">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Target Group</span>
+                    <span class="detail-value" id="modalTarget">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Registration Deadline</span>
+                    <span class="detail-value" id="modalDeadline">-</span>
+                </div>
+                <div class="detail-row" style="border: none;">
+                    <span class="detail-label">Drive Date</span>
+                    <span class="detail-value" id="modalDriveDate">-</span>
+                </div>
+                
+                <div style="margin-top: 25px; font-weight: 700; color: var(--ink-1);">Job Description</div>
+                <div class="modal-desc" id="modalDescription">
+                    No description provided.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const statusFilter = document.getElementById('statusFilter');
+            const sortBy = document.getElementById('sortBy');
+            const driveGrid = document.getElementById('driveGrid');
+            const driveCards = Array.from(driveGrid.getElementsByClassName('drive-card'));
+
+            function filterAndSort() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const category = categoryFilter.value;
+                const status = statusFilter.value;
+                const sortVal = sortBy.value;
+
+                let visibleCards = driveCards.filter(card => {
+                    const company = card.getAttribute('data-company').toLowerCase();
+                    const role = card.getAttribute('data-role').toLowerCase();
+                    const cardCategory = card.getAttribute('data-category');
+                    const cardStatus = card.getAttribute('data-status');
+
+                    const matchesSearch = company.includes(searchTerm) || role.includes(searchTerm);
+                    const matchesCategory = category === 'all' || cardCategory === category;
+                    const matchesStatus = status === 'all' || cardStatus === status;
+
+                    if (matchesSearch && matchesCategory && matchesStatus) {
+                        card.style.display = 'block';
+                        return true;
+                    } else {
+                        card.style.display = 'none';
+                        return false;
+                    }
+                });
+
+                visibleCards.sort((a, b) => {
+                    if (sortVal === 'package_high') return parseFloat(b.getAttribute('data-package')) - parseFloat(a.getAttribute('data-package'));
+                    if (sortVal === 'package_low') return parseFloat(a.getAttribute('data-package')) - parseFloat(b.getAttribute('data-package'));
+                    if (sortVal === 'newest') return parseInt(b.getAttribute('data-date')) - parseInt(a.getAttribute('data-date'));
+                    if (sortVal === 'oldest') return parseInt(a.getAttribute('data-date')) - parseInt(b.getAttribute('data-date'));
+                    if (sortVal === 'name_asc') return a.getAttribute('data-company').localeCompare(b.getAttribute('data-company'));
+                    return 0;
+                });
+
+                visibleCards.forEach(card => driveGrid.appendChild(card));
+                
+                const noDrivesMsg = document.getElementById('noDrivesMessage');
+                if (visibleCards.length === 0) {
+                    if (!noDrivesMsg) {
+                        const msg = document.createElement('div');
+                        msg.id = 'noDrivesMessage';
+                        msg.style.gridColumn = '1/-1';
+                        msg.style.textAlign = 'center';
+                        msg.style.padding = '60px';
+                        msg.style.color = 'var(--ink-3)';
+                        msg.innerHTML = '<i class="ri-search-eye-line" style="font-size: 3rem; display: block; margin-bottom: 10px; opacity: 0.5;"></i> No results match your filters.';
+                        driveGrid.appendChild(msg);
+                    }
+                } else if (noDrivesMsg) {
+                    noDrivesMsg.remove();
+                }
+            }
+
+            searchInput.addEventListener('input', filterAndSort);
+            categoryFilter.addEventListener('change', filterAndSort);
+            statusFilter.addEventListener('change', filterAndSort);
+            sortBy.addEventListener('change', filterAndSort);
+        });
+
+        function openModal(card) {
+            document.getElementById('modalCompany').innerText = card.getAttribute('data-company');
+            document.getElementById('modalRole').innerText = card.getAttribute('data-role');
+            document.getElementById('modalPackage').innerText = card.getAttribute('data-package') + ' LPA';
+            document.getElementById('modalCategory').innerText = 'Category ' + card.getAttribute('data-category');
+            document.getElementById('modalCGPA').innerText = card.getAttribute('data-min-cgpa');
+            document.getElementById('modalDepts').innerText = card.getAttribute('data-depts');
+            document.getElementById('modalTarget').innerText = card.getAttribute('data-batch') + ' Batch, Year ' + card.getAttribute('data-year');
+            document.getElementById('modalDeadline').innerText = card.getAttribute('data-deadline');
+            document.getElementById('modalDriveDate').innerText = card.getAttribute('data-drive-date');
+            document.getElementById('modalDescription').innerText = card.getAttribute('data-description') || 'No description provided.';
+            
+            document.getElementById('driveModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent scroll
+        }
+
+        function closeModal() {
+            document.getElementById('driveModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('driveModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,727 @@
+{% extends "resumes/base.html" %}
+{% load static %}
+
+{% block title %}ATS Analysis{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ── Layout ─────────────────────────────────────────────── */
+    .analysis-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    @media (max-width: 860px) {
+        .analysis-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Score Circle Card ──────────────────────────────────── */
+    .score-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+    }
+    .score-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .score-card__top {
+        background: var(--gradient);
+        padding: 28px 24px 0;
+        text-align: center;
+    }
+    .score-card__top-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .7px;
+        color: rgba(255,255,255,.7);
+        margin-bottom: 18px;
+    }
+
+    /* Circle */
+    .score-circle-wrap {
+        position: relative;
+        width: 148px;
+        height: 148px;
+        margin: 0 auto 0;
+    }
+    .score-circle-svg {
+        transform: rotate(-90deg);
+        width: 148px;
+        height: 148px;
+    }
+    .score-circle-track {
+        fill: none;
+        stroke: rgba(255,255,255,.18);
+        stroke-width: 10;
+    }
+    .score-circle-fill {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 10;
+        stroke-linecap: round;
+        stroke-dasharray: 408; /* 2π×65 */
+        stroke-dashoffset: 408;
+        transition: stroke-dashoffset 1.1s cubic-bezier(.4,0,.2,1);
+    }
+    .score-circle-inner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .score-circle-num {
+        font-family: 'Poppins', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1;
+    }
+    .score-circle-denom {
+        font-size: 12px;
+        color: rgba(255,255,255,.65);
+        font-weight: 500;
+    }
+
+    .score-card__wave {
+        display: block;
+        margin-top: 12px;
+        line-height: 0;
+    }
+    .score-card__wave svg { display: block; }
+
+    .score-card__body {
+        padding: 20px 24px 24px;
+        text-align: center;
+    }
+
+    .score-category {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--ink-1);
+        margin-bottom: 4px;
+    }
+    .score-role {
+        font-size: 12.5px;
+        color: var(--ink-3);
+        margin-bottom: 20px;
+    }
+
+    .role-select-form { text-align: left; }
+    .role-select-form label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        color: var(--ink-3);
+        margin-bottom: 6px;
+    }
+
+    /* ── Breakdown card ─────────────────────────────────────── */
+    .breakdown-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+    }
+    .breakdown-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .breakdown-card__header {
+        padding: 18px 24px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .breakdown-card__header-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        background: var(--gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: #fff;
+    }
+    .breakdown-card__title {
+        font-family: 'Poppins', sans-serif;
+        font-size: .95rem;
+        font-weight: 700;
+        color: var(--ink-1);
+    }
+
+    /* Breakdown rows */
+    .breakdown-list {
+        padding: 6px 0;
+    }
+    .breakdown-row {
+        display: grid;
+        grid-template-columns: 1fr 52px 180px;
+        align-items: center;
+        gap: 16px;
+        padding: 13px 24px;
+        border-bottom: 1px solid var(--border);
+        transition: background 200ms var(--ease);
+    }
+    .breakdown-row:last-child { border-bottom: none; }
+    .breakdown-row:hover { background: var(--bg); }
+
+    .breakdown-row__name {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--ink-1);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .breakdown-row__name i { color: var(--primary); font-size: 15px; }
+
+    .breakdown-row__score {
+        font-family: 'Poppins', sans-serif;
+        font-size: .95rem;
+        font-weight: 700;
+        color: var(--ink-1);
+        text-align: right;
+    }
+
+    .mini-bar-track {
+        height: 8px;
+        background: var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    .mini-bar-fill {
+        height: 100%;
+        border-radius: 20px;
+        background: var(--gradient);
+        transition: width 1s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* AI contribution chip */
+    .ai-chip {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 24px 20px;
+        padding: 14px 18px;
+        background: var(--primary-lt);
+        border: 1px solid #c5cefb;
+        border-radius: var(--radius-input);
+    }
+    .ai-chip__icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        background: var(--gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+    .ai-chip__label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        color: var(--primary);
+        margin-bottom: 2px;
+    }
+    .ai-chip__value {
+        font-family: 'Poppins', sans-serif;
+        font-size: .9rem;
+        font-weight: 700;
+        color: var(--ink-1);
+    }
+    .ai-chip__role {
+        font-size: 12px;
+        color: var(--ink-3);
+    }
+
+    /* ── Section cards (keywords / weak / suggestions) ──────── */
+    .section-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+    }
+    .section-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .section-card__header {
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .section-card__header-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        flex-shrink: 0;
+    }
+    .icon-orange { background: #fff3e0; color: #e67e22; }
+    .icon-red    { background: #fff3f3; color: #c0392b; }
+    .icon-green  { background: #edfbf3; color: #27ae60; }
+
+    .section-card__title {
+        font-family: 'Poppins', sans-serif;
+        font-size: .9rem;
+        font-weight: 700;
+        color: var(--ink-1);
+    }
+
+    .section-card__body {
+        padding: 22px 24px;
+    }
+
+    /* Keyword pills */
+    .keyword-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .keyword-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        background: #fff9ec;
+        border: 1px solid #fde8a0;
+        color: #b46a00;
+        font-size: 12.5px;
+        font-weight: 600;
+        transition: all 200ms var(--ease);
+    }
+    .keyword-pill:hover {
+        background: #fff3cd;
+        transform: translateY(-1px);
+    }
+    .keyword-pill i { font-size: 12px; }
+
+    .keyword-hint {
+        font-size: 12.5px;
+        color: var(--ink-3);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* Weak sections list */
+    .weak-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .weak-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 15px;
+        background: #fff3f3;
+        border: 1px solid #ffc9c9;
+        border-radius: var(--radius-input);
+        font-size: 13.5px;
+        color: var(--ink-2);
+    }
+    .weak-item i { color: #c0392b; font-size: 15px; flex-shrink: 0; }
+
+    /* Suggestions list */
+    .suggestion-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        counter-reset: suggestions;
+    }
+    .suggestion-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        counter-increment: suggestions;
+    }
+    .suggestion-num {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--gradient);
+        color: #fff;
+        font-family: 'Poppins', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+    .suggestion-text {
+        font-size: 13.5px;
+        color: var(--ink-2);
+        line-height: 1.6;
+        padding-top: 3px;
+    }
+
+    /* Section list */
+    .section-check-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+    }
+    .section-check-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border-radius: var(--radius-input);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .section-check-item.found {
+        border-color: #d1fae5;
+        background: #f0fdf4;
+        color: #065f46;
+    }
+    .section-check-item.missing {
+        border-color: #fee2e2;
+        background: #fef2f2;
+        color: #991b1b;
+        opacity: 0.8;
+    }
+    .section-check-item i { font-size: 16px; }
+    .section-check-item.found i { color: #10b981; }
+    .section-check-item.missing i { color: #ef4444; }
+
+    /* Detail tags */
+    .detail-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 12.5px;
+        color: #475569;
+        margin: 0 6px 6px 0;
+    }
+    .detail-tag i { color: var(--primary); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Stats Row ──────────────────────────────────────────── -->
+<div class="stats-row stagger" style="margin-bottom:28px;">
+    <div class="stat-card">
+        <div class="stat-card__icon"><i class="ri-bar-chart-grouped-line"></i></div>
+        <div>
+            <div class="stat-card__label">Overall Score</div>
+            <div class="stat-card__value">{{ analysis.overall_score }}<span style="font-size:1rem;color:var(--ink-3)">/100</span></div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card__icon"><i class="ri-award-line"></i></div>
+        <div>
+            <div class="stat-card__label">Category</div>
+            <div class="stat-card__value" style="font-size:1.1rem;">{{ analysis.category }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card__icon"><i class="ri-focus-3-line"></i></div>
+        <div>
+            <div class="stat-card__label">Target Role</div>
+            <div class="stat-card__value" style="font-size:1rem;">{{ analysis.target_role|title }}</div>
+        </div>
+    </div>
+    {% if analysis.missing_keywords %}
+    <div class="stat-card">
+        <div class="stat-card__icon"><i class="ri-key-2-line"></i></div>
+        <div>
+            <div class="stat-card__label">Missing Keywords</div>
+            <div class="stat-card__value">{{ analysis.missing_keywords|length }}</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ── Main Analysis Grid ─────────────────────────────────── -->
+<div class="analysis-grid" style="margin-bottom:24px;">
+
+    <!-- Left: Score Circle -->
+    <div class="score-card" style="animation: fadeInUp .4s var(--ease) .1s both;">
+        <div class="score-card__top">
+            <div class="score-card__top-label">ATS Score</div>
+            <div class="score-circle-wrap">
+                <svg class="score-circle-svg" viewBox="0 0 148 148">
+                    <circle class="score-circle-track" cx="74" cy="74" r="65"/>
+                    <circle class="score-circle-fill" cx="74" cy="74" r="65"
+                            data-score="{{ analysis.overall_score }}"/>
+                </svg>
+                <div class="score-circle-inner">
+                    <span class="score-circle-num">{{ analysis.overall_score }}</span>
+                    <span class="score-circle-denom">out of 100</span>
+                </div>
+            </div>
+            <!-- Wave divider -->
+            <span class="score-card__wave">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 30" width="300" height="30">
+                    <path d="M0,20 C75,5 150,30 225,15 C262,8 281,20 300,20 L300,30 L0,30 Z"
+                          fill="#fff"/>
+                </svg>
+            </span>
+        </div>
+
+        <div class="score-card__body">
+            <div class="score-category">{{ analysis.category }}</div>
+            <div class="score-role">Target: {{ analysis.target_role|title }}</div>
+
+            <!-- AI-Powered Re-analyse form -->
+            <form method="POST" action="{% url 'resumes:analysis' %}" class="role-select-form">
+                {% csrf_token %}
+                <label>Target Job Description</label>
+                <textarea name="job_description" rows="5" class="form-control" style="margin-bottom:12px; font-size: 13px;" required 
+                          placeholder="Paste a detailed job description here for the most accurate AI analysis...">{% if analysis.target_role %}{{ analysis.target_role }}{% else %}Software Engineer{% endif %}</textarea>
+                <input type="hidden" name="target_role" id="target_role_id" value="{% if analysis.target_role %}{{ analysis.target_role }}{% else %}Software Engineer{% endif %}">
+                <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
+                    <i class="ri-refresh-line"></i>Analyze with AI
+                </button>
+            </form>
+            <script>
+                // Update hidden target_role for simplicity
+                document.querySelector('textarea[name="job_description"]').addEventListener('input', function() {
+                    const val = this.value;
+                    document.getElementById('target_role_id').value = val.substring(0, 100);
+                });
+            </script>
+
+        </div>
+    </div>
+
+    <!-- Right: Score Breakdown -->
+    <div class="breakdown-card" style="animation: fadeInUp .4s var(--ease) .16s both;">
+        <div class="breakdown-card__header">
+            <div class="breakdown-card__header-icon"><i class="ri-pie-chart-2-line"></i></div>
+            <span class="breakdown-card__title">Score Breakdown</span>
+        </div>
+
+        <div class="breakdown-list">
+            {% for category, score in analysis.breakdown.items %}
+            <div class="breakdown-row">
+                <div class="breakdown-row__name">
+                    <i class="ri-checkbox-circle-line"></i>{{ category }}
+                </div>
+                <div class="breakdown-row__score">{{ score }}/100</div>
+                <div>
+                    <div class="mini-bar-track">
+                        <div class="mini-bar-fill" style="width:{{ score }}%;"></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if analysis.ai_contribution %}
+        <div class="ai-chip">
+            <div class="ai-chip__icon"><i class="ri-robot-2-line"></i></div>
+            <div>
+                <div class="ai-chip__label">AI Contribution</div>
+                <div class="ai-chip__value">+{{ analysis.ai_contribution }} points</div>
+                <div class="ai-chip__role">Role Fit: {{ analysis.role_fit }}</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- ── Section Cards ──────────────────────────────────────── -->
+<div class="dash-grid stagger" style="gap:20px;">
+
+    {% if analysis.sections_found %}
+    <div class="section-card" style="grid-column: 1 / -1;">
+        <div class="section-card__header">
+            <div class="section-card__header-icon icon-green">
+                <i class="ri-layout-grid-line"></i>
+            </div>
+            <span class="section-card__title">Standard Resume Sections</span>
+            <span class="badge badge-success" style="margin-left:auto;">Structure Analysis</span>
+        </div>
+        <div class="section-card__body">
+            <div class="section-check-list">
+                {% for section, found in analysis.sections_found.items %}
+                <div class="section-check-item {% if found %}found{% else %}missing{% endif %}">
+                    <i class="{% if found %}ri-checkbox-circle-fill{% else %}ri-close-circle-line{% endif %}"></i>
+                    {{ section }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if analysis.discovered_details %}
+    <div class="section-card" style="grid-column: 1 / -1;">
+        <div class="section-card__header">
+            <div class="section-card__header-icon icon-green">
+                <i class="ri-search-eye-line"></i>
+            </div>
+            <span class="section-card__title">AI Content Discovery</span>
+            <span class="badge badge-pending" style="margin-left:auto;">Extracted Details</span>
+        </div>
+        <div class="section-card__body">
+            <div class="row">
+                <div class="col-md-4" style="border-right: 1px solid var(--border);">
+                    <h5 style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--ink-3); margin-bottom: 15px;">Experience & Education</h5>
+                    <div style="margin-bottom: 12px;">
+                        <span class="detail-tag"><i class="ri-briefcase-line"></i> <strong>{{ analysis.discovered_details.years_experience }}</strong> Years Experience</span>
+                    </div>
+                    <div>
+                        {% for degree in analysis.discovered_details.degrees %}
+                        <span class="detail-tag"><i class="ri-graduation-cap-line"></i> {{ degree|upper }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-8" style="padding-left: 25px;">
+                    <h5 style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--ink-3); margin-bottom: 15px;">Technical Skills Found</h5>
+                    <div class="keyword-cloud">
+                        {% for skill in analysis.discovered_details.skills %}
+                        <span class="keyword-pill" style="background: #f0f9ff; border-color: #bae6fd; color: #0369a1;">
+                            <i class="ri-code-s-slash-line"></i>{{ skill }}
+                        </span>
+                        {% empty %}
+                        <span class="text-muted" style="font-size: 12px;">No specific technical skills highlighted.</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if analysis.missing_keywords %}
+    <div class="section-card">
+        <div class="section-card__header">
+            <div class="section-card__header-icon icon-orange">
+                <i class="ri-price-tag-3-line"></i>
+            </div>
+            <span class="section-card__title">Missing Keywords</span>
+            <span class="badge badge-pending" style="margin-left:auto;">{{ analysis.missing_keywords|length }} found</span>
+        </div>
+        <div class="section-card__body">
+            <div class="keyword-cloud">
+                {% for keyword in analysis.missing_keywords %}
+                <span class="keyword-pill">
+                    <i class="ri-add-circle-line"></i>{{ keyword }}
+                </span>
+                {% endfor %}
+            </div>
+            <p class="keyword-hint">
+                <i class="ri-information-line"></i>
+                Add these keywords to your resume to improve your ATS score.
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if analysis.weak_sections %}
+    <div class="section-card">
+        <div class="section-card__header">
+            <div class="section-card__header-icon icon-red">
+                <i class="ri-error-warning-line"></i>
+            </div>
+            <span class="section-card__title">Weak Sections</span>
+            <span class="badge badge-closed" style="margin-left:auto;">{{ analysis.weak_sections|length }} sections</span>
+        </div>
+        <div class="section-card__body">
+            <div class="weak-list">
+                {% for section in analysis.weak_sections %}
+                <div class="weak-item">
+                    <i class="ri-close-circle-line"></i>{{ section }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if analysis.suggestions %}
+    <div class="section-card">
+        <div class="section-card__header">
+            <div class="section-card__header-icon icon-green">
+                <i class="ri-lightbulb-flash-line"></i>
+            </div>
+            <span class="section-card__title">Improvement Suggestions</span>
+            <span class="badge badge-success" style="margin-left:auto;">{{ analysis.suggestions|length }} tips</span>
+        </div>
+        <div class="section-card__body">
+            <div class="suggestion-list">
+                {% for suggestion in analysis.suggestions %}
+                <div class="suggestion-item">
+                    <div class="suggestion-num">{{ forloop.counter }}</div>
+                    <div class="suggestion-text">{{ suggestion }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- ── Back action ────────────────────────────────────────── -->
+<div class="action-bar">
+    
+    <a href="{% url 'resumes:download' %}" class="btn btn-primary">
+        <i class="ri-download-2-line"></i>Download Resume
+    </a>
+</div>
+
+<!-- ── Score circle animation ────────────────────────────── -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const fill = document.querySelector('.score-circle-fill');
+    if (!fill) return;
+    const score   = parseFloat(fill.dataset.score) || 0;
+    const radius  = 65;
+    const circ    = 2 * Math.PI * radius;          // ≈ 408.41
+    const offset  = circ - (score / 100) * circ;
+    fill.style.strokeDasharray  = circ;
+    fill.style.strokeDashoffset = circ;             // start hidden
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            fill.style.strokeDashoffset = offset;   // animate to value
+        });
+    });
+});
+</script>
+{% endblock %}

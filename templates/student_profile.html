@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile - Campus Placement Training System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/style.css">
+
+  <style>
+    :root {
+      --primary:   #4f46e5;
+      --primary-light: #6366f1;
+      --navy:      #0d1b3e;
+      --accent:    #4f46e5;
+      --asoft:     #e0e7ff;
+      --success:   #10b981;
+      --warning:   #f59e0b;
+      --danger:    #ef4444;
+      --bg:        #f1f3f9;
+      --surface:   #ffffff;
+      --border:    #e2e8f0;
+      --text-primary: #0d1b3e;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --overlay:   rgba(0, 0, 0, 0.5);
+    }
+
+    *, *::before, *::after { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+
+    html, body {
+      height: 100%; 
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    a { 
+      text-decoration: none; 
+      color: inherit; 
+    }
+
+    /* ──────────────────────────────────────────── LAYOUT ─────────────────────────────────────────── */
+    .page {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding-left: var(--sb-w, 240px);
+      transition: padding-left 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+      .page { 
+        padding-left: 0; 
+      }
+    }
+
+    /* ──────────────────────────────────────────── TOP BAR ─────────────────────────────────────────── */
+    .topbar {
+      flex-shrink: 0;
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+
+    .tb-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tb-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .tb-brand {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .tb-brand span {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .tb-crumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 8px;
+      padding-left: 8px;
+      border-left: 1px solid var(--border);
+    }
+
+    .crumb {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    .crumb:hover {
+      color: var(--text-secondary);
+    }
+
+    .crumb.on {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .crumb-sep {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+    }
+
+    .tbtn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tbtn:hover {
+      background: var(--primary-light);
+      transform: translateY(-2px);
+    }
+
+    /* ──────────────────────────────────────────── BODY AREA ─────────────────────────────────────────── */
+    .body-area {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Flash Messages */
+    .flash {
+      flex-shrink: 0;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .flash-success {
+      background: #d1fae5;
+      color: #065f46;
+      border-left: 4px solid var(--success);
+    }
+
+    .flash-error {
+      background: #fee2e2;
+      color: #7f1d1d;
+      border-left: 4px solid var(--danger);
+    }
+
+    .flash-info {
+      background: #e0e7ff;
+      color: #3730a3;
+      border-left: 4px solid #4f46e5;
+    }
+
+    /* ──────────────────────────────────────────── MAIN CONTAINER ─────────────────────────────────────────── */
+    .profile-wrapper {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding-right: 4px;
+    }
+
+    .profile-wrapper::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .profile-wrapper::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .profile-wrapper::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    .profile-wrapper::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* ──────────────────────────────────────────── PROFILE HERO ─────────────────────────────────────────── */
+    .profile-hero {
+      background: linear-gradient(135deg, var(--navy) 0%, #1e40af 100%);
+      border-radius: 16px;
+      padding: 32px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 48px;
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-info {
+      flex: 1;
+    }
+
+    .hero-name {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 0.95rem;
+      opacity: 0.95;
+    }
+
+    .hero-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-stat {
+      margin-top: 16px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat-block {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-value {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      opacity: 0.85;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Hero Actions */
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .action-btn.primary {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* ──────────────────────────────────────────── QUICK INFO CARDS ─────────────────────────────────────────── */
+    .quick-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .info-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.1);
+    }
+
+    .info-card:hover::before {
+      opacity: 1;
+    }
+
+    .info-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .info-value {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .info-badge {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 4px 10px;
+      background: var(--bg);
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* ──────────────────────────────────────────── TAB SECTION ─────────────────────────────────────────── */
+    .tab-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 400px;
+    }
+
+    .tab-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .tab-buttons {
+      display: flex;
+      gap: 2px;
+    }
+
+    .tab-btn {
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-secondary);
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    }
+
+    .tab-actions {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .tab-action-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .edit-btn {
+      background: var(--primary);
+      color: white;
+    }
+
+    .edit-btn:hover {
+      background: var(--primary-light);
+      transform: translateY(-2px);
+    }
+
+    .cancel-btn {
+      background: var(--bg);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .cancel-btn:hover {
+      background: var(--border);
+    }
+
+    /* ──────────────────────────────────────────── TAB CONTENT ─────────────────────────────────────────── */
+    .tab-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* Details Grid */
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .detail-field {
+      background: var(--bg);
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .detail-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .detail-value {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .detail-value a {
+      color: var(--primary);
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    .detail-value a:hover {
+      color: var(--primary-light);
+    }
+
+    /* Edit Form */
+    .edit-form {
+      display: none;
+    }
+
+    .edit-form.active {
+      display: block;
+    }
+
+    .edit-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      background: var(--bg);
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--surface);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .save-btn {
+      flex: 1;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .save-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(15, 118, 110, 0.3);
+    }
+
+    /* ──────────────────────────────────────────── PLACEMENTS TABLE ─────────────────────────────────────────── */
+    .placements-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .placements-table thead {
+      background: var(--bg);
+    }
+
+    .placements-table th {
+      padding: 12px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .placements-table td {
+      padding: 16px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .placements-table tbody tr {
+      transition: background 0.2s ease;
+    }
+
+    .placements-table tbody tr:hover {
+      background: var(--bg);
+    }
+
+    .company-info {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .company-role {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-right: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .tag-category {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    .tag-rtw {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .status-placed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-applied {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    .status-rejected {
+      background: #fee2e2;
+      color: #7f1d1d;
+    }
+
+    .action-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--primary);
+      color: white;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .action-link:hover {
+      background: var(--primary-light);
+      transform: translateY(-2px);
+    }
+
+    /* ──────────────────────────────────────────── EMPTY STATE ─────────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      display: block;
+      font-size: 2.5rem;
+      color: var(--border);
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    /* ──────────────────────────────────────────── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .profile-hero {
+        padding: 20px;
+      }
+
+      .hero-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .hero-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 36px;
+      }
+
+      .hero-name {
+        font-size: 1.4rem;
+      }
+
+      .quick-info {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .edit-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  {% include 'menu_student.html' %}
+
+  <div class="page">
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="tb-left">
+        <div class="tb-logo">
+          <i class="ri-graduation-cap-line"></i>
+        </div>
+        <div class="tb-brand">CPTS <span>/ Portal</span></div>
+        <div class="tb-crumb">
+          <a href="{% url 'student_dashboard' %}" class="crumb">Dashboard</a>
+          <span class="crumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+          <span class="crumb on">My Profile</span>
+        </div>
+      </div>
+      <a href="{% url 'student_dashboard' %}" class="tbtn">
+        <i class="ri-arrow-left-line"></i> Back to Dashboard
+      </a>
+    </header>
+
+    <!-- BODY -->
+    <div class="body-area">
+      {% if messages %}
+      {% for message in messages %}
+      <div class="flash flash-{{ message.tags }}">
+        <i class="ri-information-line"></i>
+        {{ message }}
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      <!-- MAIN CONTENT -->
+      <div class="profile-wrapper">
+        <!-- HERO SECTION -->
+        <div class="profile-hero">
+          <div class="hero-content">
+            <div class="hero-avatar">
+              {% if profile.profile_picture %}
+              <img src="{{ profile.profile_picture.url }}" alt="{{ request.user.first_name }}">
+              {% else %}
+              <span>👤</span>
+              {% endif %}
+            </div>
+            <div class="hero-info">
+              <h1 class="hero-name">{{ request.user.first_name }} {{ request.user.last_name }}</h1>
+              <div class="hero-meta">
+                <div class="hero-meta-item">
+                  <i class="ri-shield-user-line"></i>
+                  {{ request.user.get_role_display }}
+                </div>
+                <div class="hero-meta-item">
+                  <i class="ri-building-2-line"></i>
+                  {{ request.user.department.name }}
+                </div>
+                <div class="hero-meta-item">
+                  <i class="ri-id-card-line"></i>
+                  {{ profile.roll_no }}
+                </div>
+              </div>
+
+              <div class="hero-stat">
+                <div class="stat-block">
+                  <div class="stat-value">{{ profile.cgpa }}</div>
+                  <div class="stat-label">CGPA</div>
+                </div>
+                
+                
+              </div>
+
+              <div class="hero-actions">
+                {% if resume %}
+                <a href="{% url 'resumes:upload' %}" class="action-btn primary">
+                  <i class="ri-file-text-line"></i>
+                  Manage Resume
+                </a>
+                {% else %}
+                <a href="{% url 'resumes:upload' %}" class="action-btn primary">
+                  <i class="ri-file-add-line"></i>
+                  Upload Resume
+                </a>
+                {% endif %}
+                
+                {% if profile.linkedin_url %}
+                <a href="{{ profile.linkedin_url }}" target="_blank" class="action-btn">
+                  <i class="ri-linkedin-box-fill"></i>
+                  LinkedIn
+                </a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK INFO CARDS -->
+        <div class="quick-info">
+          <div class="info-card">
+            <div class="info-label">Gender</div>
+            <div class="info-value">{{ profile.gender|default:"—" }}</div>
+          </div>
+          <div class="info-card">
+            <div class="info-label">Age</div>
+            <div class="info-value">{{ profile.age|default:"—" }}</div>
+          </div>
+          <div class="info-card">
+            <div class="info-label">Phone</div>
+            <div class="info-value">{{ profile.phone|default:"—" }}</div>
+          </div>
+          <div class="info-card">
+            <div class="info-label">Batch</div>
+            <div class="info-value">{{ profile.batch|default:"—" }}</div>
+          </div>
+        </div>
+
+        <!-- TAB SECTION -->
+        <div class="tab-wrapper">
+          <div class="tab-header">
+            <div class="tab-buttons">
+              <button class="tab-btn active" onclick="switchTab(this, 'details')">
+                <i class="ri-id-card-line"></i>
+                Profile Details
+              </button>
+              <button class="tab-btn" onclick="switchTab(this, 'placements')">
+                <i class="ri-briefcase-line"></i>
+                Placements
+              </button>
+            </div>
+            <div class="tab-actions">
+              <button id="btnEdit" onclick="toggleEdit()" class="tab-action-btn edit-btn">
+                <i class="ri-pencil-line"></i> Edit Profile
+              </button>
+              <button id="btnCancel" onclick="toggleEdit()" class="tab-action-btn cancel-btn" style="display: none;">
+                <i class="ri-close-line"></i> Cancel
+              </button>
+            </div>
+          </div>
+
+          <div class="tab-content">
+            <!-- DETAILS TAB -->
+            <div id="tab-details" class="tab-panel active">
+              <div id="viewMode">
+                <div class="details-grid">
+                  <div class="detail-field">
+                    <div class="detail-label">First Name</div>
+                    <div class="detail-value">{{ request.user.first_name }}</div>
+                  </div>
+                  <div class="detail-field">
+                    <div class="detail-label">Last Name</div>
+                    <div class="detail-value">{{ request.user.last_name }}</div>
+                  </div>
+                  <div class="detail-field">
+                    <div class="detail-label">Roll Number</div>
+                    <div class="detail-value">{{ profile.roll_no }}</div>
+                  </div>
+                  <div class="detail-field">
+                    <div class="detail-label">Year of Study</div>
+                    <div class="detail-value">Year {{ profile.year }}</div>
+                  </div>
+                  <div class="detail-field">
+                    <div class="detail-label">CGPA</div>
+                    <div class="detail-value">{{ profile.cgpa }}</div>
+                  </div>
+                  <div class="detail-field">
+                    <div class="detail-label">Active Backlogs</div>
+                    <div class="detail-value">{{ profile.backlogs }}</div>
+                  </div>
+                  <div class="detail-field" style="grid-column: 1 / -1;">
+                    <div class="detail-label">LinkedIn Profile</div>
+                    <div class="detail-value">
+                      {% if profile.linkedin_url %}
+                      <a href="{{ profile.linkedin_url }}" target="_blank">
+                        <i class="ri-external-link-line"></i> Visit Profile
+                      </a>
+                      {% else %}
+                      Not Provided
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <form id="editMode" class="edit-form" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="edit-grid">
+                  <div class="form-group">
+                    <label>First Name</label>
+                    {{ form.first_name }}
+                  </div>
+                  <div class="form-group">
+                    <label>Last Name</label>
+                    {{ form.last_name }}
+                  </div>
+                  <div class="form-group">
+                    <label>Roll Number</label>
+                    {{ form.roll_no }}
+                  </div>
+                  <div class="form-group">
+                    <label>Gender</label>
+                    {{ form.gender }}
+                  </div>
+                  <div class="form-group">
+                    <label>Age</label>
+                    {{ form.age }}
+                  </div>
+                  <div class="form-group">
+                    <label>Year of Study</label>
+                    {{ form.year }}
+                  </div>
+                  <div class="form-group">
+                    <label>Batch</label>
+                    {{ form.batch }}
+                  </div>
+                  <div class="form-group">
+                    <label>Phone</label>
+                    {{ form.phone }}
+                  </div>
+                  <div class="form-group">
+                    <label>CGPA</label>
+                    {{ form.cgpa }}
+                  </div>
+                  <div class="form-group">
+                    <label>Backlogs</label>
+                    {{ form.backlogs }}
+                  </div>
+                  <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>LinkedIn URL</label>
+                    {{ form.linkedin_url }}
+                  </div>
+                  <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Profile Picture</label>
+                    {{ form.profile_picture }}
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="save-btn">
+                    <i class="ri-save-line"></i> Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- PLACEMENTS TAB -->
+            <div id="tab-placements" class="tab-panel">
+              {% if applications %}
+              <table class="placements-table">
+                <thead>
+                  <tr>
+                    <th>Company & Role</th>
+                    <th>Applied</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for app in applications %}
+                  <tr>
+                    <td>
+                      <div class="company-info">
+                        {{ app.drive.company_name }}
+                        <span class="tag tag-category">Cat {{ app.drive.category }}</span>
+                        {% if app.is_accepted %}<span class="tag tag-rtw">★ RTW</span>{% endif %}
+                      </div>
+                      <div class="company-role">{{ app.drive.job_role }}</div>
+                    </td>
+                    <td style="font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap;">
+                      {% if app.status == 'placed' and app.placed_at %}
+                      {{ app.placed_at|date:"d M Y" }}
+                      {% else %}
+                      {{ app.applied_at|date:"d M Y" }}
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if app.is_accepted %}
+                      <span class="status-badge status-placed">
+                        <i class="ri-checkbox-circle-fill"></i> Ready to Work
+                      </span>
+                      {% elif app.status == 'placed' %}
+                      <span class="status-badge status-placed">
+                        <i class="ri-check-line"></i> Placed
+                      </span>
+                      {% elif app.status == 'applied' %}
+                      <span class="status-badge status-applied">
+                        <i class="ri-hourglass-line"></i> Applied
+                      </span>
+                      {% elif app.status == 'rejected' %}
+                      <span class="status-badge status-rejected">
+                        <i class="ri-close-line"></i> Rejected
+                      </span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if app.is_accepted %}
+                      <span class="status-badge status-placed">Confirmed</span>
+                      {% elif app.status == 'placed' %}
+                      <a href="{% url 'select_ready_to_work' app.id %}" class="action-link">
+                        <i class="ri-briefcase-line"></i> Accept
+                      </a>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+              {% else %}
+              <div class="empty-state">
+                <i class="ri-building-line"></i>
+                <p>No placement drives attended yet.<br>Complete your profile and apply to drives to get started!</p>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(btn, tabId) {
+      // Update active tab button
+      document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Update active tab panel
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+
+      // Show/hide edit buttons based on tab
+      const editBtn = document.getElementById('btnEdit');
+      const cancelBtn = document.getElementById('btnCancel');
+
+      if (tabId === 'details') {
+        const isEditing = document.getElementById('editMode').classList.contains('active');
+        editBtn.style.display = isEditing ? 'none' : 'flex';
+        cancelBtn.style.display = isEditing ? 'flex' : 'none';
+      } else {
+        editBtn.style.display = 'none';
+        cancelBtn.style.display = 'none';
+      }
+    }
+
+    function toggleEdit() {
+      const viewMode = document.getElementById('viewMode');
+      const editMode = document.getElementById('editMode');
+      const editBtn = document.getElementById('btnEdit');
+      const cancelBtn = document.getElementById('btnCancel');
+
+      const isCurrentlyEditing = editMode.classList.contains('active');
+
+      if (isCurrentlyEditing) {
+        // Switch to view mode
+        viewMode.style.display = 'block';
+        editMode.classList.remove('active');
+        editBtn.style.display = 'flex';
+        cancelBtn.style.display = 'none';
+      } else {
+        // Switch to edit mode
+        viewMode.style.display = 'none';
+        editMode.classList.add('active');
+        editBtn.style.display = 'none';
+        cancelBtn.style.display = 'flex';
+        filterYears();
+      }
+    }
+
+    function filterYears() {
+      const yearSelect = document.querySelector('[name="year"]');
+      if (!yearSelect) return;
+
+      const maxYears = parseInt('{{ request.user.department.year|default:4 }}');
+      const currentValue = yearSelect.value;
+
+      yearSelect.innerHTML = '';
+      for (let i = 1; i <= maxYears; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = 'Year ' + i;
+        if (i.toString() === currentValue) option.selected = true;
+        yearSelect.appendChild(option);
+      }
+    }
+  </script>
+</body>
+</html>
