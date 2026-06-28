@@ -51,7 +51,7 @@ The landing page provides secure authentication and allows users to log in or re
 
 The student dashboard serves as the central workspace for placement preparation, providing access to modules such as Resume Analysis, Aptitude Tests, Mock Interviews, Group Discussions, Placement Drives, and personalized progress tracking.
 
-![Student Dashboard](screenshots/student-dashboard.png)
+![Student Dashboard](screenshots/student_dashboard.png)
 
 ---
 
@@ -59,7 +59,7 @@ The student dashboard serves as the central workspace for placement preparation,
 
 The coordinator dashboard enables placement coordinators to monitor student performance, manage training activities, oversee placement drives, and analyze overall placement readiness through a centralized administrative interface.
 
-![Coordinator Dashboard](screenshots/coordinator-dashboard.png)
+![Coordinator Dashboard](screenshots/coordinator_dashboard.png)
 
 # Objectives
 
