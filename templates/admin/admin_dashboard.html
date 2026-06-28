@@ -33,16 +33,16 @@
         }
         .admin-stat-card:hover { transform: translateY(-5px); }
 
-        .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 35px; }
+        .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .hub-item {
-            background: var(--surface); padding: 20px; border-radius: 15px; border: 1px solid var(--border);
+            background: var(--surface); padding: 15px; border-radius: 12px; border: 1px solid var(--border);
             text-align: center; text-decoration: none; color: var(--ink-1); transition: all 0.2s;
         }
         .hub-item:hover { background: var(--primary-lt); border-color: var(--primary); }
-        .hub-item i { font-size: 2rem; color: var(--primary); margin-bottom: 10px; display: block; }
-        .hub-item span { font-weight: 700; font-size: 0.9rem; }
+        .hub-item i { font-size: 1.5rem; color: var(--primary); margin-bottom: 5px; display: block; }
+        .hub-item span { font-weight: 700; font-size: 0.85rem; }
 
-        .chart-box { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .chart-box { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); }
         
         .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         .data-table th { text-align: left; padding: 12px; color: var(--ink-2); font-size: 0.75rem; text-transform: uppercase; border-bottom: 2px solid var(--border); }
@@ -60,13 +60,14 @@
         {% include 'menu_admin.html' %}
 
         <div class="main-content">
-            <header class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <header class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <div>
-                    <h1 style="margin: 0; color: var(--ink-1); font-size: 1.75rem; font-weight: 800;">Command Center</h1>
-                    <p style="margin: 5px 0 0; color: var(--ink-2); font-size: 0.9rem;">System Performance & Administration Hub</p>
+                    <h1 style="margin: 0; color: var(--ink-1); font-size: 1.5rem; font-weight: 800;">Command Center</h1>
+                    <p style="margin: 2px 0 0; color: var(--ink-2); font-size: 0.85rem;">System Performance & Administration Hub</p>
                 </div>
-                <div style="display: flex; gap: 15px;">
-                    <a href="{% url 'admin_manage_courses' %}" class="btn" style="background: var(--primary); color: white; border-radius: 10px; padding: 10px 20px; font-weight: 600;">+ Add Department</a>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="{% url 'admin_manage_courses' %}" class="btn" style="background: var(--primary); color: white; border-radius: 10px; padding: 10px 20px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: all 0.2s;"><i class="ri-building-add-line"></i> Add Department</a>
+                    <a href="{% url 'logout' %}" class="btn" style="background: #fee2e2; color: var(--danger); border-radius: 10px; padding: 10px 20px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 8px; border: 1px solid #fca5a5; transition: all 0.2s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'"><i class="ri-logout-box-r-line"></i> Logout</a>
                 </div>
             </header>
 
@@ -91,8 +92,8 @@
             </div>
 
             <!-- Performance Stats -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 35px;">
-                <div class="admin-stat-card">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
+                <div class="admin-stat-card" style="padding: 15px; border-radius: 15px;">
                     <p style="color: var(--ink-2); font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">Placement Success</p>
                     <h3 style="font-size: 2rem; margin: 10px 0; color: var(--success);">{{ placement_rate }}%</h3>
                     <div style="height: 4px; background: #eee; border-radius: 2px;">
@@ -100,19 +101,19 @@
                     </div>
                 </div>
 
-                <div class="admin-stat-card">
+                <div class="admin-stat-card" style="padding: 15px; border-radius: 15px;">
                     <p style="color: var(--ink-2); font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">Total Users</p>
                     <h3 style="font-size: 2rem; margin: 10px 0;">{{ total_users }}</h3>
                     <p style="margin: 0; font-size: 0.8rem; color: var(--ink-2);">Across all roles</p>
                 </div>
 
-                <div class="admin-stat-card">
+                <div class="admin-stat-card" style="padding: 15px; border-radius: 15px;">
                     <p style="color: var(--ink-2); font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">Active Drives</p>
                     <h3 style="font-size: 2rem; margin: 10px 0; color: var(--warning);">{{ total_drives }}</h3>
                     <p style="margin: 0; font-size: 0.8rem; color: var(--ink-2);">Ongoing recruitment</p>
                 </div>
 
-                <div class="admin-stat-card">
+                <div class="admin-stat-card" style="padding: 15px; border-radius: 15px;">
                     <p style="color: var(--ink-2); font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">System Health</p>
                     <h3 style="font-size: 2rem; margin: 10px 0; color: var(--primary);">Optimal</h3>
                     <p style="margin: 0; font-size: 0.8rem; color: var(--ink-2);">DB: {{ sys_info.db_engine|upper }}</p>
@@ -120,22 +121,22 @@
             </div>
 
             <!-- Performance Dashboard Charts -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 35px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <div class="chart-box">
-                    <h3 style="font-size: 1rem; margin-bottom: 20px;">Placement by Department</h3>
-                    <canvas id="deptChart" height="200"></canvas>
+                    <h3 style="font-size: 0.95rem; margin: 0 0 10px 0;">Placement by Department</h3>
+                    <div style="height: 180px; position: relative;"><canvas id="deptChart"></canvas></div>
                 </div>
                 <div class="chart-box">
-                    <h3 style="font-size: 1rem; margin-bottom: 20px;">User Role Distribution</h3>
-                    <canvas id="roleChart" height="200"></canvas>
+                    <h3 style="font-size: 0.95rem; margin: 0 0 10px 0;">User Role Distribution</h3>
+                    <div style="height: 180px; position: relative;"><canvas id="roleChart"></canvas></div>
                 </div>
             </div>
 
             <!-- Data Tables -->
-            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
-                <div style="background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2 style="font-size: 1.1rem; margin: 0; font-weight: 800;">Recent User Activity</h2>
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px;">
+                <div style="background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h2 style="font-size: 1rem; margin: 0; font-weight: 800;">Recent User Activity</h2>
                         <a href="{% url 'admin_user_management' %}" style="color: var(--primary); text-decoration: none; font-size: 0.8rem; font-weight: 700;">View All →</a>
                     </div>
                     <table class="data-table">
@@ -161,9 +162,9 @@
                     </table>
                 </div>
 
-                <div style="background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border);">
-                    <h2 style="font-size: 1.1rem; margin-bottom: 20px; font-weight: 800;">Department Core Stats</h2>
-                    <div style="max-height: 400px; overflow-y: auto;">
+                <div style="background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border);">
+                    <h2 style="font-size: 1rem; margin-bottom: 15px; font-weight: 800;">Department Core Stats</h2>
+                    <div style="max-height: 200px; overflow-y: auto;">
                         <table class="data-table">
                             <thead>
                                 <tr>
@@ -209,7 +210,8 @@
             },
             options: {
                 responsive: true,
-                plugins: { legend: { position: 'bottom' } },
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } },
                 scales: { y: { beginAtZero: true } }
             }
         });
@@ -228,8 +230,9 @@
             },
             options: {
                 responsive: true,
-                plugins: { legend: { position: 'bottom' } },
-                cutout: '70%'
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } } },
+                cutout: '60%'
             }
         });
     </script>
