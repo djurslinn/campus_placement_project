@@ -1,7 +1,10 @@
+import logging
 import random
 import string
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 def generate_otp(length=6):
@@ -71,12 +74,10 @@ def send_otp_email(email, otp_code, purpose):
 
     if is_placeholder:
         if getattr(settings, 'DEBUG', False):
-            print("\n" + "=" * 60)
-            print("[DEV MODE] OTP EMAIL — not actually sent via SMTP")
-            print(f"  To      : {email}")
-            print(f"  Purpose : {purpose}")
-            print(f"  OTP     : {otp_code}")
-            print("=" * 60 + "\n")
+            logger.debug(
+                "[DEV MODE] OTP not sent via SMTP | To: %s | Purpose: %s | OTP: %s",
+                email, purpose, otp_code,
+            )
             # Return the OTP so the view can show it on the page
             return True, otp_code
         return False, None
@@ -88,6 +89,6 @@ def send_otp_email(email, otp_code, purpose):
         msg.attach_alternative(html_content, "text/html")
         msg.send()
         return True, None          # sent — no need to expose OTP on screen
-    except Exception as e:
-        print(f"[OTP EMAIL ERROR] {e}")
+    except Exception:
+        logger.exception("[OTP EMAIL ERROR] Failed to send OTP to %s", email)
         return False, None

@@ -1,12 +1,15 @@
 """
 ATS analysis view using the new AI-powered microservice
 """
+import logging
 from django.views.generic import View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from ..models import Resume, ATSScore
 from ..utils.ats_client import sync_analyze_resume
+
+logger = logging.getLogger(__name__)
 
 
 class ResumeAnalysisView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -100,8 +103,9 @@ class ResumeAnalysisView(LoginRequiredMixin, UserPassesTestMixin, View):
             
             messages.success(request, 'AI-powered ATS analysis completed successfully!')
             
-        except Exception as e:
-            messages.error(request, f'Error analyzing resume: {str(e)}')
+        except Exception:
+            logger.exception("ATS analysis error for user %s", request.user.id)
+            messages.error(request, 'An error occurred during analysis. Please try again later.')
             return redirect('resumes:dashboard')
         
         return redirect('resumes:analysis')
