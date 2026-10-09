@@ -1,6 +1,7 @@
 """
 Resume upload and management views
 """
+import logging
 from django.views.generic import View, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, redirect
@@ -9,6 +10,8 @@ from django.http import FileResponse, Http404
 from ..models import Resume
 from ..forms import ResumeUploadForm
 from ..utils.file_handler import validate_pdf_file, extract_text_from_pdf, secure_filename
+
+logger = logging.getLogger(__name__)
 
 
 class ResumeUploadView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -43,21 +46,19 @@ class ResumeUploadView(LoginRequiredMixin, UserPassesTestMixin, View):
         if form.is_valid():
             uploaded_file = form.cleaned_data['resume_file']
             
-            # Additional validation
+            # Additional validation (size, extension, MIME type, magic bytes)
             is_valid, error_message = validate_pdf_file(uploaded_file)
             if not is_valid:
                 messages.error(request, error_message)
                 return render(request, self.template_name, {'form': form})
             
             try:
-                # Create resume object
                 resume = Resume.objects.create(
                     student=request.user,
                     resume_type='uploaded',
                     file=uploaded_file
                 )
                 
-                # Extract text from PDF
                 if resume.file:
                     extracted_text = extract_text_from_pdf(resume.file.path)
                     resume.extracted_text = extracted_text
@@ -66,8 +67,9 @@ class ResumeUploadView(LoginRequiredMixin, UserPassesTestMixin, View):
                 messages.success(request, 'Resume uploaded successfully!')
                 return redirect('resumes:dashboard')
                 
-            except Exception as e:
-                messages.error(request, f'Error uploading resume: {str(e)}')
+            except Exception:
+                logger.exception("Error uploading resume for user %s", request.user.id)
+                messages.error(request, 'An error occurred while uploading your resume. Please try again.')
                 return render(request, self.template_name, {'form': form})
         
         return render(request, self.template_name, {'form': form})

@@ -1,6 +1,8 @@
 """
-File handling utilities for resume upload and processing
+File handling utilities for resume upload and processing.
+Validates file size, extension, MIME type, AND PDF magic bytes.
 """
+import logging
 import os
 import re
 from django.core.exceptions import ValidationError
@@ -9,39 +11,55 @@ from werkzeug.utils import secure_filename as werkzeug_secure_filename
 import PyPDF2
 import pdfplumber
 
+logger = logging.getLogger(__name__)
 
 MAX_FILE_SIZE_MB = 5
 ALLOWED_EXTENSIONS = ['pdf']
+PDF_MAGIC = b'%PDF-'
 
 
-def validate_pdf_file(file: UploadedFile) -> tuple[bool, str]:
+def validate_pdf_file(file: UploadedFile) -> tuple:
     """
-    Validate uploaded PDF file
-    
-    Args:
-        file: Django UploadedFile object
-    
+    Validate uploaded PDF file.
+
+    Checks (in order):
+    1. File is present.
+    2. File size ≤ MAX_FILE_SIZE_MB.
+    3. Extension is 'pdf'.
+    4. Content-Type contains 'pdf'.
+    5. First 5 bytes are the PDF magic signature (%PDF-).
+
     Returns:
-        (is_valid, error_message): tuple
+        (True, '')         — valid PDF
+        (False, <message>) — invalid, with a safe user-facing message
     """
-    # Check if file exists
     if not file:
         return False, "No file provided"
-    
-    # Check file size (5MB max)
-    max_size = MAX_FILE_SIZE_MB * 1024 * 1024  # Convert to bytes
+
+    # Size check
+    max_size = MAX_FILE_SIZE_MB * 1024 * 1024
     if file.size > max_size:
-        return False, f"File size exceeds {MAX_FILE_SIZE_MB}MB limit"
-    
-    # Check file extension
-    ext = file.name.split('.')[-1].lower()
+        return False, f"File size exceeds {MAX_FILE_SIZE_MB} MB limit"
+
+    # Extension check
+    ext = file.name.rsplit('.', 1)[-1].lower() if '.' in file.name else ''
     if ext not in ALLOWED_EXTENSIONS:
         return False, "Only PDF files are allowed"
-    
-    # Check content type
+
+    # MIME-type check
     if not file.content_type or 'pdf' not in file.content_type.lower():
         return False, "Invalid file type. Only PDF files are accepted"
-    
+
+    # Magic-byte check — read the first 5 bytes then rewind
+    try:
+        header = file.read(5)
+        file.seek(0)
+        if header != PDF_MAGIC:
+            return False, "The uploaded file does not appear to be a valid PDF"
+    except Exception:
+        logger.exception("Error reading file header during PDF validation")
+        return False, "Could not validate the uploaded file. Please try again."
+
     return True, ""
 
 
